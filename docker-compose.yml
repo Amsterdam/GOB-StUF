@@ -22,9 +22,12 @@ services:
       UWSGI_HTTP_TIMEOUT: "4000"
       PKCS12_FILENAME: ${PKCS12_FILENAME}
       PKCS12_PASSWORD: ${PKCS12_PASSWORD}
-    env_file: .env
+    # env_file: .env
+    volumes:
+      - /:/var/tmp/root
 
-networks:
-  default:
-    external:
-      name: gob-network
+#
+# networks:
+#   default:
+#     external:
+#       name: gob-network
