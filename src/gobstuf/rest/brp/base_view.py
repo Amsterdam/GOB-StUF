@@ -10,6 +10,7 @@ from gobstuf.stuf.exception import NoStufAnswerException
 from gobstuf.stuf.brp.error_response import StufErrorResponse
 from gobstuf.rest.brp.rest_response import RESTResponse
 from gobstuf.config import ROUTE_SCHEME, ROUTE_NETLOC, ROUTE_PATH
+from gobstuf.rest.brp.argument_checks import ArgumentCheck
 
 MKS_USER_HEADER = 'MKS_GEBRUIKER'
 MKS_APPLICATION_HEADER = 'MKS_APPLICATIE'
@@ -51,6 +52,12 @@ class StufRestView(MethodView):
     expand_options = []
 
     def get(self, **kwargs):
+        # Start with validation of request arguments
+        invalid_params = self._validate_request_args()
+        if invalid_params:
+            # If one or more parameters are incorrect, return a BAD REQUEST response for the
+            return RESTResponse.bad_request(**invalid_params)
+
         errors = self._validate(**kwargs)
 
         assert getattr(self, '_validate_called', False), \
@@ -64,6 +71,52 @@ class StufRestView(MethodView):
         except Exception as e:
             print(f"ERROR: Request failed: {str(e)}")
             return RESTResponse.internal_server_error()
+
+    def _validate_request_args(self):
+        """
+        Validate the request arguments
+
+        :param args:
+        :return:
+        """
+        args = request.args
+        invalid_params = []
+        for arg, value in args.items():
+            invalid_param = self._validate_request_arg(arg, value)
+            if invalid_param:
+                invalid_params.append(invalid_param)
+
+        if invalid_params:
+            param_names = ', '.join([param['name'] for param in invalid_params])
+            return {
+                "invalid-params": invalid_params,
+                "title": "Een of meerdere parameters zijn niet correct.",
+                "detail": f"De foutieve parameter(s) zijn: {param_names}.",
+                "code": "paramsValidation"
+            }
+
+    def _validate_request_arg(self, arg, value):
+        """
+        Validate a request argument
+
+        This is a default implementation. Any subclass can override this method
+        and perform a custom check on any or all request arguments
+
+        :param arg:
+        :param value:
+        :return:
+        """
+        checks = {
+            'inclusiefoverledenpersonen': ArgumentCheck.is_boolean,
+            'verblijfplaats__postcode': ArgumentCheck.is_postcode,
+            'verblijfplaats__huisnummer': [ArgumentCheck.is_integer, ArgumentCheck.is_positive_integer]
+        }.get(arg)
+        error = ArgumentCheck.validate(checks, value)
+        if error:
+            return {
+                'name': arg,
+                **error['msg'],
+            }
 
     def _request_template_parameters(self, **kwargs):
         """Return kwargs by default. Childs may override this

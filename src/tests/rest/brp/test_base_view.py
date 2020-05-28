@@ -115,6 +115,7 @@ class TestStufRestView(TestCase):
 
         # Naughty child does not call super()._validate() and raises an error
         naughty_child = StufRestViewNaughtyChild()
+        naughty_child._validate_request_args = MagicMock(return_value=None)
 
         kwargs = {'kw': 'arg'}
         with self.assertRaises(AssertionError):
@@ -122,6 +123,7 @@ class TestStufRestView(TestCase):
 
         # Obedient child does call super()._validate() and succeeds
         obedient_child = StufRestViewObedientChild()
+        obedient_child._validate_request_args = MagicMock(return_value=None)
 
         self.assertEqual('OK', obedient_child.get(**kwargs))
 
@@ -275,6 +277,7 @@ class TestStufRestView(TestCase):
         view._validate = MagicMock(return_value={})
         view._get_functional_query_parameters = MagicMock(return_value={})
         view._validate_called = True
+        view._validate_request_args = MagicMock(return_value=None)
 
         # Regular response
         result = view.get(any='thing')
@@ -409,3 +412,26 @@ class TestStufRestFilterView(TestCase):
         with self.assertRaises(view.InvalidQueryParametersException):
             view._get_query_parameters()
 
+
+    @patch("gobstuf.rest.brp.base_view.RESTResponse")
+    def test_argument_check(self, mock_rest_response):
+        view = StufRestView()
+        view._validate_request_args = MagicMock(return_value={'error': 'any error'})
+        self.assertEqual(view.get(), mock_rest_response.bad_request.return_value)
+        mock_rest_response.bad_request.assert_called_with(error='any error')
+
+    @patch("gobstuf.rest.brp.base_view.request")
+    def test_validate_request_args(self, mock_request):
+        view = StufRestView()
+        mock_request.args = {}
+        self.assertIsNone(view._validate_request_args())
+
+        mock_request.args = {
+            'inclusiefoverledenpersonen': 'true'
+        }
+        self.assertIsNone(view._validate_request_args())
+
+        mock_request.args = {
+            'inclusiefoverledenpersonen': '1'
+        }
+        self.assertIsNotNone(view._validate_request_args())
