@@ -5,7 +5,13 @@ Formatting of all REST responses
 import json
 
 from flask import Response, request
-from flask_api import status as http_status
+
+
+HTTP_200_OK = 200
+HTTP_400_BAD_REQUEST = 400
+HTTP_403_FORBIDDEN = 403
+HTTP_404_NOT_FOUND = 404
+HTTP_500_INTERNAL_SERVER_ERROR = 500
 
 
 class RESTResponse():
@@ -87,7 +93,7 @@ class RESTResponse():
         hal_data = cls._hal(data, links)
         return cls._json_response(data=hal_data,
                                   content_type='application/hal+json',
-                                  status=http_status.HTTP_200_OK)
+                                  status=HTTP_200_OK)
 
     @classmethod
     def bad_request(cls, **kwargs):
@@ -103,7 +109,7 @@ class RESTResponse():
                       'The client SHOULD NOT repeat the request without modification.',
             **kwargs
         }
-        return cls._client_error_response(data=data, status=http_status.HTTP_400_BAD_REQUEST)
+        return cls._client_error_response(data=data, status=HTTP_400_BAD_REQUEST)
 
     @classmethod
     def forbidden(cls, **kwargs):
@@ -118,7 +124,7 @@ class RESTResponse():
             'detail': 'The server understood the request, but is refusing to fulfill it.',
             **kwargs
         }
-        return cls._client_error_response(data=data, status=http_status.HTTP_403_FORBIDDEN)
+        return cls._client_error_response(data=data, status=HTTP_403_FORBIDDEN)
 
     @classmethod
     def not_found(cls, **kwargs):
@@ -133,7 +139,7 @@ class RESTResponse():
             'detail': 'The server has not found anything matching the Request-URI.',
             **kwargs
         }
-        return cls._client_error_response(data=data, status=http_status.HTTP_404_NOT_FOUND)
+        return cls._client_error_response(data=data, status=HTTP_404_NOT_FOUND)
 
     @classmethod
     def internal_server_error(cls, **kwargs):
@@ -142,4 +148,4 @@ class RESTResponse():
             "detail": "The server encountered an unexpected condition which prevented it from fulfilling the request.",
             **kwargs
         }
-        return cls._client_error_response(data=data, status=http_status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return cls._client_error_response(data=data, status=HTTP_500_INTERNAL_SERVER_ERROR)
