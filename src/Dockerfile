@@ -23,7 +23,13 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
 
 # Install required Python packages
 COPY requirements.txt /app/
-RUN pip3 install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host files.pythonhosted.org --no-cache-dir -r requirements.txt
+RUN LIBGDAL_VERSION=$(gdal-config --version) \
+    pip3 install  \
+    --trusted-host pypi.python.org  \
+    --trusted-host pypi.org  \
+    --trusted-host files.pythonhosted.org  \
+    --no-cache-dir  \
+    -r requirements.txt
 RUN rm requirements.txt
 
 COPY *.crt /usr/local/share/ca-certificates/extras/
@@ -44,6 +50,7 @@ COPY ./oauth2-proxy oauth2-proxy
 COPY ./oauth2-proxy.cfg oauth2-proxy.cfg
 RUN chmod 755 oauth2-proxy
 RUN mkdir -p /var/log/oauth2-proxy && chown datapunt /var/log/oauth2-proxy
+RUN ./oauth2-proxy --version
 
 # Create downloaded dir for regression tests with correct permissions
 RUN mkdir -p /app/gobstuf/regression_tests/downloaded
