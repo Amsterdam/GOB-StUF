@@ -239,7 +239,7 @@ class BrpRegression:
             with open(testcase.expected_result_file, 'r') as f:
                 result.expected_result = json.load(f)
         except FileNotFoundError:
-            result.errors.append(f"Expect file not found.")
+            result.errors.append("Expect file not found.")
 
         try:
             r.raise_for_status()
