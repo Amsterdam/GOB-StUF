@@ -50,7 +50,7 @@ class StufRestView(MethodView):
         try:
             return self._get(**kwargs)
         except Exception:
-            logging.error(f"ERROR: Request failed:")
+            logging.error("ERROR: Request failed:")
             logging.error(traceback.format_exc())
             return RESTResponse.internal_server_error()
 

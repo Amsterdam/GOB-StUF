@@ -15,7 +15,7 @@ from gobstuf.config import GOB_OBJECTSTORE, CONTAINER_BASE, API_BASE_PATH, BRP_R
 from gobconfig.datastore.config import get_datastore_config
 from gobcore.datastore.factory import DatastoreFactory
 from gobcore.exceptions import GOBException
-from objectstore.objectstore import get_full_container_list, get_object, delete_object, put_object
+from gobcore.datastore.objectstore import get_full_container_list, get_object, delete_object, put_object
 
 
 def _get_keycloak_token(user: str):
@@ -239,7 +239,7 @@ class BrpRegression:
             with open(testcase.expected_result_file, 'r') as f:
                 result.expected_result = json.load(f)
         except FileNotFoundError:
-            result.errors.append(f"Expect file not found.")
+            result.errors.append("Expect file not found.")
 
         try:
             r.raise_for_status()

@@ -54,7 +54,7 @@ def run_message_thread():
         messagedriven_service(SERVICEDEFINITION, "StUF")
     except:  # noqa: E722 do not use bare 'except'
         pass
-    print(f"ERROR: no connection with GOB message broker, application is stopped")
+    print("ERROR: no connection with GOB message broker, application is stopped")
     os._exit(os.EX_UNAVAILABLE)
 
 
