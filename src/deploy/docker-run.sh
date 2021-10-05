@@ -3,14 +3,15 @@ set -u   # crash on missing env variables
 set -e   # stop on any error
 set -x
 
-DOMAIN_NAME=$(echo "${OAUTH2_PROXY_OIDC_ISSUER_URL}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-timeout 60 bash -c "until cat < /dev/null > /dev/tcp/${DOMAIN_NAME}/443; do sleep 5; done"
+# Print sha1 of pkcs12 file
+sha1sum $PKCS12_FILENAME
+
+echo "Checking health keycloak..."
+wget "${OAUTH2_PROXY_OIDC_ISSUER_URL}/.well-known/openid-configuration" -O /dev/null -q
+echo "Keycloak is active"
 
 # Secure endpoints
 ./oauth2-proxy --config oauth2-proxy.cfg 2>&1 | tee /var/log/oauth2-proxy/oauth2proxy.log &
-
-# Print sha1 of pkcs12 file
-sha1sum $PKCS12_FILENAME
 
 # Start web server
 exec uwsgi
