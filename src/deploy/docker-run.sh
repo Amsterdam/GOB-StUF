@@ -10,6 +10,9 @@ echo "Checking health keycloak..."
 wget "${OAUTH2_PROXY_OIDC_ISSUER_URL}/.well-known/openid-configuration" -O /dev/null -q
 echo "Keycloak is active"
 
+echo "Wait 10 seconds until keycloak is ready..."
+sleep 10
+
 # Secure endpoints
 ./oauth2-proxy --config oauth2-proxy.cfg 2>&1 | tee /var/log/oauth2-proxy/oauth2proxy.log &
 
