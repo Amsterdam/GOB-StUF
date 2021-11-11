@@ -13,8 +13,6 @@ services:
       - "8165:8001"
     container_name: gobstuf
     environment:
-      SECURE_SALT: insecure
-      SECURE_PASSWORD: insecure
       MESSAGE_BROKER_ADDRESS: rabbitmq
       UWSGI_HTTP: ":8001"
       UWSGI_MODULE: "gobstuf.wsgi"
