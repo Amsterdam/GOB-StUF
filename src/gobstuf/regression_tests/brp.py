@@ -5,7 +5,7 @@ import requests
 import json
 import datetime
 
-from typing import List
+from typing import List, Callable, Any
 
 from requests import HTTPError
 
@@ -36,6 +36,22 @@ def _get_keycloak_token(user: str):
 
     jsonresp = resp.json()
     return jsonresp['token_type'] + ' ' + jsonresp['access_token']
+
+
+class EnvVarDecoder(json.JSONDecoder):
+
+    substitutes: list = []
+
+    def decode(self, s: str, _w: Callable[..., Any] = ...) -> Any:
+        for sub in self.substitutes:
+            s = s.replace(*sub)
+        return super().decode(s)
+
+
+EnvVarDecoder.substitutes += [
+    ('$PORT', BRP_REGRESSION_TEST_LOCAL_PORT),
+    ('$API_BASE_PATH', API_BASE_PATH.strip('/'))
+]
 
 
 class Objectstore:
@@ -237,7 +253,7 @@ class BrpRegression:
 
         try:
             with open(testcase.expected_result_file, 'r') as f:
-                result.expected_result = json.load(f)
+                result.expected_result = json.load(f, cls=EnvVarDecoder)
         except FileNotFoundError:
             result.errors.append("Expect file not found.")
 

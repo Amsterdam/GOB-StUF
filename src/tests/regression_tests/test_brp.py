@@ -1,11 +1,23 @@
-from freezegun import freeze_time
-
+import json
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, call, mock_open
+
+from freezegun import freeze_time
 from requests.exceptions import HTTPError
 
 from gobstuf.regression_tests.brp import BrpRegression, Objectstore, ObjectstoreResultsWriter, BrpTestResult, \
-    BrpTestCase, GOBException, _get_keycloak_token
+    BrpTestCase, GOBException, _get_keycloak_token, EnvVarDecoder
+
+
+class TestDecoder(TestCase):
+
+    def test_json_substituting(self):
+        data = '{"_links": {"self": {"href": "http://localhost:$BRP_REGRESSION_TEST_LOCAL_PORT/"}}}'
+        expected = '{"_links": {"self": {"href": "http://localhost:8000/"}}}'
+
+        EnvVarDecoder.substitutes = [('$BRP_REGRESSION_TEST_LOCAL_PORT', '8000')]
+
+        self.assertDictEqual(json.loads(data, cls=EnvVarDecoder), json.loads(expected))
 
 
 class TestModuleFunctions(TestCase):
