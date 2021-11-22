@@ -1,21 +1,19 @@
+import csv
+import datetime
+import json
 import os
 import shutil
-import csv
-import requests
-import json
-import datetime
-
 from typing import List, Callable, Any
 
+import requests
 from requests import HTTPError
-
-from gobstuf.config import GOB_OBJECTSTORE, CONTAINER_BASE, API_BASE_PATH, BRP_REGRESSION_TEST_LOCAL_PORT, \
-    KEYCLOAK_AUTH_URL, KEYCLOAK_CLIENT_ID
 
 from gobconfig.datastore.config import get_datastore_config
 from gobcore.datastore.factory import DatastoreFactory
-from gobcore.exceptions import GOBException
 from gobcore.datastore.objectstore import get_full_container_list, get_object, delete_object, put_object
+from gobcore.exceptions import GOBException
+from gobstuf.config import GOB_OBJECTSTORE, CONTAINER_BASE, API_BASE_PATH, BRP_REGRESSION_TEST_LOCAL_PORT, \
+    KEYCLOAK_AUTH_URL, KEYCLOAK_CLIENT_ID
 
 
 def _get_keycloak_token(user: str):
@@ -40,18 +38,15 @@ def _get_keycloak_token(user: str):
 
 class EnvVarDecoder(json.JSONDecoder):
 
-    substitutes: list = []
+    substitutes = [
+        ('$PORT', BRP_REGRESSION_TEST_LOCAL_PORT),
+        ('$API_BASE_PATH', API_BASE_PATH.strip('/'))
+    ]
 
     def decode(self, s: str, _w: Callable[..., Any] = ...) -> Any:
         for sub in self.substitutes:
             s = s.replace(*sub)
         return super().decode(s)
-
-
-EnvVarDecoder.substitutes += [
-    ('$PORT', BRP_REGRESSION_TEST_LOCAL_PORT),
-    ('$API_BASE_PATH', API_BASE_PATH.strip('/'))
-]
 
 
 class Objectstore:

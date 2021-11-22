@@ -14,10 +14,10 @@ class TestDecoder(TestCase):
     def test_json_substituting(self):
         data = '{"_links": {"self": {"href": "http://localhost:$BRP_REGRESSION_TEST_LOCAL_PORT/"}}}'
         expected = '{"_links": {"self": {"href": "http://localhost:8000/"}}}'
+        substitutes = [('$BRP_REGRESSION_TEST_LOCAL_PORT', '8000')]
 
-        EnvVarDecoder.substitutes = [('$BRP_REGRESSION_TEST_LOCAL_PORT', '8000')]
-
-        self.assertDictEqual(json.loads(data, cls=EnvVarDecoder), json.loads(expected))
+        with patch.object(EnvVarDecoder, 'substitutes', substitutes):
+            self.assertDictEqual(json.loads(data, cls=EnvVarDecoder), json.loads(expected))
 
 
 class TestModuleFunctions(TestCase):
