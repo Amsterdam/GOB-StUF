@@ -45,7 +45,7 @@ class EnvVarDecoder(json.JSONDecoder):
 
     def decode(self, s: str, _w: Callable[..., Any] = ...) -> Any:
         for sub in self.substitutes:
-            s = s.replace(*sub)
+            s = s.replace(str(sub[0]), str(sub[1]))
         return super().decode(s)
 
 
