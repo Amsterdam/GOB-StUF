@@ -14,8 +14,7 @@ def app() -> Generator[Flask, None, None]:
     with app.test_client() as client:
         client.get(...)
     """
-    # add app_config TestConfig here.
-    app = get_flask_app()  # {"TESTING": True})
+    app = get_flask_app()
     with app.app_context():
         yield app
 
