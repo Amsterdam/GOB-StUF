@@ -1,8 +1,6 @@
 
 class TestIngeschrevenpersonenBsnView:
 
-    def test_get_with_bsn(self, app, client, requests_mock):
-        bsn = "123"
-        response = client.get(f"/brp/ingeschrevenpersonen/{bsn}")
-        print(response)
-        # assert response.json()["xyz"] == "blabla"
+    def test_adresseerbaar_object(self, client, jwt_header):
+        response = client.get("/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        assert response.json['verblijfplaats']["adresseerbaarObjectIdentificatie"] == "0518010000784987"
