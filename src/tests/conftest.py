@@ -30,6 +30,7 @@ def app() -> Generator[Flask, None, None]:
 
 @pytest.fixture
 def client(app: Flask) -> Generator[FlaskClient, None, None]:
+    """Initiates Flask test client. Set testing to true to propagate errors."""
     with app.test_client() as client:
         client.testing = True
         yield client
@@ -51,6 +52,7 @@ def jwt_header(request) -> dict[str, bytes]:
 
 @pytest.fixture(autouse=True)
 def stuf_310_response(requests_mock, tests_dir: Path):
+    """Mocks the response from the 310 stuf endpoint. This response is read from the `response_310.xml` file."""
     url = f"{_env('ROUTE_SCHEME')}://{_env('ROUTE_NETLOC')}{_env('ROUTE_PATH_310')}"
     mock_response = Path(tests_dir, "response_310.xml").read_text()
     requests_mock.post(url, text=mock_response)
