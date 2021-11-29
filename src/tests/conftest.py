@@ -42,7 +42,7 @@ def tests_dir() -> Path:
 
 
 @pytest.fixture(params=[["fp_test_burger", "brp_r"]])
-def jwt_header(request) -> dict:
+def jwt_header(request) -> dict[str, bytes]:
     """Generates a jwt token with given roles. Allows authenticating test-requests."""
     header = {"type": "JWT", "alg": "RS256"}
     payload = {"realm_access": {"roles": request.param}}

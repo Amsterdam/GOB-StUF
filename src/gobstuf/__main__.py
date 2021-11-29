@@ -7,4 +7,4 @@ def init():
 
 
 if __name__ == "__main__":
-    init()
+    init()  # pragma: no cover
