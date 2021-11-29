@@ -1,11 +1,13 @@
 import os
 from typing import Generator
 
+import jwt
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
-from gobstuf.api import get_flask_app
+
 from gobcore.secure.request import ACCESS_TOKEN_HEADER
+from gobstuf.api import get_flask_app
 
 BASE = 'tests'
 
@@ -39,9 +41,12 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
         yield client
 
 
-@pytest.fixture
-def jwt_header() -> dict:
-    return {ACCESS_TOKEN_HEADER: _read_file(f'{BASE}/utils/jwt.txt')}
+@pytest.fixture(params=[["fp_test_burger", "brp_r"]])
+def jwt_header(request) -> dict:
+    header = {"type": "JWT", "alg": "RS256"}
+    payload = {"realm_access": {"roles": request.param}}
+
+    return {ACCESS_TOKEN_HEADER: jwt.encode(payload, key='', headers=header)}
 
 
 @pytest.fixture(autouse=True)
