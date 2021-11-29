@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Generator
 
 import jwt
@@ -9,16 +10,9 @@ from flask.testing import FlaskClient
 from gobcore.secure.request import ACCESS_TOKEN_HEADER
 from gobstuf.api import get_flask_app
 
-BASE = 'tests'
-
 
 def _env(var: str) -> str:
     return os.environ[var]
-
-
-def _read_file(path: str) -> str:
-    with open(path, mode='r') as file:
-        return file.read()
 
 
 @pytest.fixture
@@ -41,16 +35,22 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
         yield client
 
 
+@pytest.fixture
+def tests_dir() -> Path:
+    """Returns directory which contains tests. Used to find files required for tests."""
+    return Path(__file__).parent
+
+
 @pytest.fixture(params=[["fp_test_burger", "brp_r"]])
 def jwt_header(request) -> dict:
+    """Generates a jwt token with given roles. Allows authenticating test-requests."""
     header = {"type": "JWT", "alg": "RS256"}
     payload = {"realm_access": {"roles": request.param}}
-
     return {ACCESS_TOKEN_HEADER: jwt.encode(payload, key='', headers=header)}
 
 
 @pytest.fixture(autouse=True)
-def stuf_310_response(requests_mock):
+def stuf_310_response(requests_mock, tests_dir: Path):
     url = f"{_env('ROUTE_SCHEME')}://{_env('ROUTE_NETLOC')}{_env('ROUTE_PATH_310')}"
-    mock_response = _read_file(f"{BASE}/response_310.xml")
+    mock_response = Path(tests_dir, "response_310.xml").read_text()
     requests_mock.post(url, text=mock_response)
