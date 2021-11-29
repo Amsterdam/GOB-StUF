@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from flask import Response
 
@@ -5,7 +7,8 @@ from flask import Response
 @pytest.fixture
 def response(client, jwt_header, monkeypatch) -> Response:
     """Generates response for the ingeschrevenpersonen view."""
-    return client.get("/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+    base_path = os.environ['BASE_PATH']
+    return client.get(f"{base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
 
 
 class TestIngeschrevenpersonenBsnView:
