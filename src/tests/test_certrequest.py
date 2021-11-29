@@ -4,16 +4,16 @@ from unittest import mock
 
 from gobstuf.certrequest import cert_get, cert_post
 
+
 class MockResponse:
 
     def __init__(self, status_code=0, reason=""):
         self.status_code = status_code
         self.reason = reason
 
+
 class TestConfig(unittest.TestCase):
     """Test if requests get PKCS12 config from environment"""
-    def setUp(self) -> None:
-        pass
 
     @mock.patch("gobstuf.certrequest.get")
     def test_get(self, mock_get):
