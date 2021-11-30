@@ -36,11 +36,13 @@ def _routed_url(url):
     """
     split_result = urlsplit(url)
 
-    split_result = SplitResult(scheme=ROUTE_SCHEME,
-                               netloc=ROUTE_NETLOC,
-                               path=split_result.path,
-                               query=split_result.query,
-                               fragment=split_result.fragment)
+    split_result = SplitResult(
+        scheme=ROUTE_SCHEME,
+        netloc=ROUTE_NETLOC,
+        path=split_result.path.lstrip(API_BASE_PATH),
+        query=split_result.query,
+        fragment=split_result.fragment
+    )
     routed_url = urlunsplit(split_result)
 
     # The root wsdl should be requested as a parameter to the url path
@@ -189,8 +191,8 @@ def get_flask_app():
 
     # Application routes
     ROUTES = [
-        (API_BASE_PATH, f'{ROUTE_PATH_310}', _stuf, ['GET', 'POST'], '310'),
-        (API_BASE_PATH, f'{ROUTE_PATH_204}', _stuf, ['GET', 'POST'], '204'),
+        (API_BASE_PATH, ROUTE_PATH_310, _stuf, ['GET', 'POST'], '310'),
+        (API_BASE_PATH, ROUTE_PATH_204, _stuf, ['GET', 'POST'], '204'),
     ]
 
     for path, rule, view_func, methods, name in ROUTES:
