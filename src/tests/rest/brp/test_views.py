@@ -14,4 +14,6 @@ def response(client, jwt_header, monkeypatch) -> Response:
 class TestIngeschrevenpersonenBsnView:
 
     def test_adresseerbaar_object(self, response: Response):
+        """Asserts valid index and value in result of `adresseerbaarObjectIdentificatie` response."""
+        assert list(response.json['verblijfplaats'])[1] == "adresseerbaarObjectIdentificatie"
         assert response.json['verblijfplaats']["adresseerbaarObjectIdentificatie"] == "0518010000784987"
