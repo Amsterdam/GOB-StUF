@@ -7,7 +7,6 @@ from gobstuf.api import _get_stuf, _post_stuf, _stuf, _handle_stuf_request
 from gobstuf.api import get_flask_app
 from werkzeug.exceptions import BadRequest, MethodNotAllowed
 
-
 class MockResponse:
 
     def __init__(self, text, status_code=200):
@@ -19,11 +18,15 @@ class MockResponse:
 @mock.patch('gobstuf.api.logger', mock.MagicMock())
 class TestAPI(unittest.TestCase):
 
+    def setUp(self) -> None:
+        pass
+
     def test_health(self):
         result = _health()
         self.assertEqual(result, "Connectivity OK")
 
     def test_routed_url(self):
+
         result = _routed_url("proto://domain/path?args")
         NETLOC = environ.get('ROUTE_NETLOC')
         ROUTE_SCHEME = environ.get('ROUTE_SCHEME')
@@ -33,13 +36,6 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
 
         result = _routed_url("proto://domain/path/?wsdl")
-        self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
-
-    def test_routed_url_apibasepath(self):
-        BASE_PATH = environ.get('BASE_PATH')
-        NETLOC = environ.get('ROUTE_NETLOC')
-        ROUTE_SCHEME = environ.get('ROUTE_SCHEME')
-        result = _routed_url(f"proto://domain{BASE_PATH}/path?wsdl")
         self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
 
     def test_update_response(self):
@@ -68,6 +64,7 @@ class TestAPI(unittest.TestCase):
         # Only convert full references
         result = _update_request("...localhost...")
         self.assertEqual(result, "...localhost...")
+
 
     @mock.patch("gobstuf.api.cert_get")
     def test_get_stuf(self, mock_get):
@@ -122,6 +119,7 @@ class TestAPI(unittest.TestCase):
         request = type('MockInvalidMethod', (object,), {'method': 'INVALID'})
         with self.assertRaisesRegex(MethodNotAllowed, '405 Method Not Allowed'):
             _handle_stuf_request(request, routed_url)
+
 
     @mock.patch("gobstuf.api._handle_stuf_request", return_value=MockResponse('get', 123))
     @mock.patch("gobstuf.api.flask")
