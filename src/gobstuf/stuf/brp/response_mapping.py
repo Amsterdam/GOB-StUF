@@ -177,7 +177,6 @@ class NPSMapping(Mapping):
                 },
             },
             'verblijfplaats': {
-                'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
                 'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
                 'gemeenteVanInschrijving': {
                     'code': (MKSConverter.as_gemeente_code, 'BG:inp.gemeenteVanInschrijving'),
