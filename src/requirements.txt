@@ -4,6 +4,4 @@
 Flask-Cors==3.0.10
 Flask==1.1.4
 freezegun==1.1.0
-pytest-env==0.6.2
-requests-mock==1.9.3
 requests-pkcs12==1.10

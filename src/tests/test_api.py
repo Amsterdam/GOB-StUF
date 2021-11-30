@@ -1,12 +1,10 @@
 import unittest
 from unittest import mock
-from os import environ
 
 from gobstuf.api import _health, _routed_url, _update_response, _update_request
 from gobstuf.api import _get_stuf, _post_stuf, _stuf, _handle_stuf_request
 from gobstuf.api import get_flask_app
 from werkzeug.exceptions import BadRequest, MethodNotAllowed
-
 
 class MockResponse:
 
@@ -19,55 +17,48 @@ class MockResponse:
 @mock.patch('gobstuf.api.logger', mock.MagicMock())
 class TestAPI(unittest.TestCase):
 
+    def setUp(self) -> None:
+        pass
+
     def test_health(self):
         result = _health()
         self.assertEqual(result, "Connectivity OK")
 
     def test_routed_url(self):
         result = _routed_url("proto://domain/path?args")
-        NETLOC = environ.get('ROUTE_NETLOC')
-        ROUTE_SCHEME = environ.get('ROUTE_SCHEME')
-        self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?args", result)
+        self.assertEqual("ROUTE_SCHEME://ROUTE_NETLOC/path?args", result)
 
         result = _routed_url("proto://domain/path?wsdl")
-        self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
+        self.assertEqual("ROUTE_SCHEME://ROUTE_NETLOC/path?wsdl", result)
 
         result = _routed_url("proto://domain/path/?wsdl")
-        self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
-
-    def test_routed_url_apibasepath(self):
-        BASE_PATH = environ.get('BASE_PATH')
-        NETLOC = environ.get('ROUTE_NETLOC')
-        ROUTE_SCHEME = environ.get('ROUTE_SCHEME')
-        result = _routed_url(f"proto://domain{BASE_PATH}/path?wsdl")
-        self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
+        self.assertEqual("ROUTE_SCHEME://ROUTE_NETLOC/path?wsdl", result)
 
     def test_update_response(self):
-        NETLOC = environ.get('ROUTE_NETLOC')
-        GOB_STUF_PORT = environ.get('GOB_STUF_PORT')
         result = _update_response("text")
         self.assertEqual(result, "text")
 
-        expect = f"...localhost:{GOB_STUF_PORT}..."
+        expect = "...localhost:GOB_STUF_PORT..."
 
-        result = _update_response(f"...{NETLOC}...")
+        result = _update_response("...ROUTE_NETLOC...")
         self.assertEqual(result, expect)
 
         for n in [80, 800, 1234, 10000]:
-            result = _update_response(f"...{NETLOC}:{n}...")
+            result = _update_response(f"...ROUTE_NETLOC:{n}...")
             self.assertEqual(result, expect)
 
         for n in [0, 123456]:
-            result = _update_response(f"...{NETLOC}:{n}...")
+            result = _update_response(f"...ROUTE_NETLOC:{n}...")
             self.assertNotEqual(result, expect)
 
     def test_update_request(self):
         result = _update_request("...localhost:GOB_STUF_PORT...")
-        self.assertEqual(result, "...localhost:GOB_STUF_PORT...")
+        self.assertEqual(result, "...ROUTE_NETLOC...")
 
         # Only convert full references
         result = _update_request("...localhost...")
         self.assertEqual(result, "...localhost...")
+
 
     @mock.patch("gobstuf.api.cert_get")
     def test_get_stuf(self, mock_get):
@@ -122,6 +113,7 @@ class TestAPI(unittest.TestCase):
         request = type('MockInvalidMethod', (object,), {'method': 'INVALID'})
         with self.assertRaisesRegex(MethodNotAllowed, '405 Method Not Allowed'):
             _handle_stuf_request(request, routed_url)
+
 
     @mock.patch("gobstuf.api._handle_stuf_request", return_value=MockResponse('get', 123))
     @mock.patch("gobstuf.api.flask")
