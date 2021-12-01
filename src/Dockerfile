@@ -42,9 +42,6 @@ RUN mkdir -p /certs/gob/ && chmod -R 755 /certs
 # Copy gob stuf module
 COPY gobstuf gobstuf
 
-# Copy deploy dir
-COPY deploy /deploy/
-
 # OAuth2 Proxy
 COPY ./oauth2-proxy oauth2-proxy
 COPY ./oauth2-proxy.cfg oauth2-proxy.cfg
@@ -58,4 +55,4 @@ RUN chown datapunt /app/gobstuf/regression_tests/downloaded
 
 USER datapunt
 
-CMD ["/deploy/docker-run.sh"]
+CMD uwsgi
