@@ -176,6 +176,7 @@ class NPSMapping(Mapping):
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.geboorteplaats'),
                 },
             },
+            # verblijfplaats is reordered in `NPSMapping.filter`
             'verblijfplaats': {
                 'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
                 'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
@@ -361,6 +362,8 @@ class NPSMapping(Mapping):
         """
         # Set verblijfplaats: default use woonadres, fallback is briefadres
         verblijfplaats = mapped_object['verblijfplaats']
+        adress_obj = verblijfplaats.get('adresseerbaarObjectIdentificatie')
+
         for functie_adres in ['woonadres', 'briefadres']:
             adres = verblijfplaats[functie_adres]
             del verblijfplaats[functie_adres]
@@ -368,9 +371,11 @@ class NPSMapping(Mapping):
                 # Take the first adrestype that has any values
                 verblijfplaats = {
                     'functieAdres': functie_adres,
+                    'adresseerbaarObjectIdentificatie': adress_obj,
                     **adres,
                     **verblijfplaats
                 }
+
         mapped_object['verblijfplaats'] = verblijfplaats
 
         # Use overlijdensdatum for filtering
