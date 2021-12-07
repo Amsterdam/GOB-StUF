@@ -20,10 +20,12 @@ services:
       UWSGI_HARAKIRI: "3600"
       UWSGI_PROCESSES: "4"
       UWSGI_ENABLE_THREADS: ""
-      UWSGI_THREADS: ""
       UWSGI_MAX_WORKER_LIFETIME: "1800"
       UWSGI_HTTP_TIMEOUT: "4000"
       UWSGI_BUFFER_SIZE: "8192"
+      UWSGI_DIE_ON_TERM: "1"
+      UWSGI_NEED_APP: "1"
+      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy --config oauth2-proxy.cfg,freq=3,control=true,stopsignal=15"
 
       PKCS12_FILENAME: ${PKCS12_FILENAME}
       PKCS12_PASSWORD: ${PKCS12_PASSWORD}
