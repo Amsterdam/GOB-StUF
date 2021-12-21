@@ -6,11 +6,11 @@ set -e # stop on any error
 # Clear any cached results
 find . -name "*.pyc" -exec rm -f {} \;
 
+echo "Running tests"
+coverage run --source=./gobstuf -m pytest tests/
+
+echo "Running coverage report"
+coverage report --show-missing --fail-under=100
+
 echo "Running style checks"
 flake8
-
-echo "Running unit tests"
-pytest tests/
-
-echo "Running coverage tests"
-pytest --cov=gobstuf --cov-report html --cov-report term-missing --cov-fail-under=100 tests/

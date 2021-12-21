@@ -1,6 +1,6 @@
 import datetime
 
-from typing import Type
+from typing import Type, Optional
 from abc import ABC, abstractmethod
 
 from gobstuf.auth.routes import get_auth_url
@@ -234,7 +234,9 @@ class NPSMapping(Mapping):
                         'omschrijving':
                             (MKSConverter.get_land_omschrijving, 'BG:sub.verblijfBuitenland BG:lnd.landcode'),
                     },
-                })
+                }),
+                "inOnderzoek": (NPSMapping.in_onderzoek, "BG:inOnderzoek"),
+
             },
             'overlijden': {
                 'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
@@ -261,6 +263,38 @@ class NPSMapping(Mapping):
             'partners': 'BG:inp.heeftAlsEchtgenootPartner',
             'ouders': 'BG:inp.heeftAlsOuders',
             'kinderen': 'BG:inp.heeftAlsKinderen',
+        }
+
+    @classmethod
+    def in_onderzoek(cls, value: Optional[str]) -> Optional[dict[str, bool]]:
+        """Set all keys to True for each kenmerk.
+
+        :param value: True if BG:inOnderzoek was found. Else None.
+        :return: A dictionary with all keys set to True or None.
+        """
+        if value is None:
+            return None
+
+        return {
+            "functieAdres": True,
+            "identificatiecodeNummeraanduiding": True,
+            "identificatiecodeAdresseerbaarObject": True,
+            "locatiebeschrijving": True,
+            "woonplaatsnaam": True,
+            "huisnummertoevoeging": True,
+            "datumAanvangAdreshouding": True,
+            "naamOpenbareRuimte": True,
+            "postcode": True,
+            "datumInschrijvingInGemeente": True,
+            "straatnaam": True,
+            "verblijfBuitenland": True,
+            "landVanWaarIngeschreven": True,
+            "datumIngangGeldigheid": True,
+            "huisletter": True,
+            "datumVestigingInNederland": True,
+            "huisnummer": True,
+            "aanduidingBijHuisnummer": True,
+            "gemeenteVanInschrijving": True
         }
 
     def sort_ouders(self, ouders: list):
