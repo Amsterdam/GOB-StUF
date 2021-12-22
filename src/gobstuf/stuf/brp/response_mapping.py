@@ -272,7 +272,7 @@ class NPSMapping(Mapping):
         :param value: True if BG:inOnderzoek was found. Else None.
         :return: A dictionary with all keys set to True or None.
         """
-        if value is None:
+        if value is None or value.lower() != "j":
             return None
 
         return {
