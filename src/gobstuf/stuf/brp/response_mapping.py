@@ -235,8 +235,9 @@ class NPSMapping(Mapping):
                             (MKSConverter.get_land_omschrijving, 'BG:sub.verblijfBuitenland BG:lnd.landcode'),
                     },
                 }),
-                "inOnderzoek": (NPSMapping.in_onderzoek, "BG:inOnderzoek"),
-
+                # BG:inOnderzoek returns multiple nodes.
+                # Returns the value for the node with groepsnaam attribute 'Verblijfplaats', otherwise None
+                "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
             },
             'overlijden': {
                 'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
@@ -266,13 +267,15 @@ class NPSMapping(Mapping):
         }
 
     @classmethod
-    def in_onderzoek(cls, value: Optional[str]) -> Optional[dict[str, bool]]:
-        """Set all keys to True for each kenmerk.
+    def in_onderzoek(cls, values: Optional[list[Optional[str]]]) -> Optional[dict[str, bool]]:
+        """Set all keys to True for each kenmerk. BG:inOnderzoek can return multiple nodes with different attributes.
+        Currently, we only want the 'groepsnaam=Verblijfplaats' node, which is filtered in the xpath.
+        If a 'J' value is in `values`, a dict of kenmerk: True is returned.
 
-        :param value: True if BG:inOnderzoek was found. Else None.
+        :param values: A list of `str` or `None` if BG:inOnderzoek was found, else `None`.
         :return: A dictionary with all keys set to True or None.
         """
-        if value is None or value.lower() != "j":
+        if values is None or "J" not in values:
             return None
 
         return {
