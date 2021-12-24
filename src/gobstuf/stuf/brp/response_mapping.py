@@ -279,25 +279,25 @@ class NPSMapping(Mapping):
             return None
 
         return {
-            "functieAdres": True,
-            "identificatiecodeNummeraanduiding": True,
-            "identificatiecodeAdresseerbaarObject": True,
-            "locatiebeschrijving": True,
-            "woonplaatsnaam": True,
-            "huisnummertoevoeging": True,
-            "datumAanvangAdreshouding": True,
-            "naamOpenbareRuimte": True,
-            "postcode": True,
-            "datumInschrijvingInGemeente": True,
-            "straatnaam": True,
-            "verblijfBuitenland": True,
-            "landVanWaarIngeschreven": True,
-            "datumIngangGeldigheid": True,
-            "huisletter": True,
-            "datumVestigingInNederland": True,
-            "huisnummer": True,
             "aanduidingBijHuisnummer": True,
-            "gemeenteVanInschrijving": True
+            "datumAanvangAdreshouding": True,
+            "datumIngangGeldigheid": True,
+            "datumInschrijvingInGemeente": True,
+            "datumVestigingInNederland": True,
+            "functieAdres": True,
+            "gemeenteVanInschrijving": True,
+            "huisletter": True,
+            "huisnummer": True,
+            "huisnummertoevoeging": True,
+            "nummeraanduidingIdentificatie": True,
+            "adresseerbaarObjectIdentificatie": True,
+            "landVanwaarIngeschreven": True,
+            "locatiebeschrijving": True,
+            "straat": True,
+            "postcode": True,
+            "korteNaam": True,
+            "verblijfBuitenland": True,
+            "woonplaats": True
         }
 
     def sort_ouders(self, ouders: list):
