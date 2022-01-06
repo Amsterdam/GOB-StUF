@@ -1,6 +1,6 @@
 import datetime
 
-from typing import Type, Optional
+from typing import Type, Optional, Union
 from abc import ABC, abstractmethod
 
 from gobstuf.auth.routes import get_auth_url
@@ -155,6 +155,9 @@ class NPSMapping(Mapping):
                     'omschrijving': 'BG:adellijkeTitelPredikaat'
                 }
             },
+            # dit moet toegevoegd worden.
+            # check of vbt.aanduidingVerblijfstitel en(of?) ing.datumVerkrijgingVerblijfstitel maar niet<BG:ing.datumVerliesVerblijfstitel>  gevuld is,
+            "verblijfstitel": (NPSMapping.verblijfstitel, "BG:vbt.aanduidingVerblijfstitel", "BG:ing.datumVerkrijgingVerblijfstitel", "BG:ing.datumVerliesVerblijfstitel"),
             'leeftijd': (MKSConverter.as_leeftijd, 'BG:geboortedatum',
                          'BG:geboortedatum@StUF:indOnvolledigeDatum',
                          'BG:overlijdensdatum'),
@@ -299,6 +302,39 @@ class NPSMapping(Mapping):
             "verblijfBuitenland": True,
             "woonplaats": True
         }
+
+    @classmethod
+    def verblijfstitel(cls, verblijfstitel: Optional[int], datum_verkrijging: Optional[str], datum_verlies: Optional[str]) -> Optional[dict[str, Union[dict, str]]]:
+        """Returns verblijfstitel when correctly set.
+
+        :paaram verblijfstitel: code of the aanduiding.
+        :param datum_verkrijging: A date formatted YYYYMMDD
+        :param datum_verlies: A date formatted YYYYMMDD
+        :return: A dict with all the verblijfstitel details.
+        """
+        if datum_verlies is not None:
+            return None
+
+        if verblijfstitel is None or datum_verkrijging is None:
+            return None
+
+        year = datum_verkrijging[0:4]
+        month = datum_verkrijging[4:6]
+        day = datum_verkrijging[6:8]
+
+        return {
+           "aanduiding": {
+               "code": f"{verblijfstitel}",
+               # TODO: get this from somewhere
+               "omschrijving": "Vw 2000 art. 8, sub d, verg. asiel onbep. tijd of langdurig ingez., arbeid vrij"
+            },
+            "datumIngang": {
+                "datum": f"{year}-{month}-{day}",
+                "jaar": year,
+                "maand": month,
+                "dag": day
+            }
+       }
 
     def sort_ouders(self, ouders: list):
         """Sorts ouders by:
