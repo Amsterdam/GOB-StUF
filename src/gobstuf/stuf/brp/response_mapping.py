@@ -155,8 +155,6 @@ class NPSMapping(Mapping):
                     'omschrijving': 'BG:adellijkeTitelPredikaat'
                 }
             },
-            # dit moet toegevoegd worden.
-            # check of vbt.aanduidingVerblijfstitel en(of?) ing.datumVerkrijgingVerblijfstitel maar niet<BG:ing.datumVerliesVerblijfstitel>  gevuld is,
             "verblijfstitel": (NPSMapping.verblijfstitel, "BG:vbt.aanduidingVerblijfstitel", "BG:ing.datumVerkrijgingVerblijfstitel", "BG:ing.datumVerliesVerblijfstitel"),
             'leeftijd': (MKSConverter.as_leeftijd, 'BG:geboortedatum',
                          'BG:geboortedatum@StUF:indOnvolledigeDatum',
