@@ -1,8 +1,9 @@
-KEY=test_key.key
-PEM=test_pem.pem
-PW=gobstuf
+#!/usr/bin/env bash
+export KEY=test_key.key
+export PEM=test_pem.pem
+export PW=gobstuf
 
-PKCS=test_pkcs.p12
+export PKCS=test_pkcs.p12
 
 openssl req \
   -x509 \
@@ -10,7 +11,8 @@ openssl req \
   -nodes \
   -newkey rsa:4096 \
   -keyout $KEY \
-  -out $PEM
+  -out $PEM \
+  -days 3650
 
 openssl pkcs12 \
   -export \
