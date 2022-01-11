@@ -144,7 +144,7 @@ datumVerkrijgingVerblijfstitel.
                                    naam="omschrijvingRedenOpschortingBijhoudingOmschrijving"/>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true"
                                    naam="omschrijvingUitsluitingKiesrecht"/>
-                <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="omschrijvingVerblijfstitel"/>
+<!--                <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="omschrijvingVerblijfstitel"/>-->
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="onderToezichtstelling"/>
                 <StUF:extraElement naam="opgemaakteNaam">A. Kumari</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="terAttentieVan"/>
