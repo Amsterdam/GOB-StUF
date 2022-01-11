@@ -143,7 +143,7 @@ are there. Element datumVerliesVerblijfstitel is missing, so this will give a re
                                    naam="omschrijvingRedenOpschortingBijhoudingOmschrijving"/>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true"
                                    naam="omschrijvingUitsluitingKiesrecht"/>
-                <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="omschrijvingVerblijfstitel"/>
+                <StUF:extraElement naam="omschrijvingVerblijfstitel">Vw 2000 art. 8, onder a, vergunning regulier bepaalde tijd, arbeid vrij</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="onderToezichtstelling"/>
                 <StUF:extraElement naam="opgemaakteNaam">A. Kumari</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="terAttentieVan"/>

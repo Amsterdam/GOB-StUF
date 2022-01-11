@@ -155,7 +155,14 @@ class NPSMapping(Mapping):
                     'omschrijving': 'BG:adellijkeTitelPredikaat'
                 }
             },
-            "verblijfstitel": (NPSMapping.verblijfstitel, "BG:vbt.aanduidingVerblijfstitel", "BG:ing.datumVerkrijgingVerblijfstitel", "BG:ing.datumVerliesVerblijfstitel"),
+            "verblijfstitel": (
+                NPSMapping.verblijfstitel,
+                "BG:vbt.aanduidingVerblijfstitel",
+                "BG:ing.datumVerkrijgingVerblijfstitel",
+                "BG:ing.datumVerliesVerblijfstitel",
+                ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
+
+            ),
             'leeftijd': (MKSConverter.as_leeftijd, 'BG:geboortedatum',
                          'BG:geboortedatum@StUF:indOnvolledigeDatum',
                          'BG:overlijdensdatum'),
@@ -302,12 +309,16 @@ class NPSMapping(Mapping):
         }
 
     @classmethod
-    def verblijfstitel(cls, verblijfstitel: Optional[int], datum_verkrijging: Optional[str], datum_verlies: Optional[str]) -> Optional[dict[str, Union[dict, str]]]:
+    def verblijfstitel(
+            cls, verblijfstitel: Optional[int], datum_verkrijging: Optional[str],
+            datum_verlies: Optional[str], omschrijving: list[Optional[str]]
+    ) -> Optional[dict[str, Union[dict, str]]]:
         """Returns verblijfstitel when correctly set.
 
-        :paaram verblijfstitel: code of the aanduiding.
+        :param verblijfstitel: code of the aanduiding.
         :param datum_verkrijging: A date formatted YYYYMMDD
         :param datum_verlies: A date formatted YYYYMMDD
+        :param omschrijving: Description of verblijfstitel
         :return: A dict with all the verblijfstitel details.
         """
         if datum_verlies is not None:
@@ -319,12 +330,10 @@ class NPSMapping(Mapping):
         year = datum_verkrijging[0:4]
         month = datum_verkrijging[4:6]
         day = datum_verkrijging[6:8]
-
         return {
-           "aanduiding": {
-               "code": f"{verblijfstitel}",
-               # TODO: get this from somewhere
-               "omschrijving": "Vw 2000 art. 8, sub d, verg. asiel onbep. tijd of langdurig ingez., arbeid vrij"
+            "aanduiding": {
+                "code": f"{verblijfstitel}",
+                "omschrijving": omschrijving[0] if omschrijving else None
             },
             "datumIngang": {
                 "datum": f"{year}-{month}-{day}",
@@ -332,7 +341,7 @@ class NPSMapping(Mapping):
                 "maand": month,
                 "dag": day
             }
-       }
+        }
 
     def sort_ouders(self, ouders: list):
         """Sorts ouders by:
