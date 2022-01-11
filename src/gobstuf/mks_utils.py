@@ -4,6 +4,7 @@ MKS utility methods
 """
 import datetime
 from calendar import isleap
+from typing import Dict
 
 from gobstuf.reference_data.code_resolver import CodeResolver, DataItemNotFoundException
 from gobstuf.lib.communicatie import Persoon, Partner, Communicatie

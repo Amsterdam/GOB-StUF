@@ -327,20 +327,12 @@ class NPSMapping(Mapping):
         if verblijfstitel is None or datum_verkrijging is None:
             return None
 
-        year = datum_verkrijging[0:4]
-        month = datum_verkrijging[4:6]
-        day = datum_verkrijging[6:8]
         return {
             "aanduiding": {
                 "code": f"{verblijfstitel}",
                 "omschrijving": omschrijving[0] if omschrijving else None
             },
-            "datumIngang": {
-                "datum": f"{year}-{month}-{day}",
-                "jaar": year,
-                "maand": month,
-                "dag": day
-            }
+            "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging)
         }
 
     def sort_ouders(self, ouders: list):
