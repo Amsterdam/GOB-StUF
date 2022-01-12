@@ -326,47 +326,6 @@ class TestMKSConverter(TestCase):
         self.assertEqual(len(nationaliteit), 1)
         self.assertEqual(nationaliteit[0]['nationaliteit']['omschrijving'], 'Nederlandse')
 
-
-
-    def test_get_nationaliteit_no_permission(self):
-        nationaliteit_parameters = {
-            'aanduidingBijzonderNederlanderschap': None,
-            'nationaliteiten': [
-                {
-                    'datumIngangGeldigheid': {
-                        'datum': '2001-04-12',
-                        'jaar': 2001,
-                        'maand': 4,
-                        'dag': 12
-                    },
-                    'datumVerlies': None,
-                    'nationaliteit': {
-                        'code': '0001',
-                        'omschrijving': 'Nederlandse',
-                    }
-                },
-                {
-                    'datumIngangGeldigheid': {
-                        'datum': '2001-04-12',
-                        'jaar': 2001,
-                        'maand': 4,
-                        'dag': 12
-                    },
-                    'datumVerlies': "20020716",
-                    'nationaliteit': {
-                        'code': '0339',
-                        'omschrijving': 'Turkse',
-                    }
-                }
-            ]
-        }
-        nationaliteit = MKSConverter.get_nationaliteit(nationaliteit_parameters)
-        print(nationaliteit)
-        # # Expect one nationaliteit, Nederlandse
-        # self.assertEqual(len(nationaliteit), 1)
-        # self.assertEqual(nationaliteit[0]['nationaliteit']['omschrijving'], 'Nederlandse')
-
-
     def test_get_verblijf_buitenland(self):
         parameters = {
             'land': {
