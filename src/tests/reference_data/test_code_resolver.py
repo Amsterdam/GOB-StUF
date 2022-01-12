@@ -24,7 +24,7 @@ class TestCodeResolver(TestCase):
         for method_name in ['get_land', 'get_gemeente']:
             method = getattr(CodeResolver, method_name)
 
-            
+
             result = method("")
             self.assertIsNone(result)
 
@@ -58,3 +58,7 @@ class TestCodeResolver(TestCase):
         CodeResolver._gemeenten_omschrijving['any omschrijving'] = {'code': 'any code'}
         result = CodeResolver.get_gemeente_code("any omschrijving")
         self.assertEqual(result, 'any code')
+
+    def test_get_adelijke_titel_lowercase(self):
+        """Tabel38 CSV holds keys capitalized, test if lower case works."""
+        self.assertEqual(CodeResolver.get_adellijke_titel_code("ridder"), "R")
