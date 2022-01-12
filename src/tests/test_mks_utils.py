@@ -224,7 +224,7 @@ class TestMKSConverter(TestCase):
         for c, value in enumerate(values):
             true_if_equals = MKSConverter.true_if_equals(value)
             self.assertTrue(true_if_equals(value))
-            
+
             self.assertFalse(true_if_equals(false_values[c]))
 
     def test_true_if_in(self):
