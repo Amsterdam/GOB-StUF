@@ -88,6 +88,7 @@ class CodeResolver:
         data = {}
         for line in lines[1:]:  # Skip header
             code = line[config['fields'][key_field]]
+            code = code.lower()
             data[code] = {
                 attr: line[index] for attr, index in config['fields'].items()
             }
@@ -95,8 +96,7 @@ class CodeResolver:
 
     @classmethod
     def _get_dataitem(cls, data, key, value_field):
-        """
-        Get the value field for the given code
+        """Get the value field for the given code.
 
         :param data: The dictionary to search in
         :param key: The key to look for
@@ -109,7 +109,7 @@ class CodeResolver:
             return
 
         try:
-            return data[key][value_field]
+            return data[key.lower()][value_field]
         except KeyError:
             raise DataItemNotFoundException(f"ERROR: {key} could not be found")
 
