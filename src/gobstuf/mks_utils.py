@@ -4,6 +4,7 @@ MKS utility methods
 """
 import datetime
 from calendar import isleap
+from typing import Optional
 
 from gobstuf.indications import Geslachtsaanduiding, AanduidingNaamgebruik, IncompleteDateIndicator, \
     SoortVerbintenis, AanduidingBijzonderNederlanderschap
@@ -262,6 +263,10 @@ class MKSConverter:
     def _get_nationaliteit(cls, nationaliteit_parameters):
         nationaliteiten = []
         for nationaliteit in nationaliteit_parameters['nationaliteiten']:
+            # Handle <BG:inp.heeftAlsNationaliteit ... StUF:noValue="nietGeautoriseerd"/>
+            if nationaliteit["nationaliteit"]["code"] is None:
+                continue
+
             if not nationaliteit['datumVerlies']:
                 result = {
                     'aanduidingBijzonderNederlanderschap':
@@ -274,8 +279,17 @@ class MKSConverter:
         return nationaliteiten
 
     @classmethod
-    def get_nationaliteit(cls, nationaliteit_parameters):
-        return cls._get_nationaliteit(nationaliteit_parameters)
+    def get_nationaliteit(cls, nationaliteit_parameters: dict) -> Optional[list[dict]]:
+        """Returns nationalities, if the user has permission to see them.
+
+        :param nationaliteit_parameters: A dict with parameters coming from xml.
+        :return:
+        """
+        nationaliteiten = cls._get_nationaliteit(nationaliteit_parameters)
+        if len(nationaliteiten) == 0:
+            return None
+
+        return nationaliteiten
 
     @classmethod
     def get_verblijf_buitenland(cls, verblijf_buitenland_parameters):
