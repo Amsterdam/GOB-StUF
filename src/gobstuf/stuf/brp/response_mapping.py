@@ -1,6 +1,6 @@
 import datetime
 
-from typing import Type, Optional
+from typing import Type, Optional, Union
 from abc import ABC, abstractmethod
 
 from gobstuf.auth.routes import get_auth_url
@@ -155,6 +155,14 @@ class NPSMapping(Mapping):
                     'omschrijving': 'BG:adellijkeTitelPredikaat'
                 }
             },
+            "verblijfstitel": (
+                NPSMapping.verblijfstitel,
+                "BG:vbt.aanduidingVerblijfstitel",
+                "BG:ing.datumVerkrijgingVerblijfstitel",
+                "BG:ing.datumVerliesVerblijfstitel",
+                ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
+
+            ),
             'leeftijd': (MKSConverter.as_leeftijd, 'BG:geboortedatum',
                          'BG:geboortedatum@StUF:indOnvolledigeDatum',
                          'BG:overlijdensdatum'),
@@ -298,6 +306,33 @@ class NPSMapping(Mapping):
             "korteNaam": True,
             "verblijfBuitenland": True,
             "woonplaats": True
+        }
+
+    @classmethod
+    def verblijfstitel(
+            cls, verblijfstitel: Optional[int], datum_verkrijging: Optional[str],
+            datum_verlies: Optional[str], omschrijving: list[Optional[str]]
+    ) -> Optional[dict[str, Union[dict, str]]]:
+        """Returns verblijfstitel when correctly set.
+
+        :param verblijfstitel: code of the aanduiding.
+        :param datum_verkrijging: A date formatted YYYYMMDD
+        :param datum_verlies: A date formatted YYYYMMDD
+        :param omschrijving: Description of verblijfstitel
+        :return: A dict with all the verblijfstitel details.
+        """
+        if datum_verlies is not None:
+            return None
+
+        if verblijfstitel is None or datum_verkrijging is None:
+            return None
+
+        return {
+            "aanduiding": {
+                "code": f"{verblijfstitel}",
+                "omschrijving": omschrijving[0] if omschrijving else None
+            },
+            "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging)
         }
 
     def sort_ouders(self, ouders: list):
