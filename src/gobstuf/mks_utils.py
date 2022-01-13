@@ -82,6 +82,16 @@ class MKSConverter:
             return int(cls._dd(mks_datum))
 
     @classmethod
+    def to_date(cls, mks_datum: str) -> Optional[datetime.date]:
+        """Make  python date object from a mks_datum string.
+
+        :param mks_datum: Date formatted like yyyymmdd
+        :return: a datetime object, if it can be formatted.
+        """
+        if cls._is_mks_datum(mks_datum):
+            return datetime.datetime.strptime(mks_datum, cls._MKS_DATUM_PARSE_FORMAT).date()
+
+    @classmethod
     def _get_age(cls, now, birthday):
         """
         Age calculation that takes leap years into account
