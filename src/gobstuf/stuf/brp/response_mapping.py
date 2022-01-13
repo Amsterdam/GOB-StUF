@@ -321,7 +321,8 @@ class NPSMapping(Mapping):
         :param omschrijving: Description of verblijfstitel
         :return: A dict with all the verblijfstitel details.
         """
-        if datum_verlies is not None:
+        today = datetime.date.today()
+        if datum_verlies is not None and MKSConverter.to_date(datum_verlies) < today:
             return None
 
         if verblijfstitel is None or datum_verkrijging is None:

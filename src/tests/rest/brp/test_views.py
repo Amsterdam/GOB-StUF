@@ -1,3 +1,4 @@
+import freezegun
 import pytest
 
 
@@ -41,12 +42,25 @@ class TestIngeschrevenpersonenBsnView:
         assert "inOnderzoek" not in response.json["verblijfplaats"]
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
-    def test_verblijfstitel_none_when_datumVerliesVerblijfstitel(
+    def test_verblijfstitel_none_when_datumVerliesVerblijfstitel_in_past(
             self, stuf_310_response, app_base_path, client, jwt_header
     ):
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200
         assert "verblijfstitel" not in response.json
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
+    @freezegun.freeze_time("2011-01-01")
+    def test_verblijfstitel_when_datumVerliesVerblijfstitel_in_future(
+            self, stuf_310_response, app_base_path, client, jwt_header
+    ):
+        """Test if verblijfstitel is there when datum_verlies is in the future.
+
+        Test date is 20110412 in response_310.xml.
+        """
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        assert response.status_code == 200
+        assert "verblijfstitel" in response.json
 
     @pytest.mark.parametrize(
         "stuf_310_response",
