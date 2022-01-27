@@ -175,9 +175,9 @@ class NPSMapping(Mapping):
                 'plaats': {
                     'code': (MKSConverter.as_gemeente_code, 'BG:inp.geboorteplaats'),
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.geboorteplaats'),
-                },
+                }
             },
-            'overlijden': {
+                'overlijden': {
                 'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
                 'datum': (
                     MKSConverter.as_datum_broken_down,
@@ -254,7 +254,7 @@ class NPSMapping(Mapping):
                 }),
                 # BG:inOnderzoek returns multiple nodes.
                 # Returns the value for the node with groepsnaam attribute 'Verblijfplaats', otherwise None
-                "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
+                "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"])
             },
             "verblijfstitel": (
                 NPSMapping.verblijfstitel,
