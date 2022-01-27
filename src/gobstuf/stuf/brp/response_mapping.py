@@ -177,7 +177,7 @@ class NPSMapping(Mapping):
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.geboorteplaats'),
                 }
             },
-                'overlijden': {
+            'overlijden': {
                 'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
                 'datum': (
                     MKSConverter.as_datum_broken_down,
