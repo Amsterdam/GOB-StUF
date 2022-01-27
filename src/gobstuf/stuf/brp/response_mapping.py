@@ -192,7 +192,7 @@ class NPSMapping(Mapping):
                     'code': (MKSConverter.as_gemeente_code, 'BG:inp.overlijdenplaats'),
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.overlijdenplaats')
                 }
-            },            
+            },
             # verblijfplaats is reordered in `NPSMapping.filter`
             'verblijfplaats': {
                 'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
@@ -262,7 +262,6 @@ class NPSMapping(Mapping):
                 "BG:ing.datumVerkrijgingVerblijfstitel",
                 "BG:ing.datumVerliesVerblijfstitel",
                 ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
-
             )          
         }
 
