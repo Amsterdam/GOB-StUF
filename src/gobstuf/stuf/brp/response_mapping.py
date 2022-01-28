@@ -237,8 +237,7 @@ class NPSMapping(Mapping):
                     'postcode': 'BG:sub.correspondentieAdres BG:postcode',
                     'woonplaatsnaam': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
                     'identificatiecodeNummeraanduiding': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
-                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving',
-                    
+                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving',       
                 },
                 'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
                     'adresRegel1': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland1',
