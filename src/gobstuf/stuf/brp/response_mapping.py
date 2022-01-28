@@ -160,7 +160,7 @@ class NPSMapping(Mapping):
                 'aanhef': (MKSConverter.get_aanhef, communicatie_parameters),
                 'aanschrijfwijze': (MKSConverter.get_aanschrijfwijze, communicatie_parameters),
                 'aanduidingNaamgebruik': (MKSConverter.as_aanduiding_naamgebruik, 'BG:aanduidingNaamgebruik')
-            },
+                },
             'nationaliteiten': (MKSConverter.get_nationaliteit, nationaliteit_parameters),
             'geboorte': {
                 'datum': (
@@ -175,8 +175,8 @@ class NPSMapping(Mapping):
                 'plaats': {
                     'code': (MKSConverter.as_gemeente_code, 'BG:inp.geboorteplaats'),
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.geboorteplaats'),
-                }
-            },
+                },
+                },
             'overlijden': {
                 'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
                 'datum': (
@@ -190,9 +190,9 @@ class NPSMapping(Mapping):
                 },
                 'plaats': {
                     'code': (MKSConverter.as_gemeente_code, 'BG:inp.overlijdenplaats'),
-                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.overlijdenplaats'),
+                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.overlijdenplaats')
                 }
-            },
+                },
             # verblijfplaats is reordered in `NPSMapping.filter`
             'verblijfplaats': {
                 'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
@@ -237,7 +237,8 @@ class NPSMapping(Mapping):
                     'postcode': 'BG:sub.correspondentieAdres BG:postcode',
                     'woonplaatsnaam': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
                     'identificatiecodeNummeraanduiding': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
-                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving' 
+                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving',
+                    
                 },
                 'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
                     'adresRegel1': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland1',
@@ -254,15 +255,15 @@ class NPSMapping(Mapping):
                 }),
                 # BG:inOnderzoek returns multiple nodes.
                 # Returns the value for the node with groepsnaam attribute 'Verblijfplaats', otherwise None
-                "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"])
-            },
+                "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
+                },
             "verblijfstitel": (
                 NPSMapping.verblijfstitel,
                 "BG:vbt.aanduidingVerblijfstitel",
                 "BG:ing.datumVerkrijgingVerblijfstitel",
                 "BG:ing.datumVerliesVerblijfstitel",
                 ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
-            )
+                )
         }
 
     @property
