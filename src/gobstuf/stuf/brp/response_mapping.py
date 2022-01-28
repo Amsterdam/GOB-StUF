@@ -139,36 +139,29 @@ class NPSMapping(Mapping):
         }
 
         return {
+            'burgerservicenummer': 'BG:inp.bsn',
+            'geheimhoudingPersoonsgegevens':
+                (MKSConverter.true_if_in(['1', '2', '3', '4', '5', '6', '7']), 'BG:inp.indicatieGeheim'),
             'geslachtsaanduiding': (MKSConverter.as_geslachtsaanduiding,
                                     'BG:geslachtsaanduiding',
                                     'BG:geslachtsaanduiding@StUF:noValue'),
+            'leeftijd': (MKSConverter.as_leeftijd, 'BG:geboortedatum',
+                         'BG:geboortedatum@StUF:indOnvolledigeDatum',
+                         'BG:overlijdensdatum'),
             'naam': {
-                'aanhef': (MKSConverter.get_aanhef, communicatie_parameters),
-                'aanschrijfwijze': (MKSConverter.get_aanschrijfwijze, communicatie_parameters),
-                'aanduidingNaamgebruik': (MKSConverter.as_aanduiding_naamgebruik, 'BG:aanduidingNaamgebruik'),
-                'voornamen': 'BG:voornamen',
-                'voorletters': 'BG:voorletters',
                 'geslachtsnaam': 'BG:geslachtsnaam',
+                'voorletters': 'BG:voorletters',
+                'voornamen': 'BG:voornamen',
                 'voorvoegsel': 'BG:voorvoegselGeslachtsnaam',
                 'adellijkeTitelPredikaat': {
                     'code': (MKSConverter.get_adellijke_titel_code, 'BG:adellijkeTitelPredikaat'),
                     'omschrijving': 'BG:adellijkeTitelPredikaat'
-                }
-            },
-            "verblijfstitel": (
-                NPSMapping.verblijfstitel,
-                "BG:vbt.aanduidingVerblijfstitel",
-                "BG:ing.datumVerkrijgingVerblijfstitel",
-                "BG:ing.datumVerliesVerblijfstitel",
-                ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
-
-            ),
-            'leeftijd': (MKSConverter.as_leeftijd, 'BG:geboortedatum',
-                         'BG:geboortedatum@StUF:indOnvolledigeDatum',
-                         'BG:overlijdensdatum'),
-            'burgerservicenummer': 'BG:inp.bsn',
-            'geheimhoudingPersoonsgegevens':
-                (MKSConverter.true_if_in(['1', '2', '3', '4', '5', '6', '7']), 'BG:inp.indicatieGeheim'),
+                },
+                'aanhef': (MKSConverter.get_aanhef, communicatie_parameters),
+                'aanschrijfwijze': (MKSConverter.get_aanschrijfwijze, communicatie_parameters),
+                'aanduidingNaamgebruik': (MKSConverter.as_aanduiding_naamgebruik, 'BG:aanduidingNaamgebruik')
+                },
+            'nationaliteiten': (MKSConverter.get_nationaliteit, nationaliteit_parameters),
             'geboorte': {
                 'datum': (
                     MKSConverter.as_datum_broken_down,
@@ -183,7 +176,23 @@ class NPSMapping(Mapping):
                     'code': (MKSConverter.as_gemeente_code, 'BG:inp.geboorteplaats'),
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.geboorteplaats'),
                 },
-            },
+                },
+            'overlijden': {
+                'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
+                'datum': (
+                    MKSConverter.as_datum_broken_down,
+                    'BG:overlijdensdatum',
+                    'BG:overlijdensdatum@StUF:indOnvolledigeDatum'
+                ),
+                'land': {
+                    'code': (MKSConverter.as_code(4), 'BG:inp.overlijdenLand'),
+                    'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.overlijdenLand')
+                },
+                'plaats': {
+                    'code': (MKSConverter.as_gemeente_code, 'BG:inp.overlijdenplaats'),
+                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.overlijdenplaats')
+                }
+                },
             # verblijfplaats is reordered in `NPSMapping.filter`
             'verblijfplaats': {
                 'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
@@ -204,31 +213,31 @@ class NPSMapping(Mapping):
                     'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.immigratieLand')
                 },
                 'woonadres': {
-                    'identificatiecodeNummeraanduiding': 'BG:verblijfsadres BG:aoa.identificatie',
-                    'identificatiecodeAdresseerbaarObject':
-                        'BG:inp.verblijftIn BG:gerelateerde StUF:extraElementen' +
-                        '!.//StUF:extraElement[@naam="identificatie"]',
+                    'straatnaam': 'BG:verblijfsadres BG:gor.straatnaam',
                     'naamOpenbareRuimte': 'BG:verblijfsadres BG:gor.openbareRuimteNaam',
-                    'huisletter': 'BG:verblijfsadres BG:aoa.huisletter',
                     'huisnummer': 'BG:verblijfsadres BG:aoa.huisnummer',
+                    'huisletter': 'BG:verblijfsadres BG:aoa.huisletter',
                     'huisnummertoevoeging': 'BG:verblijfsadres BG:aoa.huisnummertoevoeging',
                     'postcode': 'BG:verblijfsadres BG:aoa.postcode',
                     'woonplaatsnaam': 'BG:verblijfsadres BG:wpl.woonplaatsNaam',
+                    'identificatiecodeAdresseerbaarObject':
+                        'BG:inp.verblijftIn BG:gerelateerde StUF:extraElementen' +
+                        '!.//StUF:extraElement[@naam="identificatie"]',
+                    'identificatiecodeNummeraanduiding': 'BG:verblijfsadres BG:aoa.identificatie',
                     'locatiebeschrijving': 'BG:verblijfsadres BG:inp.locatiebeschrijving',
-                    'straatnaam': 'BG:verblijfsadres BG:gor.straatnaam',
                     'datumAanvangAdreshouding':
                         (MKSConverter.as_datum_broken_down, 'BG:verblijfsadres BG:begindatumVerblijf'),
                 },
                 'briefadres': {
-                    'identificatiecodeNummeraanduiding': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
-                    'huisletter': 'BG:sub.correspondentieAdres BG:aoa.huisletter',
+                    'straatnaam': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
+                    'naamOpenbareRuimte': 'BG:sub.correspondentieAdres BG:gor.openbareRuimteNaam',
                     'huisnummer': 'BG:sub.correspondentieAdres BG:aoa.huisnummer',
+                    'huisletter': 'BG:sub.correspondentieAdres BG:aoa.huisletter',
                     'huisnummertoevoeging': 'BG:sub.correspondentieAdres BG:aoa.huisnummertoevoeging',
                     'postcode': 'BG:sub.correspondentieAdres BG:postcode',
                     'woonplaatsnaam': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
+                    'identificatiecodeNummeraanduiding': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
                     'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving',
-                    'straatnaam': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
-                    'naamOpenbareRuimte': 'BG:sub.correspondentieAdres BG:gor.openbareRuimteNaam',
                 },
                 'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
                     'adresRegel1': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland1',
@@ -246,24 +255,14 @@ class NPSMapping(Mapping):
                 # BG:inOnderzoek returns multiple nodes.
                 # Returns the value for the node with groepsnaam attribute 'Verblijfplaats', otherwise None
                 "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
-            },
-            'overlijden': {
-                'indicatieOverleden': (MKSConverter.true_if_exists, 'BG:overlijdensdatum'),
-                'datum': (
-                    MKSConverter.as_datum_broken_down,
-                    'BG:overlijdensdatum',
-                    'BG:overlijdensdatum@StUF:indOnvolledigeDatum'
-                ),
-                'land': {
-                    'code': (MKSConverter.as_code(4), 'BG:inp.overlijdenLand'),
-                    'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.overlijdenLand')
                 },
-                'plaats': {
-                    'code': (MKSConverter.as_gemeente_code, 'BG:inp.overlijdenplaats'),
-                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.overlijdenplaats')
-                }
-            },
-            'nationaliteiten': (MKSConverter.get_nationaliteit, nationaliteit_parameters)
+            "verblijfstitel": (
+                NPSMapping.verblijfstitel,
+                "BG:vbt.aanduidingVerblijfstitel",
+                "BG:ing.datumVerkrijgingVerblijfstitel",
+                "BG:ing.datumVerliesVerblijfstitel",
+                ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
+                )
         }
 
     @property
