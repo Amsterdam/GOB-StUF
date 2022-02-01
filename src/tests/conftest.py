@@ -39,7 +39,14 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
 @pytest.fixture
 def tests_dir() -> Path:
     """Returns directory which contains tests. Used to find files required for tests."""
-    return Path(__file__).parent
+    old_dir = Path.cwd()
+    test_dir = Path(__file__).parent
+
+    try:
+        os.chdir(test_dir.parent)
+        yield test_dir
+    finally:
+        os.chdir(old_dir)
 
 
 @pytest.fixture(params=[["fp_test_burger", "brp_r"]])

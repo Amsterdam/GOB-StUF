@@ -196,48 +196,45 @@ class NPSMapping(Mapping):
             # verblijfplaats is reordered in `NPSMapping.filter`
             'verblijfplaats': {
                 'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
-                'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
-                'gemeenteVanInschrijving': {
-                    'code': (MKSConverter.as_gemeente_code, 'BG:inp.gemeenteVanInschrijving'),
-                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.gemeenteVanInschrijving')
-                },
-                'datumVestigingInNederland':
-                    (MKSConverter.as_datum_broken_down, 'BG:inp.datumVestigingInNederland',
-                     'BG:inp.datumVestigingInNederland@StUF:indOnvolledigeDatum'),
-                'indicatieVestigingVanuitBuitenland':
-                    (MKSConverter.true_if_exists, 'BG:inp.datumVestigingInNederland'),
-                'vanuitVertrokkenOnbekendWaarheen':
-                    (MKSConverter.true_if_equals('0000'), (MKSConverter.as_code(4), 'BG:inp.immigratieLand')),
-                'landVanwaarIngeschreven': {
-                    'code': (MKSConverter.as_code(4), 'BG:inp.immigratieLand'),
-                    'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.immigratieLand')
-                },
                 'woonadres': {
-                    'straat': 'BG:verblijfsadres BG:gor.straatnaam',
                     'naamOpenbareRuimte': 'BG:verblijfsadres BG:gor.openbareRuimteNaam',
+                    'straat': 'BG:verblijfsadres BG:gor.straatnaam',
                     'huisnummer': 'BG:verblijfsadres BG:aoa.huisnummer',
                     'huisletter': 'BG:verblijfsadres BG:aoa.huisletter',
                     'huisnummertoevoeging': 'BG:verblijfsadres BG:aoa.huisnummertoevoeging',
                     'postcode': 'BG:verblijfsadres BG:aoa.postcode',
                     'woonplaats': 'BG:verblijfsadres BG:wpl.woonplaatsNaam',
-                    'adresseerbaarObjectIdentificatie':
-                        'BG:inp.verblijftIn BG:gerelateerde StUF:extraElementen' +
-                        '!.//StUF:extraElement[@naam="identificatie"]',
                     'nummeraanduidingIdentificatie': 'BG:verblijfsadres BG:aoa.identificatie',
-                    'locatiebeschrijving': 'BG:verblijfsadres BG:inp.locatiebeschrijving',
-                    'datumAanvangAdreshouding':
-                        (MKSConverter.as_datum_broken_down, 'BG:verblijfsadres BG:begindatumVerblijf'),
+                    'locatiebeschrijving': 'BG:verblijfsadres BG:inp.locatiebeschrijving'
                 },
                 'briefadres': {
-                    'straat': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
                     'naamOpenbareRuimte': 'BG:sub.correspondentieAdres BG:gor.openbareRuimteNaam',
+                    'straat': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
                     'huisnummer': 'BG:sub.correspondentieAdres BG:aoa.huisnummer',
                     'huisletter': 'BG:sub.correspondentieAdres BG:aoa.huisletter',
                     'huisnummertoevoeging': 'BG:sub.correspondentieAdres BG:aoa.huisnummertoevoeging',
                     'postcode': 'BG:sub.correspondentieAdres BG:postcode',
                     'woonplaats': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
                     'nummeraanduidingIdentificatie': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
-                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving',
+                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving'
+                },
+                'indicatieVestigingVanuitBuitenland':
+                    (MKSConverter.true_if_exists, 'BG:inp.datumVestigingInNederland'),
+                'vanuitVertrokkenOnbekendWaarheen':
+                    (MKSConverter.true_if_equals('0000'), (MKSConverter.as_code(4), 'BG:inp.immigratieLand')),
+                'datumAanvangAdreshouding':
+                    (MKSConverter.as_datum_broken_down, 'BG:verblijfsadres BG:begindatumVerblijf'),
+                'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
+                'datumVestigingInNederland':
+                    (MKSConverter.as_datum_broken_down, 'BG:inp.datumVestigingInNederland',
+                     'BG:inp.datumVestigingInNederland@StUF:indOnvolledigeDatum'),
+                'gemeenteVanInschrijving': {
+                    'code': (MKSConverter.as_gemeente_code, 'BG:inp.gemeenteVanInschrijving'),
+                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.gemeenteVanInschrijving')
+                },
+                'landVanwaarIngeschreven': {
+                    'code': (MKSConverter.as_code(4), 'BG:inp.immigratieLand'),
+                    'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.immigratieLand')
                 },
                 'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
                     'adresRegel1': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland1',
@@ -434,19 +431,23 @@ class NPSMapping(Mapping):
         """
         # Set verblijfplaats: default use woonadres, fallback is briefadres
         verblijfplaats = mapped_object['verblijfplaats']
-        adress_obj = verblijfplaats.get('adresseerbaarObjectIdentificatie')
 
         for functie_adres in ['woonadres', 'briefadres']:
-            adres = verblijfplaats[functie_adres]
-            del verblijfplaats[functie_adres]
+            adres = verblijfplaats.pop(functie_adres)
+
             if not verblijfplaats.get('functieAdres') and any(adres.values()):
                 # Take the first adrestype that has any values
-                verblijfplaats = {
+                # reorder the middle part of the verblijfplaats dictionary, to align with haalcentraal
+
+                reordered = {
+                    'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
+                    'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
                     'functieAdres': functie_adres,
-                    'adresseerbaarObjectIdentificatie': adress_obj,
-                    **adres,
-                    **verblijfplaats
+                    'indicatieVestigingVanuitBuitenland':
+                        verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
+                    'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
                 }
+                verblijfplaats = {**adres, **reordered, **verblijfplaats}
 
         mapped_object['verblijfplaats'] = verblijfplaats
 
