@@ -213,30 +213,30 @@ class NPSMapping(Mapping):
                     'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.immigratieLand')
                 },
                 'woonadres': {
-                    'straatnaam': 'BG:verblijfsadres BG:gor.straatnaam',
+                    'straat': 'BG:verblijfsadres BG:gor.straatnaam',
                     'naamOpenbareRuimte': 'BG:verblijfsadres BG:gor.openbareRuimteNaam',
                     'huisnummer': 'BG:verblijfsadres BG:aoa.huisnummer',
                     'huisletter': 'BG:verblijfsadres BG:aoa.huisletter',
                     'huisnummertoevoeging': 'BG:verblijfsadres BG:aoa.huisnummertoevoeging',
                     'postcode': 'BG:verblijfsadres BG:aoa.postcode',
-                    'woonplaatsnaam': 'BG:verblijfsadres BG:wpl.woonplaatsNaam',
-                    'identificatiecodeAdresseerbaarObject':
+                    'woonplaats': 'BG:verblijfsadres BG:wpl.woonplaatsNaam',
+                    'adresseerbaarObjectIdentificatie':
                         'BG:inp.verblijftIn BG:gerelateerde StUF:extraElementen' +
                         '!.//StUF:extraElement[@naam="identificatie"]',
-                    'identificatiecodeNummeraanduiding': 'BG:verblijfsadres BG:aoa.identificatie',
+                    'nummeraanduidingIdentificatie': 'BG:verblijfsadres BG:aoa.identificatie',
                     'locatiebeschrijving': 'BG:verblijfsadres BG:inp.locatiebeschrijving',
                     'datumAanvangAdreshouding':
                         (MKSConverter.as_datum_broken_down, 'BG:verblijfsadres BG:begindatumVerblijf'),
                 },
                 'briefadres': {
-                    'straatnaam': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
+                    'straat': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
                     'naamOpenbareRuimte': 'BG:sub.correspondentieAdres BG:gor.openbareRuimteNaam',
                     'huisnummer': 'BG:sub.correspondentieAdres BG:aoa.huisnummer',
                     'huisletter': 'BG:sub.correspondentieAdres BG:aoa.huisletter',
                     'huisnummertoevoeging': 'BG:sub.correspondentieAdres BG:aoa.huisnummertoevoeging',
                     'postcode': 'BG:sub.correspondentieAdres BG:postcode',
-                    'woonplaatsnaam': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
-                    'identificatiecodeNummeraanduiding': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
+                    'woonplaats': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
+                    'nummeraanduidingIdentificatie': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
                     'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving',
                 },
                 'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
