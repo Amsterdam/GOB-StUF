@@ -503,8 +503,8 @@ class NPSMapping(Mapping):
         """
         links = super().get_links(mapped_object)
 
-        if mapped_object.get('verblijfplaats', {}).get('woonadres', {}).get('identificatiecodeNummeraanduiding'):
-            nummeraanduiding = mapped_object['verblijfplaats']['woonadres']['identificatiecodeNummeraanduiding']
+        if mapped_object.get('verblijfplaats', {}).get('woonadres', {}).get('nummeraanduidingIdentificatie'):
+            nummeraanduiding = mapped_object['verblijfplaats']['woonadres']['nummeraanduidingIdentificatie']
             links['verblijfplaatsNummeraanduiding'] = {
                 'href': f"https://api.data.amsterdam.nl/gob/bag/nummeraanduidingen/{nummeraanduiding}/"
             }
