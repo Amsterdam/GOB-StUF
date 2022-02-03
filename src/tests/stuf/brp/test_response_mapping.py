@@ -546,7 +546,7 @@ class TestNPSMapping(TestCase):
         mapped_object = {
             'verblijfplaats': {
                 'woonadres': {
-                    'identificatiecodeNummeraanduiding': '036digitdigitdigit'
+                    'nummeraanduidingIdentificatie': '036digitdigitdigit'
                 }
             },
             'burgerservicenummer': 'digitdigitdigit',
