@@ -89,3 +89,10 @@ class TestIngeschrevenpersonenBsnView:
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200
         assert "nationaliteiten" not in response.json
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
+    def test_forbidden_403(self, stuf_310_response, app_base_path, client, jwt_header_forbidden):
+        """Test against an unauthorized jwt header."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header_forbidden)
+        assert response.status_code == 403
+        assert response.data == b'Forbidden'

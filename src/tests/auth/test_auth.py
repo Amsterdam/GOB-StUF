@@ -1,19 +1,21 @@
-from unittest import TestCase, mock
+from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
 from gobstuf.auth.routes import secure_route, _get_roles, get_auth_url, \
-                                MKS_USER_KEY, USER_NAME_HEADER, _allows_access, _get_role
+                                MKS_USER_KEY, USER_NAME_HEADER, _allows_access, _get_role_fp
 
 
-class MockRequest():
+class MockRequest:
     pass
+
 
 mock_request = MockRequest()
 
 
-class MockG():
+class MockG:
     def __init__(self):
         self.__setattr__(MKS_USER_KEY, None)
+
 
 mock_g = MockG()
 
@@ -59,35 +61,40 @@ class TestAuth(TestCase):
             delattr(mock_request, 'headers')
             self.assertEqual(_get_roles(), [])
 
+    def test_get_role(self):
+        none_cases = [[], ['some ignored role'], ['brp_r']]
+        for case in none_cases:
+            self.assertIsNone(_get_role_fp(case))
+
+        roles = ['some ignored role', 'fp_the_role', 'brp_r']
+        self.assertEqual('fp_the_role', _get_role_fp(roles))
+
+        roles = ['some ignored role', 'fp_the_role', 'fp_other_role', 'brp_r']
+        self.assertEqual('fp_the_role', _get_role_fp(roles))
+
     @patch('gobstuf.auth.routes._get_roles')
-    def test_get_role(self, mock_get_roles):
-        mock_get_roles.return_value = []
-        self.assertIsNone(_get_role())
-
-        mock_get_roles.return_value = ['some ignored role']
-        self.assertIsNone(_get_role())
-
-        mock_get_roles.return_value = ['some ignored role', 'fp_the_role']
-        self.assertEqual('fp_the_role', _get_role())
-
-        mock_get_roles.return_value = ['some ignored role', 'fp_the_role', 'fp_other_role']
-        self.assertEqual('fp_the_role', _get_role())
-
-    @patch('gobstuf.auth.routes._get_role')
-    def test_allows_access(self, mock_get_role):
+    def test_allows_access(self, mock_get_roles):
         mock_g = MagicMock()
         mock_request = MagicMock()
 
         with patch('gobstuf.auth.routes.g', mock_g), \
-            patch('gobstuf.auth.routes.request', mock_request):
-                mock_get_role.return_value = None
-                mock_request.headers = {USER_NAME_HEADER: 'some username'}
-                self.assertFalse(_allows_access('rule'))
+                patch('gobstuf.auth.routes.request', mock_request):
+            mock_get_roles.return_value = []
+            self.assertFalse(_allows_access('rule'))
 
-                mock_get_role.return_value = 'some role'
-                self.assertTrue(_allows_access('rule'))
-                self.assertEqual('some role', mock_g.MKS_APPLICATIE)
-                self.assertEqual('some username', mock_g.MKS_GEBRUIKER)
+            # you need 'brp_r' role too
+            mock_get_roles.return_value = ['fp_somerole']
+            self.assertFalse(_allows_access('rule'))
+
+            # you need 'fp_*' role too
+            mock_get_roles.return_value = ['brp_r']
+            self.assertFalse(_allows_access('rule'))
+
+            mock_request.headers = {USER_NAME_HEADER: 'some username'}
+            mock_get_roles.return_value = ['some role', 'fp_somerole', 'brp_r']
+            self.assertTrue(_allows_access('rule'))
+            self.assertEqual('fp_somerole', mock_g.MKS_APPLICATIE)
+            self.assertEqual('some username', mock_g.MKS_GEBRUIKER)
 
     @patch('gobstuf.auth.routes.url_for')
     def test_get_auth_url(self, mock_url_for):

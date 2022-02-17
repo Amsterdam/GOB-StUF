@@ -51,7 +51,23 @@ def tests_dir() -> Path:
 
 @pytest.fixture(params=[["fp_test_burger", "brp_r"]])
 def jwt_header(request) -> dict[str, bytes]:
-    """Generates a jwt token with given roles. Allows authenticating test-requests.
+    """
+    Generates a jwt token with given roles. Allows authenticating test-requests.
+    The request will fail with 403 if these are not in roles: `brp_r` and `fp_*`
+
+    :param request: pytest SubRequest object.
+    :return: A JWT token.
+    """
+    header = {"type": "JWT", "alg": "RS256"}
+    payload = {"realm_access": {"roles": request.param}}
+    return {ACCESS_TOKEN_HEADER: jwt.encode(payload, key='', headers=header)}
+
+
+@pytest.fixture(params=[["fp_test_burger_403", "brp_r_403"], ["brp_r"], ["fp_test_burger"]])
+def jwt_header_forbidden(request) -> dict[str, bytes]:
+    """
+    Generates a jwt token with given roles. Allows authenticating test-requests.
+    The request will fail with 403 if these are not in roles: `brp_r` and `fp_*`
 
     :param request: pytest SubRequest object.
     :return: A JWT token.
