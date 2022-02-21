@@ -7,7 +7,7 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
-from gobcore.secure.request import ACCESS_TOKEN_HEADER
+from gobcore.secure.request import ACCESS_TOKEN_HEADER, USER_NAME_HEADER
 from gobstuf.api import get_flask_app
 
 
@@ -49,16 +49,57 @@ def tests_dir() -> Path:
         os.chdir(old_dir)
 
 
-@pytest.fixture(params=[["fp_test_burger", "brp_r"]])
+@pytest.fixture(params=[{"roles": ["fp_test_burger", "brp_r"], USER_NAME_HEADER: "test_burger"}])
 def jwt_header(request) -> dict[str, bytes]:
-    """Generates a jwt token with given roles. Allows authenticating test-requests.
+    """
+    Generates a jwt token with given roles. Allows authenticating test-requests.
+    The request will fail with 403 if these are not in roles: `brp_r` and `fp_*`
+    Preferred_username is optional in the request to MKS
+
+    :param request: pytest SubRequest object.
+    :return: A header dict containing a JWT token and preferred username.
+    """
+    header = {"type": "JWT", "alg": "RS256"}
+    payload = {"realm_access": {"roles": request.param["roles"]}}
+    return {
+        ACCESS_TOKEN_HEADER: jwt.encode(payload, key='', headers=header),
+        USER_NAME_HEADER: request.param[USER_NAME_HEADER],
+        '_param': request.param
+    }
+
+
+@pytest.fixture(params=[
+    {"roles": ["fp_test_burger_403", "brp_r_403"], USER_NAME_HEADER: "test_burger"},
+    {"roles": ["brp_r"], USER_NAME_HEADER: "test_burger"},
+    {"roles": ["fp_test_burger"], USER_NAME_HEADER: "test_burger"},
+    {USER_NAME_HEADER: "test_burger"},
+    {"roles": [], USER_NAME_HEADER: ""},
+    {"roles": ["roles"]},
+    {}
+])
+def jwt_header_forbidden(request) -> dict[str, bytes]:
+    """
+    Generates a jwt token with given roles. Allows authenticating test-requests.
+    The request will fail with 403 if these are not in roles: `brp_r` and `fp_*`
+    Preferred_username is optional in the request to MKS
 
     :param request: pytest SubRequest object.
     :return: A JWT token.
     """
-    header = {"type": "JWT", "alg": "RS256"}
-    payload = {"realm_access": {"roles": request.param}}
-    return {ACCESS_TOKEN_HEADER: jwt.encode(payload, key='', headers=header)}
+    if not request.param:
+        return {}
+
+    header = {'_param': request.param}
+
+    if "roles" in request.param:
+        payload = {"realm_access": {"roles": request.param}}
+        token_header = {"type": "JWT", "alg": "RS256"}
+        header[ACCESS_TOKEN_HEADER] = jwt.encode(payload, key='', headers=token_header)
+
+    if USER_NAME_HEADER in request.param:
+        header[USER_NAME_HEADER] = request.param[USER_NAME_HEADER]
+
+    return header
 
 
 @pytest.fixture(params=["response_310.xml"])
