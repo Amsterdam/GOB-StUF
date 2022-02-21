@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
@@ -6,13 +7,20 @@ from gobstuf.auth.routes import secure_route, get_auth_url
 
 class MockG:
 
-    MKS_GEBRUIKER = None
-    MKS_APPLICATIE = None
+    MKS_GEBRUIKER: Optional[str]
+    MKS_APPLICATIE: Optional[str]
+
+    def __init__(self):
+        self.MKS_GEBRUIKER = None
+        self.MKS_APPLICATIE = None
 
 
 class MockRequest:
 
-    headers = None
+    headers: Optional[dict]
+
+    def __init__(self):
+        self.headers = None
 
 
 def view_func(*args, **kwargs):
@@ -24,8 +32,8 @@ class TestSecureRoute:
     def test_secure_route_allow(self, jwt_header, app):
         route_name = "route_name"
 
-        with patch("gobstuf.auth.routes.request", MockRequest) as mock_request, \
-                patch("gobstuf.auth.routes.g", MockG) as mock_g:
+        with patch("gobstuf.auth.routes.request", MockRequest()) as mock_request, \
+                patch("gobstuf.auth.routes.g", MockG()) as mock_g:
             mock_request.headers = jwt_header
             result = secure_route("rule", view_func, name=route_name)
 
@@ -37,8 +45,8 @@ class TestSecureRoute:
     def test_secure_route_forbidden(self, jwt_header_forbidden, app):
         route_name = "route_name"
 
-        with patch("gobstuf.auth.routes.request", MockRequest) as mock_request, \
-                patch("gobstuf.auth.routes.g", MockG) as mock_g:
+        with patch("gobstuf.auth.routes.request", MockRequest()) as mock_request, \
+                patch("gobstuf.auth.routes.g", MockG()) as mock_g:
             mock_request.headers = jwt_header_forbidden
             result = secure_route("rule", view_func, name=route_name)
 
