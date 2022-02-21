@@ -33,14 +33,6 @@ def secure_route(rule: str, func: Callable, name: str = None) -> Callable:
     return wrapper
 
 
-def _get_roles() -> list[str]:
-    """Gets the user roles from the request headers."""
-    try:
-        return extract_roles(request.headers)
-    except AttributeError:
-        return []
-
-
 def _get_role_fp(roles: list[str]) -> Optional[str]:
     """Get the first active `functieprofiel` role, which starts with 'fp_'."""
     return next((role for role in roles if role.startswith(REQUIRED_ROLE_PREFIX)), None)
@@ -50,7 +42,7 @@ def _allows_access(rule, *args, **kwargs) -> bool:
     """
     Check access to paths with variable catalog/collection names
     """
-    roles = _get_roles()
+    roles = extract_roles(request.headers)
     fp_role = _get_role_fp(roles)
 
     if REQUIRED_ROLE in roles and fp_role:
