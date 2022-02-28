@@ -15,7 +15,7 @@ def _env(var: str) -> str:
     return os.environ[var]
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def app() -> Generator[Flask, None, None]:
     """Creates a flask test app, with an app context.
 
@@ -117,8 +117,8 @@ def stuf_310_response(request, requests_mock, tests_dir: Path) -> None:
     requests_mock.post(url, text=mock_response)
 
 
-@pytest.fixture
-def app_base_path() -> str:
+@pytest.fixture(params=["API_BASE_PATH", "HC_BASE_PATH"])
+def app_base_path(request) -> str:
     """Returns the base path where the api is mounted.
 
     For example:
@@ -126,4 +126,4 @@ def app_base_path() -> str:
 
     :returns: the path as a string.
     """
-    return os.environ['BASE_PATH']
+    return os.environ[request.param]
