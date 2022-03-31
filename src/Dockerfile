@@ -1,4 +1,4 @@
-FROM amsterdam/python:3.9-buster
+FROM amsterdam/python:3.9-buster as application
 MAINTAINER datapunt@amsterdam.nl
 
 ENV REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
@@ -23,6 +23,10 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
 
 # Install required Python packages
 COPY requirements.txt /app/
+
+# Install gdal separately from the rest of the python requirements.
+# This avoids that changes to requirements.txt incure a time consuming gdal build
+RUN LIBGDAL_VERSION=$(gdal-config --version) && pip3 install GDAL==${LIBGDAL_VERSION}
 RUN LIBGDAL_VERSION=$(gdal-config --version) \
     pip3 install  \
     --trusted-host pypi.python.org  \
@@ -56,3 +60,30 @@ RUN chown datapunt /app/gobstuf/regression_tests/downloaded
 USER datapunt
 
 CMD uwsgi
+FROM application as development
+USER root
+# Install GOB-Core and GOB-Config in development mode. Will be overridden with
+# mounts from the developer filesystem. Changes made to GOB-Core and GOB-Config
+# will be available immediately.
+RUN git clone --depth=1 https://github.com/Amsterdam/GOB-Core.git
+RUN LIBGDAL_VERSION=$(gdal-config --version) pip install -e /app/GOB-Core
+RUN git clone --depth=1 https://github.com/Amsterdam/GOB-Config.git
+RUN pip install -e /app/GOB-Config
+USER datapunt
+
+FROM application as test
+USER root
+# Remove gobcore tests
+RUN rm -rf /app/src/gobcore/tests
+RUN rm -rf /app/src/gobconfig/tests
+RUN rm -rf /app/src/datapunt-flask-audit-log/tests
+
+# Copy tests
+COPY tests tests
+COPY .flake8 .flake8
+COPY test.sh test.sh
+
+# Copy jenkins files
+COPY .jenkins /.jenkins
+RUN mkdir -p /app/shared && chown datapunt /app/shared
+USER datapunt

@@ -3,8 +3,7 @@
 set -u # crash on missing env
 set -e # stop on any error
 
-# Clear any cached results
-find . -name "*.pyc" -exec rm -f {} \;
+export COVERAGE_FILE=/tmp/.coverage
 
 echo "Running tests"
 coverage run --source=./gobstuf -m pytest tests/

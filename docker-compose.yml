@@ -1,18 +1,22 @@
-version: '3.0'
+version: '3.4'
 
 services:
 
   gobstuf:
-    build: src
+    build:
+      context: src
+      target: development
     ports:
-      # To use oauth2-proxy:
-      #   Set port to 8000
-      #   Set the variables in .env
-      #   Set cookie_secure in oauth2-proxy.cfg to false
-      # Use port 8001 to bypass the OAuth2 Proxy locally
+      # No OAuth2 Proxy
       - "8165:8001"
+      # With oauth2-proxy
+      #   Set cookie_secure in oauth2-proxy.cfg to false
+      #   Uncomment UWSGI_ATTACH_DAEMON2
+      # - "8165:8000"
     container_name: gobstuf
     environment:
+      KEYCLOAK_AUTH_URL: "https://keycloak/auth/url"
+      KEYCLOAK_CLIENT_ID: "fakefake"
       MESSAGE_BROKER_ADDRESS: rabbitmq
       UWSGI_HTTP: ":8001"
       UWSGI_MODULE: "gobstuf.wsgi"
@@ -25,7 +29,7 @@ services:
       UWSGI_BUFFER_SIZE: "8192"
       UWSGI_DIE_ON_TERM: "1"
       UWSGI_NEED_APP: "1"
-      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy --config oauth2-proxy.cfg,freq=3,control=true,stopsignal=15"
+#      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy --config oauth2-proxy.cfg,freq=3,control=true,stopsignal=15"
 
       PKCS12_FILENAME: ${PKCS12_FILENAME}
       PKCS12_PASSWORD: ${PKCS12_PASSWORD}
@@ -37,8 +41,17 @@ services:
       OAUTH2_PROXY_OIDC_ISSUER_URL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
       OAUTH2_PROXY_REDIRECT_URL: ${OAUTH2_PROXY_REDIRECT_URL}
     env_file: .env
-
+    volumes:
+      - gob-volume:/app/shared
+      - ./src/gobstuf:/app/gobstuf
+      - ./src/tests:/app/tests
+      - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
+      - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
 networks:
   default:
     external:
       name: gob-network
+
+volumes:
+  gob-volume:
+    external: true
