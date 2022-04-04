@@ -9,3 +9,11 @@ services:
       GOB_SHARED_DIR: /app/shared
     command: >
       bash -c "./test.sh"
+    depends_on:
+      - test_message_queue
+  test_message_queue:
+    image: "rabbitmq:3.9-management"
+    environment:
+      RABBITMQ_CONFIG_FILE: /etc/rabbitmq/rabbitmq.conf
+    volumes:
+      - "./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
