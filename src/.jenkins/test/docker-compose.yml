@@ -7,11 +7,12 @@ services:
       target: test
     environment:
       GOB_SHARED_DIR: /app/shared
+      MESSAGE_BROKER_ADDRESS: rabbitmq
     command: >
       bash -c "./test.sh"
     depends_on:
-      - test_message_queue
-  test_message_queue:
+      - rabbitmq
+  rabbitmq:
     image: "rabbitmq:3.9-management"
     environment:
       RABBITMQ_CONFIG_FILE: /etc/rabbitmq/rabbitmq.conf
