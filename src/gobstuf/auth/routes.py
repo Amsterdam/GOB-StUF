@@ -1,10 +1,8 @@
 from typing import Optional, Callable
 
 from flask import g, request, url_for
-from werkzeug import routing
 
 from gobcore.secure.request import is_secured_request, extract_roles, USER_NAME_HEADER
-from gobstuf.config import BASE_PATHS
 
 REQUIRED_ROLE_PREFIX = 'fp_'
 REQUIRED_ROLE = 'brp_r'
