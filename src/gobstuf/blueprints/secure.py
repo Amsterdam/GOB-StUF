@@ -111,9 +111,7 @@ def _handle_stuf_request(request, routed_url):
 
 
 def _stuf():
-    """
-    Handle StUF request
-
+    """Forward stuf request to mks server, return response as recieved.
     :return: XML response
     """
     request = flask.request
@@ -145,10 +143,25 @@ secure_bp = Blueprint('secure', __name__, url_prefix=API_BASE_PATH)
 
 
 XML_ROUTES = [
-    (ROUTE_PATH_310, _stuf, ['GET', 'POST']),
-    (ROUTE_PATH_204, _stuf, ['GET', 'POST'])
+    (ROUTE_PATH_310, _stuf, ['GET', 'POST'], "stuf_310"),
+    (ROUTE_PATH_204, _stuf, ['GET', 'POST'], "stuf_204")
 ]
 
-for rule, view_func, methods in [route + (['GET'],) for route in REST_ROUTES] + XML_ROUTES:
-    secure_bp.add_url_rule(rule=rule, methods=methods, view_func=secure_route(rule, view_func))
+
+for rule, view_func, methods in [route + (['GET'], ) for route in REST_ROUTES]:
+    secure_bp.add_url_rule(
+        rule=rule,
+        methods=methods,
+        view_func=secure_route(rule, view_func)
+    )
+    logger.info(secure_bp.url_prefix + rule)
+
+
+for rule, view_func, methods, endpoint in XML_ROUTES:
+    secure_bp.add_url_rule(
+        rule=rule,
+        methods=methods,
+        view_func=secure_route(rule, view_func),
+        endpoint=endpoint
+    )
     logger.info(secure_bp.url_prefix + rule)
