@@ -4,7 +4,6 @@ from flask import g, request, url_for
 
 from gobcore.secure.request import is_secured_request, extract_roles, USER_NAME_HEADER
 
-
 REQUIRED_ROLE_PREFIX = 'fp_'
 REQUIRED_ROLE = 'brp_r'
 
@@ -12,15 +11,14 @@ MKS_USER_KEY = 'MKS_GEBRUIKER'
 MKS_APPLICATION_KEY = 'MKS_APPLICATIE'
 
 
-def secure_route(rule: str, func: Callable, name: str = None) -> Callable:
+def secure_route(rule: str, func: Callable) -> Callable:
     """
     Secure routes are protected by oauth2-proxy.
     The headers that are used to identify the user and/or role should be present.
 
     :param rule: route/rule to secure
     :param func: view function
-    :param name: (optional) route name
-    :return: 403 if access is not allowed, else `func`
+    :return: 403 if access is not allowed, else wrapped `func`
     """
     def wrapper(*args, **kwargs) -> tuple[str, int]:
         # Check that the endpoint is protected by oauth2-proxy and check access
@@ -29,7 +27,7 @@ def secure_route(rule: str, func: Callable, name: str = None) -> Callable:
         else:
             return "Forbidden", 403
 
-    wrapper.__name__ = func.__name__ if name is None else name
+    wrapper.__name__ = func.__name__
     return wrapper
 
 
@@ -55,5 +53,5 @@ def _allows_access(rule, *args, **kwargs) -> bool:
 
 
 def get_auth_url(view_name, **kwargs):
-    url = url_for(view_name, **kwargs)
-    return f"{request.scheme}://{request.host}{url}"
+    view_url = url_for(f"{request.blueprint}.{view_name}", **kwargs)
+    return f"{request.scheme}://{request.host}{view_url}"

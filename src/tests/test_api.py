@@ -1,11 +1,13 @@
 import unittest
-from unittest import mock
 from os import environ
+from unittest import mock
 
-from gobstuf.api import _health, _routed_url, _update_response, _update_request
-from gobstuf.api import _get_stuf, _post_stuf, _stuf, _handle_stuf_request
-from gobstuf.api import get_flask_app
 from werkzeug.exceptions import BadRequest, MethodNotAllowed
+
+from gobstuf.api import _health
+from gobstuf.api import get_flask_app
+from gobstuf.blueprints.secure import _routed_url, _update_response, _update_request, _get_stuf, _post_stuf, _stuf, \
+    _handle_stuf_request
 
 
 class MockResponse:
@@ -69,7 +71,7 @@ class TestAPI(unittest.TestCase):
         result = _update_request("...localhost...")
         self.assertEqual(result, "...localhost...")
 
-    @mock.patch("gobstuf.api.cert_get")
+    @mock.patch("gobstuf.blueprints.secure.cert_get")
     def test_get_stuf(self, mock_get):
         mock_get.return_value = "get"
 
@@ -77,7 +79,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response, "get")
         mock_get.assert_called_with("any url")
 
-    @mock.patch("gobstuf.api.cert_post")
+    @mock.patch("gobstuf.blueprints.secure.cert_post")
     def test_post_stuf(self, mock_post):
         mock_post.return_value = "post"
 
@@ -105,9 +107,9 @@ class TestAPI(unittest.TestCase):
                 headers = h
                 response = _post_stuf(url, data, headers)
 
-    @mock.patch("gobstuf.api._get_stuf")
-    @mock.patch("gobstuf.api._post_stuf")
-    @mock.patch("gobstuf.api._update_request")
+    @mock.patch("gobstuf.blueprints.secure._get_stuf")
+    @mock.patch("gobstuf.blueprints.secure._post_stuf")
+    @mock.patch("gobstuf.blueprints.secure._update_request")
     def test_handle_stuf_request(self, mock_update_request, mock_post_stuf, mock_get_stuf):
         routed_url = 'routed url'
 
@@ -123,8 +125,8 @@ class TestAPI(unittest.TestCase):
         with self.assertRaisesRegex(MethodNotAllowed, '405 Method Not Allowed'):
             _handle_stuf_request(request, routed_url)
 
-    @mock.patch("gobstuf.api._handle_stuf_request", return_value=MockResponse('get', 123))
-    @mock.patch("gobstuf.api.flask")
+    @mock.patch("gobstuf.blueprints.secure._handle_stuf_request", return_value=MockResponse('get', 123))
+    @mock.patch("gobstuf.blueprints.secure.flask")
     def test_stuf(self, mock_flask, mock_handle_stuf):
         mock_flask.request.method = 'GET'
         mock_flask.request.url = "any url"
@@ -137,8 +139,8 @@ class TestAPI(unittest.TestCase):
         response = _stuf()
         self.assertEqual(response.data, b"get")
 
-    @mock.patch("gobstuf.api._handle_stuf_request", return_value=MockResponse('get', 123))
-    @mock.patch("gobstuf.api.flask")
+    @mock.patch("gobstuf.blueprints.secure._handle_stuf_request", return_value=MockResponse('get', 123))
+    @mock.patch("gobstuf.blueprints.secure.flask")
     def test_stuf_exception(self, mock_flask, mock_handle_stuf):
         mock_handle_stuf.side_effect = BadRequest("Exception message")
 
