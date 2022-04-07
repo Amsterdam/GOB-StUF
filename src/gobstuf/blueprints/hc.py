@@ -10,6 +10,6 @@ logger = get_default_logger()
 hc_bp = Blueprint('hc', __name__, url_prefix=HC_BASE_PATH)
 
 
-for rule, view_func in REST_ROUTES:
-    hc_bp.add_url_rule(rule=rule, methods=['GET'], view_func=secure_route(rule, view_func))
+for rule, view_func, methods in REST_ROUTES:
+    hc_bp.add_url_rule(rule=rule, methods=methods, view_func=secure_route(rule, view_func))
     logger.info(hc_bp.url_prefix + rule)

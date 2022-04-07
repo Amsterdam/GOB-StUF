@@ -148,7 +148,7 @@ XML_ROUTES = [
 ]
 
 
-for rule, view_func, methods in [route + (['GET'], ) for route in REST_ROUTES]:
+for rule, view_func, methods in REST_ROUTES:
     secure_bp.add_url_rule(
         rule=rule,
         methods=methods,
