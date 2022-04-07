@@ -27,7 +27,7 @@ REST_ROUTES = [
     ),
     (
         '/brp/ingeschrevenpersonen/<bsn>/partners/<partners_id>',
-         IngeschrevenpersonenBsnPartnerDetailView.as_view('brp_ingeschrevenpersonen_bsn_partners_detail'),
+        IngeschrevenpersonenBsnPartnerDetailView.as_view('brp_ingeschrevenpersonen_bsn_partners_detail'),
         ["GET"]
     ),
     (
