@@ -32,7 +32,7 @@ def get_flask_app():
     logger.info("Available endpoints:")
 
     # Health check route
-    app.route(rule='/status/health/')(_health)
+    app.route(rule='/brp/status/health/')(_health)
 
     # import blueprints, prints endpoints
     from gobstuf.blueprints import hc_bp, secure_bp
