@@ -8,11 +8,8 @@ from gobstuf.logger import get_default_logger
 logger = get_default_logger()
 
 
-def _health():
-    """
-
-    :return: Message telling the StUF API is OK
-    """
+def _health() -> str:
+    """Message telling the StUF API is OK."""
     return 'Connectivity OK'
 
 
@@ -31,8 +28,9 @@ def get_flask_app():
 
     logger.info("Available endpoints:")
 
-    # Health check route
-    app.route(rule='/status/health/')(_health)
+    # Health check route for HC endpoint (/brp prefix is required)
+    # see oauth2-proxy.cfg for bypass
+    app.route(rule='/brp/status/health/')(_health)
 
     # import blueprints, prints endpoints
     from gobstuf.blueprints import hc_bp, secure_bp
