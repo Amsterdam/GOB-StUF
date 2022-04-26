@@ -1,5 +1,6 @@
 import freezegun
 import pytest
+from urllib.parse import urlencode
 
 
 class TestIngeschrevenpersonenBsnView:
@@ -96,3 +97,26 @@ class TestIngeschrevenpersonenBsnView:
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header_forbidden)
         assert response.status_code == 403
         assert response.data == b'Forbidden'
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
+    def test_param_huisnummertoevoeging(self, stuf_310_response, app_base_path, client, jwt_header):
+        """Test query parameter huisnummertoevoeging."""
+        url = f"{app_base_path}/brp/ingeschrevenpersonen?"
+        param = {
+            "verblijfplaats__postcode": "1024QQ",
+            "verblijfplaats__huisnummer": "10",
+            "verblijfplaats__huisnummertoevoeging": "ABCD"
+        }
+
+        response = client.get(url + urlencode(param), headers=jwt_header)
+        assert response.status_code == 200
+
+        param["verblijfplaats__huisnummertoevoeging"] = "ABCDE"
+        response = client.get(url + urlencode(param), headers=jwt_header)
+        assert response.status_code == 400
+        assert response.json["invalid-params"] == \
+               [{
+                   'name': 'verblijfplaats__huisnummertoevoeging',
+                   'code': 'maxLength',
+                   'reason': 'Waarde is langer dan maximale lengte 4'
+               }]
