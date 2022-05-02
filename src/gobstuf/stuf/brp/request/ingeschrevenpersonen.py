@@ -22,7 +22,7 @@ class IngeschrevenpersonenStufRequest(StufRequest, ABC):
 class IngeschrevenpersonenFilterStufRequest(IngeschrevenpersonenStufRequest):
     GEMEENTECODE_LENGTH = 4
     HUISLETTER_LENGTH = 1
-    HUISNUMMERTOEVOEGING_LENGTH = 1
+    HUISNUMMERTOEVOEGING_LENGTH = 4
 
     parameter_paths = {
         'burgerservicenummer': 'BG:gelijk BG:inp.bsn',
