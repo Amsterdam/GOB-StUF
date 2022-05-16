@@ -134,7 +134,8 @@ class NPSMapping(Mapping):
                 'nationaliteit': {
                     'code': (MKSConverter.as_code(4), 'BG:gerelateerde BG:code'),
                     'omschrijving': 'BG:gerelateerde BG:omschrijving',
-                }
+                },
+                'inOnderzoek': 'BG:inOnderzoek'
             }]
         }
 
