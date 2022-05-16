@@ -130,6 +130,11 @@ class TestIngeschrevenpersonenBsnView:
         assert response.status_code == 200
         assert "nationaliteiten" not in response.json
 
+    def test_anummer(self, stuf_310_response, app_base_path, client, jwt_header):
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        assert response.status_code == 200
+        assert response.json["aNummer"] == "9794354356"
+
     @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
     def test_forbidden_403(self, stuf_310_response, app_base_path, client, jwt_header_forbidden):
         """Test against an unauthorized jwt header."""
@@ -171,7 +176,7 @@ class TestIngeschrevenpersonenBsnView:
     def test_query_parameters(
             self, stuf_310_response, app_base_path, client, jwt_header, query_param, result_code, err_on
     ):
-        """Test query parameter huisnummertoevoeging."""
+        """Test query parameters on the test client."""
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen?{urlencode(query_param)}", headers=jwt_header)
         assert response.status_code == result_code
 
