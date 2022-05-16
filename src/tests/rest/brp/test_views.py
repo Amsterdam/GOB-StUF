@@ -130,6 +130,13 @@ class TestIngeschrevenpersonenBsnView:
         assert response.status_code == 200
         assert "nationaliteiten" not in response.json
 
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_nationaliteit_io.xml"], indirect=True)
+    def test_nationaliteit_inonderzoek(self, stuf_310_response, app_base_path, client, jwt_header):
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        expected = {"nationaliteit": True, "aanduidingBijzonderNederlanderschap": True, "datumIngangGeldigheid": True}
+        assert response.status_code == 200
+        assert response.json["nationaliteiten"][0]["inOnderzoek"] == expected
+
     def test_anummer(self, stuf_310_response, app_base_path, client, jwt_header):
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200

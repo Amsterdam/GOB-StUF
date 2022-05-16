@@ -303,7 +303,8 @@ class TestMKSConverter(TestCase):
                     'nationaliteit': {
                         'code': '0001',
                         'omschrijving': 'Nederlandse',
-                    }
+                    },
+                    'inOnderzoek': 'J'
                 },
                 {
                     'datumIngangGeldigheid': {
@@ -316,7 +317,8 @@ class TestMKSConverter(TestCase):
                     'nationaliteit': {
                         'code': '0339',
                         'omschrijving': 'Turkse',
-                    }
+                    },
+                    'inOnderzoek': 'N'
                 }
             ]
         }
@@ -325,6 +327,7 @@ class TestMKSConverter(TestCase):
         # Expect one nationaliteit, Nederlandse
         self.assertEqual(len(nationaliteit), 1)
         self.assertEqual(nationaliteit[0]['nationaliteit']['omschrijving'], 'Nederlandse')
+        self.assertTrue(nationaliteit[0]['inOnderzoek']['nationaliteit'])
 
     def test_get_verblijf_buitenland(self):
         parameters = {
