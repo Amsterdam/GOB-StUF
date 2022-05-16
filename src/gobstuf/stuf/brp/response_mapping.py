@@ -328,6 +328,7 @@ class NPSMapping(Mapping):
 
         if verblijfstitel is None or datum_verkrijging is None:
             return None
+
         inonderzoek = [io for io in inonderzoek if io is not None]
         is_in_onderzoek = len(inonderzoek) == 1 and inonderzoek[0] == 'J'
         return {
@@ -336,6 +337,7 @@ class NPSMapping(Mapping):
                 "omschrijving": omschrijving[0] if omschrijving else None
             },
             "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging),
+            "datumEinde": MKSConverter.as_datum_broken_down(datum_verlies),
             "inOnderzoek": {
                 "aanduiding": is_in_onderzoek,
                 "datumIngang": is_in_onderzoek,
