@@ -29,7 +29,7 @@ class TestModuleFunctions(TestCase):
     def test_get_keycloak_token(self, mock_getenv, mock_requests):
         mock_getenv.return_value = None
 
-        with self.assertRaisesRegexp(GOBException, "Missing password for user some_user"):
+        with self.assertRaisesRegex(GOBException, "Missing password for user some_user"):
             _get_keycloak_token("some_user")
             mock_getenv.assert_called_with("USER_PASSWORD_SOME_USER")
 

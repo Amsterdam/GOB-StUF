@@ -434,32 +434,33 @@ class NPSMapping(Mapping):
         Filter the mapped object on overlijdensdatum
         Overleden personen are returned based on the inclusiefoverledenpersonen kwarg
 
-        Filter the mapped object on either woonadres or briefadres
+        Filter the mapped object on either woonadres or briefadres.
+        When the mapped object contains both, only use the the briefadres.
 
         :param mapped_object: The mapped response object
         :return:
         """
-        # Set verblijfplaats: default use woonadres, fallback is briefadres
         verblijfplaats = mapped_object['verblijfplaats']
 
+        adres = {}
+        functie = None
+
         for functie_adres in ['woonadres', 'briefadres']:
-            adres = verblijfplaats.pop(functie_adres)
+            cur_adres = verblijfplaats.pop(functie_adres, {})
 
-            if not verblijfplaats.get('functieAdres') and any(adres.values()):
-                # Take the first adrestype that has any values
-                # reorder the middle part of the verblijfplaats dictionary, to align with haalcentraal
+            if any(cur_adres.values()):
+                adres = cur_adres
+                functie = functie_adres
 
-                reordered = {
-                    'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
-                    'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
-                    'functieAdres': functie_adres,
-                    'indicatieVestigingVanuitBuitenland':
-                        verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
-                    'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
-                }
-                verblijfplaats = {**adres, **reordered, **verblijfplaats}
-
-        mapped_object['verblijfplaats'] = verblijfplaats
+        reordered = {
+            'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
+            'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
+            'functieAdres': functie,
+            'indicatieVestigingVanuitBuitenland':
+                verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
+            'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
+        }
+        mapped_object['verblijfplaats'] = {**adres, **reordered, **verblijfplaats}
 
         # Use overlijdensdatum for filtering
         is_overleden = mapped_object['overlijden']['indicatieOverleden']
