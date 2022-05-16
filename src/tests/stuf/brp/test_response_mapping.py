@@ -417,7 +417,7 @@ class TestNPSMapping(TestCase):
                 result[k] = None
         return result
 
-    def test_filter(self):
+    def test_filter_overleden(self):
         mapping = NPSMapping()
 
         obj = self.empty_mapping(mapping.mapping)
@@ -443,6 +443,9 @@ class TestNPSMapping(TestCase):
         result = mapping.filter(obj, **kwargs)
         self.assertEqual(result, {'any key': 'any value', 'overlijden': {'indicatieOverleden': True}})
 
+    def test_filter_adres(self):
+        mapping = NPSMapping()
+
         obj = self.empty_mapping(mapping.mapping)
         obj['verblijfplaats']['woonadres'] = {'any key': 'any value'}
         result = mapping.filter(obj)
@@ -452,6 +455,13 @@ class TestNPSMapping(TestCase):
         obj['verblijfplaats']['briefadres'] = {'any key': 'any value'}
         result = mapping.filter(obj)
         self.assertEqual(result, {'verblijfplaats': {'any key': 'any value', 'functieAdres': 'briefadres'}})
+
+        # test both brief- and woonadres, should result in briefadres
+        obj = self.empty_mapping(mapping.mapping)
+        obj['verblijfplaats']['woonadres'] = {'any woon key': 'any woon value'}
+        obj['verblijfplaats']['briefadres'] = {'any brief key': 'any brief value'}
+        result = mapping.filter(obj)
+        self.assertEqual(result, {'verblijfplaats': {'any brief key': 'any brief value', 'functieAdres': 'briefadres'}})
 
     @patch("gobstuf.stuf.brp.response_mapping.get_auth_url",
            lambda name, **kwargs: f"https://theurl/{name}/{kwargs['bsn']}/type/{kwargs.get('thetype_id', kwargs.get('theothertype_id'))}")
