@@ -140,6 +140,7 @@ class NPSMapping(Mapping):
 
         return {
             'burgerservicenummer': 'BG:inp.bsn',
+            'aNummer': 'BG:inp.a-nummer',
             'geheimhoudingPersoonsgegevens':
                 (MKSConverter.true_if_in(['1', '2', '3', '4', '5', '6', '7']), 'BG:inp.indicatieGeheim'),
             'geslachtsaanduiding': (MKSConverter.as_geslachtsaanduiding,
