@@ -254,12 +254,13 @@ class NPSMapping(Mapping):
                 "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
                 },
             "verblijfstitel": (
-                NPSMapping.verblijfstitel,
-                "BG:vbt.aanduidingVerblijfstitel",
-                "BG:ing.datumVerkrijgingVerblijfstitel",
-                "BG:ing.datumVerliesVerblijfstitel",
-                ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
-                )
+                    NPSMapping.verblijfstitel,
+                    "BG:vbt.aanduidingVerblijfstitel",
+                    "BG:ing.datumVerkrijgingVerblijfstitel",
+                    "BG:ing.datumVerliesVerblijfstitel",
+                    ["BG:inOnderzoek", ".!.[@elementnaam='aanduidingVerblijfstitel']"],
+                    ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"],
+                ),
         }
 
     @property
@@ -307,13 +308,15 @@ class NPSMapping(Mapping):
     @classmethod
     def verblijfstitel(
             cls, verblijfstitel: Optional[int], datum_verkrijging: Optional[str],
-            datum_verlies: Optional[str], omschrijving: list[Optional[str]]
+            datum_verlies: Optional[str], inonderzoek: list[str],
+            omschrijving: list[Optional[str]]
     ) -> Optional[dict[str, Union[dict, str]]]:
         """Returns verblijfstitel when correctly set.
 
         :param verblijfstitel: code of the aanduiding.
         :param datum_verkrijging: A date formatted YYYYMMDD
         :param datum_verlies: A date formatted YYYYMMDD
+        :param inonderzoek: In onderzoek values
         :param omschrijving: Description of verblijfstitel
         :return: A dict with all the verblijfstitel details.
         """
@@ -323,13 +326,19 @@ class NPSMapping(Mapping):
 
         if verblijfstitel is None or datum_verkrijging is None:
             return None
-
+        inonderzoek = [io for io in inonderzoek if io is not None]
+        is_in_onderzoek = len(inonderzoek) == 1 and inonderzoek[0] == 'J'
         return {
             "aanduiding": {
                 "code": f"{verblijfstitel}",
                 "omschrijving": omschrijving[0] if omschrijving else None
             },
-            "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging)
+            "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging),
+            "inOnderzoek": {
+                "aanduiding": is_in_onderzoek,
+                "datumIngang": is_in_onderzoek,
+                "datumEinde": is_in_onderzoek,
+            }
         }
 
     def sort_ouders(self, ouders: list):
