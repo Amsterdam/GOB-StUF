@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
 <!--
-Has missing data for verblijfstitel: both BG:vbt.aanduidingVerblijfstitel and BG:ing.datumVerkrijgingVerblijfstitel
-should be there. If not: no verblijfstitel will be returned by the proxy. This file is missing
-datumVerkrijgingVerblijfstitel.
+Has data for verblijfstitel: both BG:vbt.aanduidingVerblijfstitel and BG:ing.datumVerkrijgingVerblijfstitel
+are there. Element datumVerliesVerblijfstitel is missing, so this will give a response containing verblijfstitel.
 
-Has *no* data for verblijfstitel with 'inonderzoek' data set.
+Additionally has data for verblijfstitel with 'inonderzoek' data set to N.
 -->
 <BG:npsLa01 xmlns:xsi="http://www.w3.org/2001/XMLSchemainstance" xmlns:StUF="http://www.egem.nl/StUF/StUF0301"
             xmlns:BG="http://www.egem.nl/StUF/sector/bg/0310">
@@ -29,7 +28,13 @@ Has *no* data for verblijfstitel with 'inonderzoek' data set.
     <BG:antwoord>
         <BG:object StUF:entiteittype="NPS">
             <BG:inp.bsn>999991619</BG:inp.bsn>
-            <BG:inp.a-nummer>9794354356</BG:inp.a-nummer>
+            <BG:inp.anummer>9794354356</BG:inp.anummer>
+            <!-- added inOnderzoek -->
+            <BG:inOnderzoek groepsnaam="Persoonsgegevens" StUF:metagegeven="true" xsi:nil="true" StUF:noValue="waardeOnbekend"/>
+            <BG:inOnderzoek groepsnaam="Overlijden" StUF:metagegeven="true" xsi:nil="true" StUF:noValue="waardeOnbekend"/>
+            <BG:inOnderzoek elementnaam="aanduidingVerblijfstitel" StUF:metagegeven="true">N</BG:inOnderzoek>
+            <BG:inOnderzoek groepsnaam="Verblijfsplaats" StUF:metagegeven="true" xsi:nil="true" StUF:noValue="waardeOnbekend"/>
+
             <BG:geslachtsnaam>Kumari</BG:geslachtsnaam>
             <BG:voorvoegselGeslachtsnaam StUF:noValue="geenWaarde" xsi:nil="true"/>
             <BG:voorletters>A.</BG:voorletters>
@@ -90,7 +95,7 @@ Has *no* data for verblijfstitel with 'inonderzoek' data set.
             <BG:inp.gemeenteVanInschrijving>363</BG:inp.gemeenteVanInschrijving>
             <BG:inp.datumInschrijving>19950412</BG:inp.datumInschrijving>
             <BG:vbt.aanduidingVerblijfstitel>21</BG:vbt.aanduidingVerblijfstitel>
-<!--            <BG:ing.datumVerkrijgingVerblijfstitel>20100812</BG:ing.datumVerkrijgingVerblijfstitel> -->
+            <BG:ing.datumVerkrijgingVerblijfstitel>20100812</BG:ing.datumVerkrijgingVerblijfstitel>
 <!--            <BG:ing.datumVerliesVerblijfstitel>20110412</BG:ing.datumVerliesVerblijfstitel>-->
             <BG:inp.datumVestigingInNederland StUF:noValue="geenWaarde" xsi:nil="true"/>
             <BG:inp.immigratieLand StUF:noValue="nietOndersteund" xsi:nil="true"/>
@@ -146,7 +151,7 @@ Has *no* data for verblijfstitel with 'inonderzoek' data set.
                                    naam="omschrijvingRedenOpschortingBijhoudingOmschrijving"/>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true"
                                    naam="omschrijvingUitsluitingKiesrecht"/>
-<!--                <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="omschrijvingVerblijfstitel"/>-->
+                <StUF:extraElement naam="omschrijvingVerblijfstitel">Vw 2000 art. 8, onder a, vergunning regulier bepaalde tijd, arbeid vrij</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="onderToezichtstelling"/>
                 <StUF:extraElement naam="opgemaakteNaam">A. Kumari</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="terAttentieVan"/>
