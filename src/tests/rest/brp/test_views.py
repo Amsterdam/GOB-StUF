@@ -61,7 +61,8 @@ class TestIngeschrevenpersonenBsnView:
         """
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200
-        assert "verblijfstitel" in response.json
+        verblijfstitel = response.json["verblijfstitel"]
+        assert verblijfstitel["datumEinde"]["datum"] == "2011-04-12"
 
     @pytest.mark.parametrize(
         "stuf_310_response",
