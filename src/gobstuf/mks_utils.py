@@ -284,6 +284,14 @@ class MKSConverter:
                     'datumIngangGeldigheid': nationaliteit['datumIngangGeldigheid'],
                     'nationaliteit': nationaliteit['nationaliteit']
                 }
+
+                if nationaliteit['inOnderzoek'] == 'J':
+                    result['inOnderzoek'] = {
+                        "nationaliteit": True,
+                        "aanduidingBijzonderNederlanderschap": True,
+                        "datumIngangGeldigheid": True,
+                    }
+
                 nationaliteiten.append(result)
 
         return nationaliteiten

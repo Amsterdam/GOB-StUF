@@ -1,4 +1,10 @@
 <?xml version="1.0"?>
+<!--
+Has data for verblijfstitel: both BG:vbt.aanduidingVerblijfstitel and BG:ing.datumVerkrijgingVerblijfstitel
+are there. Element datumVerliesVerblijfstitel is missing, so this will give a response containing verblijfstitel.
+
+Additionally has data for verblijfstitel with 'inonderzoek' data set to J.
+-->
 <BG:npsLa01 xmlns:xsi="http://www.w3.org/2001/XMLSchemainstance" xmlns:StUF="http://www.egem.nl/StUF/StUF0301"
             xmlns:BG="http://www.egem.nl/StUF/sector/bg/0310">
     <BG:stuurgegevens>
@@ -22,7 +28,13 @@
     <BG:antwoord>
         <BG:object StUF:entiteittype="NPS">
             <BG:inp.bsn>999991619</BG:inp.bsn>
-            <BG:inp.a-nummer>9794354356</BG:inp.a-nummer>
+            <BG:inp.anummer>9794354356</BG:inp.anummer>
+            <!-- added inOnderzoek -->
+            <BG:inOnderzoek groepsnaam="Persoonsgegevens" StUF:metagegeven="true" xsi:nil="true" StUF:noValue="waardeOnbekend"/>
+            <BG:inOnderzoek groepsnaam="Overlijden" StUF:metagegeven="true" xsi:nil="true" StUF:noValue="waardeOnbekend"/>
+            <BG:inOnderzoek elementnaam="aanduidingVerblijfstitel" StUF:metagegeven="true">J</BG:inOnderzoek>
+            <BG:inOnderzoek groepsnaam="Verblijfsplaats" StUF:metagegeven="true" xsi:nil="true" StUF:noValue="waardeOnbekend"/>
+
             <BG:geslachtsnaam>Kumari</BG:geslachtsnaam>
             <BG:voorvoegselGeslachtsnaam StUF:noValue="geenWaarde" xsi:nil="true"/>
             <BG:voorletters>A.</BG:voorletters>
@@ -74,7 +86,6 @@
                 <BG:inp.locatiebeschrijving StUF:noValue="geenWaarde" xsi:nil="true"/>
                 <BG:begindatumVerblijf>19951020</BG:begindatumVerblijf>
             </BG:verblijfsadres>
-            <BG:inOnderzoek groepsnaam="Verblijfsplaats" StUF:metagegeven="true">N</BG:inOnderzoek>
             <BG:sub.telefoonnummer StUF:noValue="nietOndersteund" xsi:nil="true"/>
             <BG:sub.faxnummer StUF:noValue="nietOndersteund" xsi:nil="true"/>
             <BG:sub.emailadres StUF:noValue="nietOndersteund" xsi:nil="true"/>
@@ -85,7 +96,7 @@
             <BG:inp.datumInschrijving>19950412</BG:inp.datumInschrijving>
             <BG:vbt.aanduidingVerblijfstitel>21</BG:vbt.aanduidingVerblijfstitel>
             <BG:ing.datumVerkrijgingVerblijfstitel>20100812</BG:ing.datumVerkrijgingVerblijfstitel>
-            <BG:ing.datumVerliesVerblijfstitel>20110412</BG:ing.datumVerliesVerblijfstitel>
+<!--            <BG:ing.datumVerliesVerblijfstitel>20110412</BG:ing.datumVerliesVerblijfstitel>-->
             <BG:inp.datumVestigingInNederland StUF:noValue="geenWaarde" xsi:nil="true"/>
             <BG:inp.immigratieLand StUF:noValue="nietOndersteund" xsi:nil="true"/>
             <BG:inp.datumVertrekUitNederland StUF:noValue="nietGeautoriseerd" xsi:nil="true"/>
@@ -140,7 +151,7 @@
                                    naam="omschrijvingRedenOpschortingBijhoudingOmschrijving"/>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true"
                                    naam="omschrijvingUitsluitingKiesrecht"/>
-                <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="omschrijvingVerblijfstitel"/>
+                <StUF:extraElement naam="omschrijvingVerblijfstitel">Vw 2000 art. 8, onder a, vergunning regulier bepaalde tijd, arbeid vrij</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="onderToezichtstelling"/>
                 <StUF:extraElement naam="opgemaakteNaam">A. Kumari</StUF:extraElement>
                 <StUF:extraElement StUF:noValue="nietOndersteund" xsi:nil="true" naam="terAttentieVan"/>

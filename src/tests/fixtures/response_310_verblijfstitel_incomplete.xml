@@ -3,6 +3,8 @@
 Has missing data for verblijfstitel: both BG:vbt.aanduidingVerblijfstitel and BG:ing.datumVerkrijgingVerblijfstitel
 should be there. If not: no verblijfstitel will be returned by the proxy. This file is missing
 datumVerkrijgingVerblijfstitel.
+
+Has *no* data for verblijfstitel with 'inonderzoek' data set.
 -->
 <BG:npsLa01 xmlns:xsi="http://www.w3.org/2001/XMLSchemainstance" xmlns:StUF="http://www.egem.nl/StUF/StUF0301"
             xmlns:BG="http://www.egem.nl/StUF/sector/bg/0310">
@@ -27,7 +29,7 @@ datumVerkrijgingVerblijfstitel.
     <BG:antwoord>
         <BG:object StUF:entiteittype="NPS">
             <BG:inp.bsn>999991619</BG:inp.bsn>
-            <BG:inp.anummer>9794354356</BG:inp.anummer>
+            <BG:inp.a-nummer>9794354356</BG:inp.a-nummer>
             <BG:geslachtsnaam>Kumari</BG:geslachtsnaam>
             <BG:voorvoegselGeslachtsnaam StUF:noValue="geenWaarde" xsi:nil="true"/>
             <BG:voorletters>A.</BG:voorletters>

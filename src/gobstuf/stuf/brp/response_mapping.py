@@ -134,12 +134,14 @@ class NPSMapping(Mapping):
                 'nationaliteit': {
                     'code': (MKSConverter.as_code(4), 'BG:gerelateerde BG:code'),
                     'omschrijving': 'BG:gerelateerde BG:omschrijving',
-                }
+                },
+                'inOnderzoek': 'BG:inOnderzoek'
             }]
         }
 
         return {
             'burgerservicenummer': 'BG:inp.bsn',
+            'aNummer': 'BG:inp.a-nummer',
             'geheimhoudingPersoonsgegevens':
                 (MKSConverter.true_if_in(['1', '2', '3', '4', '5', '6', '7']), 'BG:inp.indicatieGeheim'),
             'geslachtsaanduiding': (MKSConverter.as_geslachtsaanduiding,
@@ -254,12 +256,13 @@ class NPSMapping(Mapping):
                 "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
                 },
             "verblijfstitel": (
-                NPSMapping.verblijfstitel,
-                "BG:vbt.aanduidingVerblijfstitel",
-                "BG:ing.datumVerkrijgingVerblijfstitel",
-                "BG:ing.datumVerliesVerblijfstitel",
-                ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"]
-                )
+                    NPSMapping.verblijfstitel,
+                    "BG:vbt.aanduidingVerblijfstitel",
+                    "BG:ing.datumVerkrijgingVerblijfstitel",
+                    "BG:ing.datumVerliesVerblijfstitel",
+                    ["BG:inOnderzoek", ".!.[@elementnaam='aanduidingVerblijfstitel']"],
+                    ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"],
+                ),
         }
 
     @property
@@ -307,13 +310,15 @@ class NPSMapping(Mapping):
     @classmethod
     def verblijfstitel(
             cls, verblijfstitel: Optional[int], datum_verkrijging: Optional[str],
-            datum_verlies: Optional[str], omschrijving: list[Optional[str]]
+            datum_verlies: Optional[str], inonderzoek: list[str],
+            omschrijving: list[Optional[str]]
     ) -> Optional[dict[str, Union[dict, str]]]:
         """Returns verblijfstitel when correctly set.
 
         :param verblijfstitel: code of the aanduiding.
         :param datum_verkrijging: A date formatted YYYYMMDD
         :param datum_verlies: A date formatted YYYYMMDD
+        :param inonderzoek: In onderzoek values
         :param omschrijving: Description of verblijfstitel
         :return: A dict with all the verblijfstitel details.
         """
@@ -324,12 +329,20 @@ class NPSMapping(Mapping):
         if verblijfstitel is None or datum_verkrijging is None:
             return None
 
+        inonderzoek = [io for io in inonderzoek if io is not None]
+        is_in_onderzoek = len(inonderzoek) == 1 and inonderzoek[0] == 'J'
         return {
             "aanduiding": {
                 "code": f"{verblijfstitel}",
                 "omschrijving": omschrijving[0] if omschrijving else None
             },
-            "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging)
+            "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging),
+            "datumEinde": MKSConverter.as_datum_broken_down(datum_verlies),
+            "inOnderzoek": {
+                "aanduiding": is_in_onderzoek,
+                "datumIngang": is_in_onderzoek,
+                "datumEinde": is_in_onderzoek,
+            }
         }
 
     def sort_ouders(self, ouders: list):
@@ -424,32 +437,33 @@ class NPSMapping(Mapping):
         Filter the mapped object on overlijdensdatum
         Overleden personen are returned based on the inclusiefoverledenpersonen kwarg
 
-        Filter the mapped object on either woonadres or briefadres
+        Filter the mapped object on either woonadres or briefadres.
+        When the mapped object contains both, only use the the briefadres.
 
         :param mapped_object: The mapped response object
         :return:
         """
-        # Set verblijfplaats: default use woonadres, fallback is briefadres
         verblijfplaats = mapped_object['verblijfplaats']
 
+        adres = {}
+        functie = None
+
         for functie_adres in ['woonadres', 'briefadres']:
-            adres = verblijfplaats.pop(functie_adres)
+            cur_adres = verblijfplaats.pop(functie_adres, {})
 
-            if not verblijfplaats.get('functieAdres') and any(adres.values()):
-                # Take the first adrestype that has any values
-                # reorder the middle part of the verblijfplaats dictionary, to align with haalcentraal
+            if any(cur_adres.values()):
+                adres = cur_adres
+                functie = functie_adres
 
-                reordered = {
-                    'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
-                    'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
-                    'functieAdres': functie_adres,
-                    'indicatieVestigingVanuitBuitenland':
-                        verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
-                    'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
-                }
-                verblijfplaats = {**adres, **reordered, **verblijfplaats}
-
-        mapped_object['verblijfplaats'] = verblijfplaats
+        reordered = {
+            'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
+            'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
+            'functieAdres': functie,
+            'indicatieVestigingVanuitBuitenland':
+                verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
+            'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
+        }
+        mapped_object['verblijfplaats'] = {**adres, **reordered, **verblijfplaats}
 
         # Use overlijdensdatum for filtering
         is_overleden = mapped_object['overlijden']['indicatieOverleden']
