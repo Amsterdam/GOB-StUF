@@ -329,21 +329,24 @@ class NPSMapping(Mapping):
         if verblijfstitel is None or datum_verkrijging is None:
             return None
 
-        inonderzoek = [io for io in inonderzoek if io is not None]
-        is_in_onderzoek = len(inonderzoek) == 1 and inonderzoek[0] == 'J'
-        return {
+        verblijfstitel = {
             "aanduiding": {
                 "code": f"{verblijfstitel}",
                 "omschrijving": omschrijving[0] if omschrijving else None
             },
             "datumIngang": MKSConverter.as_datum_broken_down(datum_verkrijging),
             "datumEinde": MKSConverter.as_datum_broken_down(datum_verlies),
-            "inOnderzoek": {
-                "aanduiding": is_in_onderzoek,
-                "datumIngang": is_in_onderzoek,
-                "datumEinde": is_in_onderzoek,
-            }
         }
+
+        inonderzoek = [io for io in inonderzoek if io is not None]
+        if len(inonderzoek) == 1 and inonderzoek[0] == 'J':
+            verblijfstitel["inOnderzoek"] = {
+                "aanduiding": True,
+                "datumIngang": True,
+                "datumEinde": True,
+            }
+
+        return verblijfstitel
 
     def sort_ouders(self, ouders: list):
         """Sorts ouders by:
