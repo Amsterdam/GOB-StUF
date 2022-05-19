@@ -97,10 +97,7 @@ class TestIngeschrevenpersonenBsnView:
     def test_verblijfstitel_inonderzoek_n(self, stuf_310_response, app_base_path, client, jwt_header):
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200
-        verblijfstitel = response.json["verblijfstitel"]
-        assert verblijfstitel["inOnderzoek"]["aanduiding"] is False
-        assert verblijfstitel["inOnderzoek"]["datumIngang"] is False
-        assert verblijfstitel["inOnderzoek"]["datumEinde"] is False
+        assert "inOnderzoek" not in response.json["verblijfstitel"]
 
     @pytest.mark.parametrize(
         "stuf_310_response",
@@ -110,10 +107,7 @@ class TestIngeschrevenpersonenBsnView:
     def test_verblijfstitel_inonderzoek_missing(self, stuf_310_response, app_base_path, client, jwt_header):
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200
-        verblijfstitel = response.json["verblijfstitel"]
-        assert verblijfstitel["inOnderzoek"]["aanduiding"] is False
-        assert verblijfstitel["inOnderzoek"]["datumIngang"] is False
-        assert verblijfstitel["inOnderzoek"]["datumEinde"] is False
+        assert "inOnderzoek" not in response.json["verblijfstitel"]
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_verblijfstitel_incomplete.xml"], indirect=True)
     def test_verblijfstitel_none_on_incomplete_data(self, stuf_310_response, app_base_path, client, jwt_header):
