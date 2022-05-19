@@ -219,13 +219,17 @@ class TestMKSConverter(TestCase):
         self.assertIsNone(MKSConverter.true_if_exists(None))
 
     def test_true_if_equals(self):
-        values = [1, '1', True, False, '', None]
-        false_values = [2, '2', False, True, None, '']
+        values = [1, '1', True, False]
+        false_values = [2, '2', False, True]
+
         for c, value in enumerate(values):
             true_if_equals = MKSConverter.true_if_equals(value)
             self.assertTrue(true_if_equals(value))
-
             self.assertFalse(true_if_equals(false_values[c]))
+
+        # Dont compare to None
+        compare_none = MKSConverter.true_if_equals('0000')
+        self.assertIsNone(compare_none(None))
 
     def test_true_if_in(self):
         values = [1,2,3,4]

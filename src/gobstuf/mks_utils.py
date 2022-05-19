@@ -232,7 +232,8 @@ class MKSConverter:
         :return:
         """
         def true_if_equals(property):
-            return property == value
+            if property is not None:
+                return property == value
 
         return true_if_equals
 
