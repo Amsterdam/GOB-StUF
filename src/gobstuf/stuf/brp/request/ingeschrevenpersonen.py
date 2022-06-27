@@ -13,9 +13,9 @@ class IngeschrevenpersonenStufRequest(StufRequest, ABC):
     BSN_LENGTH = 9
 
     bsn_check = [
-        ArgumentCheck.is_integer,
         ArgumentCheck.has_min_length(BSN_LENGTH),
         ArgumentCheck.has_max_length(BSN_LENGTH),
+        ArgumentCheck.is_integer
     ]
 
     template = 'ingeschrevenpersonen.xml'
