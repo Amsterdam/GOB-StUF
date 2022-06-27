@@ -188,3 +188,14 @@ class TestIngeschrevenpersonenBsnView:
                 assert inv["code"] == on["code"]
         else:
             assert response.json.get("invalid-params") is err_on
+
+    @pytest.mark.parametrize("bsn, status_code", [
+        ("undefined", 400),
+        ("********", 400),
+        ("123456789", 200),
+        ("023456789", 200)
+    ])
+    def test_query_bsn(self, stuf_310_response, app_base_path, client, jwt_header, bsn, status_code):
+        """Test against an unauthorized jwt header."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/{bsn}", headers=jwt_header)
+        assert response.status_code == status_code
