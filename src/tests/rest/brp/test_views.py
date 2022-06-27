@@ -189,13 +189,29 @@ class TestIngeschrevenpersonenBsnView:
         else:
             assert response.json.get("invalid-params") is err_on
 
-    @pytest.mark.parametrize("bsn, status_code", [
-        ("undefined", 400),
-        ("********", 400),
-        ("123456789", 200),
-        ("023456789", 200)
+    bsn_err = {
+        "min_len": "Waarde is korter dan minimale lengte 9",
+        "max_len": "Waarde is langer dan maximale lengte 9",
+        "no_int": "Waarde is geen geldige integer."
+    }
+
+    @pytest.mark.parametrize("bsn, status_code, msg", [
+        ("undefined", 400, bsn_err["no_int"]),  # len == 9
+        ("undefined1", 400, bsn_err["max_len"]),
+        ("undefin1", 400, bsn_err["min_len"]),
+        ("*********", 400, bsn_err["no_int"]),  # len == 9
+        ("12345678", 400, bsn_err["min_len"]),
+        ("1234567899", 400, bsn_err["max_len"]),
+        ("١٢٣٤٥٦٧٨٩", 400, bsn_err["no_int"]),  # len == 9
+        ("023456789", 200, ""),
+        ("", 404, ""),
+        ("/", 404, ""),
     ])
-    def test_query_bsn(self, stuf_310_response, app_base_path, client, jwt_header, bsn, status_code):
-        """Test against an unauthorized jwt header."""
+    def test_query_bsn(self, stuf_310_response, app_base_path, client, jwt_header, bsn, status_code, msg):
+        """Test for different bsn queries and use the correct error message."""
+        # https://github.com/VNG-Realisatie/Haal-Centraal-BRP-bevragen/issues/499
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/{bsn}", headers=jwt_header)
         assert response.status_code == status_code
+
+        if response.status_code == 400:
+            assert response.json["invalid-params"][0]["reason"] == msg
