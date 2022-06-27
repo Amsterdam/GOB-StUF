@@ -64,7 +64,7 @@ class ArgumentCheck():
     }
 
     is_integer = {
-        'check': lambda v: re.match(r'^\d+$', v) is not None,
+        'check': lambda v: re.match(r'^[0-9]+$', v) is not None,
         'msg': {
             "code": "integer",
             "reason": "Waarde is geen geldige integer."
@@ -88,7 +88,7 @@ class ArgumentCheck():
     }
 
     is_valid_date_format = {
-        'check': lambda v: re.match(r'^\d{4}-\d{2}-\d{2}$', v) is not None,
+        'check': lambda v: re.match(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$', v) is not None,
         'msg': {
             "code": "invalidFormat",
             "reason": "Waarde voldoet niet aan het formaat YYYY-MM-DD",

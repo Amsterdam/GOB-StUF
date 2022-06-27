@@ -46,7 +46,7 @@ def _update_response(text):
     :param text: any text, normally a XML string
     :return: the text where any reference to the underlying SOAP API is changed to ourself
     """
-    pattern = ROUTE_NETLOC + r"(:\d{2,5})?"
+    pattern = ROUTE_NETLOC + r"(:[0-9]{2,5})?"
     return re.sub(pattern, f"localhost:{GOB_STUF_PORT}", text)
 
 

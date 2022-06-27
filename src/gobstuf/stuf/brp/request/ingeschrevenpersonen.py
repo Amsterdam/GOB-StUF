@@ -6,13 +6,17 @@ from gobstuf.rest.brp.argument_checks import ArgumentCheck
 from gobstuf.stuf.brp.base_request import StufRequest
 
 # Defined at the module level so it's only compiled once
-date_match = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+date_match = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
 
 
 class IngeschrevenpersonenStufRequest(StufRequest, ABC):
     BSN_LENGTH = 9
 
-    bsn_check = [ArgumentCheck.has_min_length(BSN_LENGTH), ArgumentCheck.has_max_length(BSN_LENGTH)]
+    bsn_check = [
+        ArgumentCheck.is_integer,
+        ArgumentCheck.has_min_length(BSN_LENGTH),
+        ArgumentCheck.has_max_length(BSN_LENGTH),
+    ]
 
     template = 'ingeschrevenpersonen.xml'
     content_root_elm = 'soapenv:Body BG:npsLv01'
