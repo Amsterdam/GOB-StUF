@@ -6,7 +6,7 @@ from gobstuf.rest.brp.argument_checks import ArgumentCheck
 from gobstuf.stuf.brp.base_request import StufRequest
 
 # Defined at the module level so it's only compiled once
-date_match = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+date_match = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
 
 
 class IngeschrevenpersonenStufRequest(StufRequest, ABC):
