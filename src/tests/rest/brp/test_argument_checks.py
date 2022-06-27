@@ -1,8 +1,9 @@
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from gobstuf.rest.brp.argument_checks import ArgumentCheck
 from gobstuf.reference_data.code_resolver import DataItemNotFoundException
+
 
 class TestArgumentCheck(TestCase):
 
@@ -20,7 +21,7 @@ class TestArgumentCheck(TestCase):
             self.assertEqual(ArgumentCheck.validate(check, v), check)
 
         check = ArgumentCheck.is_integer
-        for v in ['0', '1']:
+        for v in ['0', '1', '091111222']:
             self.assertIsNone(ArgumentCheck.validate(check, v))
         for v in ['-1', '', '1.5', 'one']:
             self.assertEqual(ArgumentCheck.validate(check, v), check)

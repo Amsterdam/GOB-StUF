@@ -12,7 +12,11 @@ date_match = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 class IngeschrevenpersonenStufRequest(StufRequest, ABC):
     BSN_LENGTH = 9
 
-    bsn_check = [ArgumentCheck.has_min_length(BSN_LENGTH), ArgumentCheck.has_max_length(BSN_LENGTH)]
+    bsn_check = [
+        ArgumentCheck.is_integer,
+        ArgumentCheck.has_min_length(BSN_LENGTH),
+        ArgumentCheck.has_max_length(BSN_LENGTH),
+    ]
 
     template = 'ingeschrevenpersonen.xml'
     content_root_elm = 'soapenv:Body BG:npsLv01'
