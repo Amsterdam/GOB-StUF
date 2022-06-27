@@ -89,7 +89,8 @@ class TestStufRestView(TestCase):
             headers={
                 'Soapaction': 'THE SOAP action',
                 'Content-Type': 'text/xml',
-            }
+            },
+            timeout=(5, 30)
         )
 
     @patch("gobstuf.rest.brp.base_view.logging")

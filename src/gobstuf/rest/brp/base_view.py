@@ -13,7 +13,8 @@ from gobstuf.stuf.brp.base_response import StufMappedResponse
 from gobstuf.stuf.exception import NoStufAnswerException
 from gobstuf.stuf.brp.error_response import StufErrorResponse, UnknownErrorCode
 from gobstuf.rest.brp.rest_response import RESTResponse
-from gobstuf.config import ROUTE_SCHEME, ROUTE_NETLOC, ROUTE_PATH_310, CORRELATION_ID_HEADER
+from gobstuf.config import ROUTE_SCHEME, ROUTE_NETLOC, ROUTE_PATH_310, CORRELATION_ID_HEADER, \
+    MKS_TIMEOUT_CONNECT, MKS_TIMEOUT_READ
 from gobstuf.rest.brp.argument_checks import ArgumentCheck
 
 
@@ -225,8 +226,9 @@ class StufRestView(MethodView):
             'Content-Type': 'text/xml'
         }
         url = f'{ROUTE_SCHEME}://{ROUTE_NETLOC}{ROUTE_PATH_310}'
+        timeout = (MKS_TIMEOUT_CONNECT, MKS_TIMEOUT_READ)
 
-        return cert_post(url, data=request_template.to_string(), headers=soap_headers)
+        return cert_post(url, data=request_template.to_string(), headers=soap_headers, timeout=timeout)
 
     def _error_response(self, response_obj: StufErrorResponse):
         """Builds the error response based on the error response received from MKS

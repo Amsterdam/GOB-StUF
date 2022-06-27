@@ -52,3 +52,6 @@ UNIQUE_ID_HEADER = 'X-Unique-ID'
 
 KEYCLOAK_AUTH_URL = _getenv('KEYCLOAK_AUTH_URL')
 KEYCLOAK_CLIENT_ID = _getenv('KEYCLOAK_CLIENT_ID')
+
+MKS_TIMEOUT_CONNECT = int(_getenv('MKS_TIMEOUT_CONNECT', default_value=4))
+MKS_TIMEOUT_READ = int(_getenv('MKS_TIMEOUT_READ', default_value=60))
