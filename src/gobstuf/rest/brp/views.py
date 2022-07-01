@@ -48,6 +48,7 @@ class IngeschrevenpersonenFilterView(IngeschrevenpersonenView, StufRestFilterVie
         ['verblijfplaats__gemeentevaninschrijving',
          'verblijfplaats__naamopenbareruimte',
          'verblijfplaats__huisnummer'],
+        ['verblijfplaats__identificatiecodenummeraanduiding'],
         ['geboorte__datum', 'naam__geslachtsnaam'],
     ]
 
