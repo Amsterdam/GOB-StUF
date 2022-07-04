@@ -10,7 +10,8 @@ class TestIngeschrevenpersonenBsnView:
 
     @pytest.mark.parametrize("key_path,expected", [
         (["verblijfplaats", "adresseerbaarObjectIdentificatie"], "0518010000784987"),
-        (["nationaliteiten"], [{'nationaliteit': {'code': '0315'}}])
+        (["nationaliteiten"], [{'nationaliteit': {'code': '0315'}}]),
+        (["verblijfplaats", "datumAanvangAdreshouding"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20})
     ])
     def test_various_keys(self, key_path, expected, stuf_310_response, app_base_path, client, jwt_header):
         """Asserts if various keys are found in the correct 310 response."""
@@ -139,6 +140,14 @@ class TestIngeschrevenpersonenBsnView:
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
         assert response.status_code == 200
         assert response.json["aNummer"] == "9794354356"
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_brief_adres.xml"], indirect=True)
+    def test_brief_adres(self, stuf_310_response, app_base_path, client, jwt_header):
+        """Test briefadres datumAanvangAdreshouding search on fallback."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        assert response.status_code == 200
+        assert response.json["verblijfplaats"]["functieAdres"] == "briefadres"
+        assert response.json["verblijfplaats"]["datumAanvangAdreshouding"]
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
     def test_forbidden_403(self, stuf_310_response, app_base_path, client, jwt_header_forbidden):
