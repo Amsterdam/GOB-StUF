@@ -56,6 +56,7 @@ class IngeschrevenpersonenFilterStufRequest(IngeschrevenpersonenStufRequest):
         'verblijfplaats__identificatiecodenummeraanduiding': [
             ArgumentCheck.has_min_length(NUMMERAANDUIDING_LENGTH),
             ArgumentCheck.has_max_length(NUMMERAANDUIDING_LENGTH),
+            ArgumentCheck.is_integer,
         ],
         'geboorte__datum': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
         'naam__geslachtsnaam': [ArgumentCheck.has_max_length(200)],
