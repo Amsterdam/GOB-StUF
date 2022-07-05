@@ -225,7 +225,10 @@ class NPSMapping(Mapping):
                 'vanuitVertrokkenOnbekendWaarheen':
                     (MKSConverter.true_if_equals('0000'), (MKSConverter.as_code(4), 'BG:inp.immigratieLand')),
                 'datumAanvangAdreshouding':
-                    (MKSConverter.as_datum_broken_down, 'BG:verblijfsadres BG:begindatumVerblijf'),
+                    (MKSConverter.get_datum_aanvang_adreshouding,
+                        'BG:verblijfsadres BG:begindatumVerblijf',
+                        'BG:inp.verblijftIn StUF:tijdvakRelatie StUF:beginRelatie'
+                     ),
                 'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
                 'datumVestigingInNederland':
                     (MKSConverter.as_datum_broken_down, 'BG:inp.datumVestigingInNederland',

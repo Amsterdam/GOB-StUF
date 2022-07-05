@@ -1,13 +1,17 @@
 import freezegun
 import pytest
 from urllib.parse import urlencode
+import xml.etree.ElementTree as ET
+
+from gobstuf.stuf.message import StufMessage
 
 
 class TestIngeschrevenpersonenBsnView:
 
     @pytest.mark.parametrize("key_path,expected", [
         (["verblijfplaats", "adresseerbaarObjectIdentificatie"], "0518010000784987"),
-        (["nationaliteiten"], [{'nationaliteit': {'code': '0315'}}])
+        (["nationaliteiten"], [{'nationaliteit': {'code': '0315'}}]),
+        (["verblijfplaats", "datumAanvangAdreshouding"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20})
     ])
     def test_various_keys(self, key_path, expected, stuf_310_response, app_base_path, client, jwt_header):
         """Asserts if various keys are found in the correct 310 response."""
@@ -137,6 +141,14 @@ class TestIngeschrevenpersonenBsnView:
         assert response.status_code == 200
         assert response.json["aNummer"] == "9794354356"
 
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_brief_adres.xml"], indirect=True)
+    def test_brief_adres(self, stuf_310_response, app_base_path, client, jwt_header):
+        """Test briefadres datumAanvangAdreshouding search on fallback."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        assert response.status_code == 200
+        assert response.json["verblijfplaats"]["functieAdres"] == "briefadres"
+        assert response.json["verblijfplaats"]["datumAanvangAdreshouding"]
+
     @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
     def test_forbidden_403(self, stuf_310_response, app_base_path, client, jwt_header_forbidden):
         """Test against an unauthorized jwt header."""
@@ -172,7 +184,20 @@ class TestIngeschrevenpersonenBsnView:
              }, 400, [
                 {"name": "burgerservicenummer", "code": "minLength"},
                 {"name": "verblijfplaats__huisnummer", "code": "integer"}
-            ])
+            ]),
+            ({
+                "verblijfplaats__identificatiecodenummeraanduiding": "123456789012345"
+            }, 400, [
+                {"name": "verblijfplaats__identificatiecodenummeraanduiding", "code": "minLength"}
+            ]),
+            ({
+                 "verblijfplaats__identificatiecodenummeraanduiding": "12345678901234567"
+             }, 400, [
+                 {"name": "verblijfplaats__identificatiecodenummeraanduiding", "code": "maxLength"}
+             ]),
+            ({
+                "verblijfplaats__identificatiecodenummeraanduiding": "1234567890123456",
+            }, 200, None)
         ]
     )
     def test_query_parameters(
@@ -215,3 +240,46 @@ class TestIngeschrevenpersonenBsnView:
 
         if response.status_code == 400:
             assert response.json["invalid-params"][0]["reason"] == msg
+
+    @pytest.mark.parametrize("query_string, expected_elms", [
+        # All minimal parameter combinations
+        ("burgerservicenummer=123456789", {
+            "BG:inp.bsn": "123456789"
+        }),
+        ("verblijfplaats__postcode=1234AA&verblijfplaats__huisnummer=1", {
+            "BG:verblijfsadres BG:aoa.postcode": "1234AA",
+            "BG:verblijfsadres BG:aoa.huisnummer": "1"
+        }),
+        ("verblijfplaats__gemeentevaninschrijving=0363&verblijfplaats__naamopenbareruimte=Amstel&verblijfplaats__huisnummer=1", {
+            "BG:gem.gemeenteCode": "0363",
+            "BG:verblijfsadres BG:gor.openbareRuimteNaam": "Amstel",
+            "BG:verblijfsadres BG:aoa.huisnummer": "1"
+        }),
+        ("verblijfplaats__identificatiecodenummeraanduiding=1234567890123456", {
+            "BG:verblijfsadres BG:aoa.identificatie": "1234567890123456"
+        }),
+        ("geboorte__datum=1970-01-01&naam__geslachtsnaam=Jansen", {
+            "BG:geboortedatum": "19700101",
+            "BG:geslachtsnaam": "Jansen",
+        }),
+        # All optional parameters added
+        ("geboorte__datum=1970-01-01&naam__geslachtsnaam=Jansen&naam__voornamen=Jan&naam__voorvoegsel=de&verblijfplaats__huisletter=a&verblijfplaats__huisnummertoevoeging=1", {
+            "BG:geboortedatum": "19700101",
+            "BG:geslachtsnaam": "Jansen",
+            "BG:voornamen": "Jan",
+            "BG:voorvoegselGeslachtsnaam": "de",
+            "BG:verblijfsadres BG:aoa.huisletter": "a",
+            "BG:verblijfsadres BG:aoa.huisnummertoevoeging": "1"
+        }),
+    ])
+    def test_query_parameters_to_xml(self, app_base_path, stuf_310_response, requests_mock, client, jwt_header, query_string, expected_elms):
+        _ = client.get(f"{app_base_path}/brp/ingeschrevenpersonen?{query_string}", headers=jwt_header)
+
+        assert requests_mock._adapter.call_count == 1
+        request_xml = requests_mock._adapter.last_request.text
+
+        message = StufMessage(request_xml)
+        gelijk_elm = message.find_elm("soapenv:Body BG:npsLv01 BG:gelijk")
+
+        for path, value in expected_elms.items():
+            assert message.get_elm_value(path, gelijk_elm) == value

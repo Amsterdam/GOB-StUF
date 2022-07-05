@@ -367,3 +367,10 @@ class TestMKSConverter(TestCase):
 
         with self.assertRaises(DataItemNotFoundException):
             MKSConverter.get_adellijke_titel_code('Koning')
+
+    def test_get_aanvang_adreshouding(self):
+        expected = {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20}
+        self.assertEqual(MKSConverter.get_datum_aanvang_adreshouding('19951020', None), expected)
+        self.assertEqual(MKSConverter.get_datum_aanvang_adreshouding('19951020', '19961020'), expected)
+        self.assertEqual(MKSConverter.get_datum_aanvang_adreshouding(None, '19951020'), expected)
+        self.assertIsNone(MKSConverter.get_datum_aanvang_adreshouding(None, None))

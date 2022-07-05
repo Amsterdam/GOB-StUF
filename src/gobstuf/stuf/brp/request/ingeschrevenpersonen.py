@@ -27,6 +27,7 @@ class IngeschrevenpersonenFilterStufRequest(IngeschrevenpersonenStufRequest):
     GEMEENTECODE_LENGTH = 4
     HUISLETTER_LENGTH = 1
     HUISNUMMERTOEVOEGING_LENGTH = 4
+    NUMMERAANDUIDING_LENGTH = 16
 
     parameter_paths = {
         'burgerservicenummer': 'BG:gelijk BG:inp.bsn',
@@ -36,6 +37,7 @@ class IngeschrevenpersonenFilterStufRequest(IngeschrevenpersonenStufRequest):
         'verblijfplaats__huisnummertoevoeging': 'BG:gelijk BG:verblijfsadres BG:aoa.huisnummertoevoeging',
         'verblijfplaats__naamopenbareruimte': 'BG:gelijk BG:verblijfsadres BG:gor.openbareRuimteNaam',
         'verblijfplaats__gemeentevaninschrijving': 'BG:gelijk BG:gem.gemeenteCode',
+        'verblijfplaats__identificatiecodenummeraanduiding': 'BG:gelijk BG:verblijfsadres BG:aoa.identificatie',
         'geboorte__datum': 'BG:gelijk BG:geboortedatum',
         'naam__geslachtsnaam': 'BG:gelijk BG:geslachtsnaam',
         'naam__voorvoegsel': 'BG:gelijk BG:voorvoegselGeslachtsnaam',
@@ -51,6 +53,11 @@ class IngeschrevenpersonenFilterStufRequest(IngeschrevenpersonenStufRequest):
         'verblijfplaats__gemeentevaninschrijving': [ArgumentCheck.has_min_length(GEMEENTECODE_LENGTH),
                                                     ArgumentCheck.has_max_length(GEMEENTECODE_LENGTH),
                                                     ArgumentCheck.is_valid_gemeentecode],
+        'verblijfplaats__identificatiecodenummeraanduiding': [
+            ArgumentCheck.has_min_length(NUMMERAANDUIDING_LENGTH),
+            ArgumentCheck.has_max_length(NUMMERAANDUIDING_LENGTH),
+            ArgumentCheck.is_integer,
+        ],
         'geboorte__datum': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
         'naam__geslachtsnaam': [ArgumentCheck.has_max_length(200)],
         'burgerservicenummer': IngeschrevenpersonenStufRequest.bsn_check
