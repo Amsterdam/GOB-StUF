@@ -22,11 +22,11 @@ RUN rm requirements.txt
 # Wheelhouse cleanup.
 RUN rm -rf /opt/wheelhouse
 
-# Certs.
+# Custom certs.
 ENV REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
 COPY *.crt /usr/local/share/ca-certificates/extras/
-RUN chmod 755 /usr/local/share/ca-certificates/extras && chmod 644 /usr/local/share/ca-certificates/extras/* \
- && update-ca-certificates
+RUN chmod 755 /usr/local/share/ca-certificates/extras && \
+	chmod 644 /usr/local/share/ca-certificates/extras/* && update-ca-certificates
 
 # Create directory for client certs (datapunt Openstack).
 RUN mkdir -p /certs/gob/ && chmod -R 755 /certs
