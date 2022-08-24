@@ -47,10 +47,11 @@ services:
       - ./src/tests:/app/tests
       - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
       - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
+
 networks:
   default:
-    external:
-      name: gob-network
+    name: gob-network
+    external: true
 
 volumes:
   gob-volume:
