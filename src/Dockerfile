@@ -46,7 +46,6 @@ RUN mkdir -p /app/gobstuf/regression_tests/downloaded
 RUN chown datapunt /app/gobstuf/regression_tests/downloaded
 
 USER datapunt
-
 CMD uwsgi
 
 
@@ -66,18 +65,19 @@ USER datapunt
 # Test.
 FROM application as test
 USER root
+
 # Remove gobcore tests
 RUN rm -rf /app/src/gobcore/tests
 RUN rm -rf /app/src/gobconfig/tests
 # flask-audit-log cleanup.
 RUN rm -rf /app/src/datapunt-flask-audit-log/tests
 
-# Copy tests
+# Copy test module and tests.
+COPY test.sh .flake8 ./
 COPY tests tests
-COPY .flake8 .flake8
-COPY test.sh test.sh
 
 # Copy Jenkins files.
 COPY .jenkins /.jenkins
-RUN mkdir -p /app/shared && chown datapunt /app/shared
+RUN mkdir -m 2755 -p /app/shared && chown -R datapunt.datapunt /app/shared
+
 USER datapunt

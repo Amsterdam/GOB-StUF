@@ -8,7 +8,7 @@ It serves as a proxy and transparantly forwards requests to a StUF server.
 
 * docker compose >= 1.25
 * Docker CE >= 18.09
-* Python >= 3.6
+* Python >= 3.9
 
 # Notes
 
