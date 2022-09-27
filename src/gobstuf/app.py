@@ -13,8 +13,6 @@ from gobstuf.regression_tests.brp import BrpRegression, ObjectstoreResultsWriter
 
 
 def handle_brp_regression_test_msg(msg):
-    logger.configure(msg, 'BRP Regression test')
-
     results = BrpRegression(logger).run()
     writer = ObjectstoreResultsWriter(results, 'regression_tests/results/brp')
     writer.write()
