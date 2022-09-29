@@ -105,7 +105,7 @@ class TestObjectStore(TestCase):
             {'name': 'dira/dird/filed.json', 'content_type': 'application/json'},
             {'name': 'dira/dirb/dirf/somefile.json', 'content_type': 'application/json'},
         ])
-        store._get_object = lambda x: 'downloaded(' + x['name'] + ')'
+        store._get_object = lambda x: [f'downloaded({x["name"]})']
 
         store.download_directory('dira/dirb', 'local/directory')
 
