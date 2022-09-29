@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 import shutil
-from typing import List, Callable, Any
+from typing import List, Callable, Any, Iterator
 
 import requests
 from requests import HTTPError
@@ -60,7 +60,7 @@ class Objectstore:
     def _get_objects_list(self):
         return get_full_container_list(self.connection, CONTAINER_BASE)
 
-    def _get_object(self, item):
+    def _get_object(self, item) -> Iterator[bytes]:
         return get_object(self.connection, item, CONTAINER_BASE)
 
     def _delete_object(self, item):
@@ -86,7 +86,8 @@ class Objectstore:
                     dst_directory = '/'.join(save_path.split('/')[:-1])
                     os.makedirs(dst_directory, exist_ok=True)
                     with open(save_path, 'wb') as f:
-                        f.write(obj)
+                        for chunk in obj:
+                            f.write(chunk)
 
     def clear_directory(self, objectstore_path: str):
         for item in self._get_objects_list():
