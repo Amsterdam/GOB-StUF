@@ -118,4 +118,3 @@ class IngeschrevenpersonenBsnHistorieStufRequest(IngeschrevenpersonenStufRequest
         'datumVan': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
         'datumTotEnMet': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date]
     }
-    
