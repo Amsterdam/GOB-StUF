@@ -4,7 +4,8 @@ from gobstuf.stuf.brp.request.ingeschrevenpersonen import (
     IngeschrevenpersonenBsnPartnerStufRequest,
     IngeschrevenpersonenBsnOudersStufRequest,
     IngeschrevenpersonenFilterStufRequest,
-    IngeschrevenpersonenBsnKinderenStufRequest
+    IngeschrevenpersonenBsnKinderenStufRequest,
+    IngeschrevenpersonenBsnHistorieStufRequest
 )
 from gobstuf.stuf.brp.response.ingeschrevenpersonen import (
     IngeschrevenpersonenStufResponse,
@@ -13,7 +14,8 @@ from gobstuf.stuf.brp.response.ingeschrevenpersonen import (
     IngeschrevenpersonenStufOudersDetailResponse,
     IngeschrevenpersonenStufOudersListResponse,
     IngeschrevenpersonenStufKinderenListResponse,
-    IngeschrevenpersonenStufKinderenDetailResponse
+    IngeschrevenpersonenStufKinderenDetailResponse,
+    IngeschrevenpersonenStufHistorieResponse
 )
 
 
@@ -110,3 +112,25 @@ class IngeschrevenpersonenBsnKinderenDetailView(IngeschrevenpersonenBsnView):
 
     def get_not_found_message(self, **kwargs):
         return f"Ingeschreven kind voor persoon niet gevonden met burgerservicenummer {kwargs['bsn']}."
+
+class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView):
+    request_template = IngeschrevenpersonenBsnHistorieStufRequest
+    response_template = IngeschrevenpersonenStufHistorieResponse
+
+    @property
+    def functional_query_parameters(self):
+        return {
+            **super().functional_query_parameters,
+        }
+
+    name = 'verblijfplaatshistorie'
+    
+    # For this Class parameters are not requiered, but if they are used, only certain combinations are valid
+    # Herefore the empty list is provided at index 0 of query_parameter_combinations
+    query_parameter_combinations = [
+        [], 
+        ['peildatum'],
+        ['datumVan','datumTotEnMet'] 
+     ]
+
+    optional_query_parameters = []
