@@ -39,3 +39,6 @@ class IngeschrevenpersonenStufKinderenDetailResponse(IngeschrevenpersonenStufRes
 
 class IngeschrevenpersonenStufKinderenListResponse(IngeschrevenpersonenStufResponse):
     response_filters = [KinderenListResponseFilter]
+
+class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse):
+    answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa07 BG:antwoord'

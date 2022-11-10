@@ -1,0 +1,43 @@
+<soapenv:Envelope
+	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:ns="http://www.egem.nl/StUF/sector/bg/0310"
+	xmlns:stuf="http://www.egem.nl/StUF/StUF0301"
+	xmlns:xlin="http://www.w3.org/1999/xlink"
+	xmlns:gml="http://www.opengis.net/gml">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<BG:npsLv07
+			xmlns:BG="http://www.egem.nl/StUF/sector/bg/0310"
+			xmlns:StUF="http://www.egem.nl/StUF/StUF0301"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.egem.nl/StUF/sector/bg/0310 bg0310\bg0310.msg.xsd">
+			<BG:stuurgegevens>
+				<StUF:berichtcode>Lv07</StUF:berichtcode>
+				<StUF:zender>
+					<StUF:applicatie>APPLICATIE</StUF:applicatie>
+					<StUF:gebruiker>GEBRUIKER</StUF:gebruiker>
+				</StUF:zender>
+				<StUF:ontvanger>
+					<StUF:organisatie>Amsterdam</StUF:organisatie>
+					<StUF:applicatie>CGM</StUF:applicatie>
+				</StUF:ontvanger>
+				<StUF:referentienummer>TestJeroenHistorie</StUF:referentienummer>
+				<StUF:tijdstipBericht>2020101508064822</StUF:tijdstipBericht>
+				<StUF:entiteittype>NPS</StUF:entiteittype>
+			</BG:stuurgegevens>
+			<BG:parameters>
+				<StUF:sortering>0</StUF:sortering>
+				<StUF:indicatorVervolgvraag>false</StUF:indicatorVervolgvraag>
+				<StUF:maximumAantal>15</StUF:maximumAantal>
+				<StUF:indicatorAfnemerIndicatie>false</StUF:indicatorAfnemerIndicatie>
+				<StUF:indicatorAantal>false</StUF:indicatorAantal>
+			</BG:parameters>
+			<BG:gelijk StUF:entiteittype="NPS">
+			    <!-- Parameters are inserted here -->
+			</BG:gelijk>
+			<BG:scope>
+				<ns:object
+					xmlns:stuf="http://www.egem.nl/StUF/StUF0301" stuf:entiteittype="NPS" stuf:scope="alles"/>
+				</BG:scope>
+			</BG:npsLv07>
+		</soapenv:Body>
+	</soapenv:Envelope>
