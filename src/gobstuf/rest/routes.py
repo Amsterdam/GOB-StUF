@@ -51,9 +51,10 @@ REST_ROUTES = [
         IngeschrevenpersonenBsnKinderenDetailView.as_view('brp_ingeschrevenpersonen_bsn_kinderen_detail'),
         ["GET"]
     ),
-       (
-       '/brp/ingeschrevenpersonen/<bsn>/verblijfsplaatshistorie',
-       IngeschrevenpersonenBsnVerblijfsplaatshistorieListView.as_view('brp_ingeschrevenpersonen_bsn_verblijfplaatshistorie'),
-       ["GET"]
+    (
+        '/brp/ingeschrevenpersonen/<bsn>/verblijfsplaatshistorie',
+        IngeschrevenpersonenBsnVerblijfsplaatshistorieListView.as_view(
+        'brp_ingeschrevenpersonen_bsn_verblijfplaatshistorie'),
+        ["GET"]
    )
 ]

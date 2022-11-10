@@ -103,6 +103,7 @@ class IngeschrevenpersonenBsnOudersStufRequest(IngeschrevenpersonenBsnStufReques
 class IngeschrevenpersonenBsnKinderenStufRequest(IngeschrevenpersonenBsnStufRequest):
     parameters = ['kinderen_id']
 
+
 class IngeschrevenpersonenBsnHistorieStufRequest(IngeschrevenpersonenStufRequest):
     content_root_elm = 'soapenv:Body BG:npsLa07'
     template = 'historie.xml'
@@ -117,3 +118,4 @@ class IngeschrevenpersonenBsnHistorieStufRequest(IngeschrevenpersonenStufRequest
         'datumVan': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
         'datumTotEnMet': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date]
     }
+    
