@@ -129,10 +129,9 @@ class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView)
     # For this Class parameters are not requiered, but if they are used, only certain combinations are valid
     # Herefore the empty list is provided at index 0 of query_parameter_combinations
     query_parameter_combinations = [
-        [], 
-        ['peildatum'], 
-        ['datumVan','datumTotEnMet']
+        [],
+        ['peildatum'],
+        ['datumVan', 'datumTotEnMet']
      ]
 
     optional_query_parameters = []
-    
