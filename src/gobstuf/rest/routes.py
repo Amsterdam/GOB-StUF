@@ -57,5 +57,5 @@ REST_ROUTES = [
             'brp_ingeschrevenpersonen_bsn_verblijfplaatshistorie'
         ),
         ["GET"]
-   )
+    )
 ]
