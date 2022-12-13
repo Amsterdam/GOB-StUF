@@ -6,7 +6,8 @@ from gobstuf.rest.brp.views import (
     IngeschrevenpersonenBsnOudersDetailView,
     IngeschrevenpersonenBsnOudersListView,
     IngeschrevenpersonenBsnKinderenDetailView,
-    IngeschrevenpersonenBsnKinderenListView
+    IngeschrevenpersonenBsnKinderenListView,
+    IngeschrevenpersonenBsnVerblijfsplaatshistorieListView
 )
 
 REST_ROUTES = [
@@ -50,4 +51,11 @@ REST_ROUTES = [
         IngeschrevenpersonenBsnKinderenDetailView.as_view('brp_ingeschrevenpersonen_bsn_kinderen_detail'),
         ["GET"]
     ),
+    (
+        '/brp/ingeschrevenpersonen/<bsn>/verblijfsplaatshistorie',
+        IngeschrevenpersonenBsnVerblijfsplaatshistorieListView.as_view(
+            'brp_ingeschrevenpersonen_bsn_verblijfplaatshistorie'
+        ),
+        ["GET"]
+    )
 ]

@@ -102,3 +102,19 @@ class IngeschrevenpersonenBsnOudersStufRequest(IngeschrevenpersonenBsnStufReques
 
 class IngeschrevenpersonenBsnKinderenStufRequest(IngeschrevenpersonenBsnStufRequest):
     parameters = ['kinderen_id']
+
+
+class IngeschrevenpersonenBsnHistorieStufRequest(IngeschrevenpersonenStufRequest):
+    content_root_elm = 'soapenv:Body BG:npsLa07'
+    template = 'historie.xml'
+
+    parameter_paths = {
+       'bsn': 'BG:gelijk BG:inp.bsn'
+    }
+
+    parameter_checks = {
+        'bsn': IngeschrevenpersonenStufRequest.bsn_check,
+        'peildatum': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
+        'datumVan': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
+        'datumTotEnMet': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date]
+    }
