@@ -45,13 +45,13 @@ class IngeschrevenpersonenFilterView(IngeschrevenpersonenView, StufRestFilterVie
     name = 'ingeschrevenpersonen'
 
     query_parameter_combinations = [
-        ['burgerservicenummer'],
-        ['verblijfplaats__postcode', 'verblijfplaats__huisnummer'],
-        ['verblijfplaats__gemeentevaninschrijving',
+        ('burgerservicenummer',),
+        ('verblijfplaats__postcode', 'verblijfplaats__huisnummer'),
+        ('verblijfplaats__gemeentevaninschrijving',
          'verblijfplaats__naamopenbareruimte',
-         'verblijfplaats__huisnummer'],
-        ['verblijfplaats__identificatiecodenummeraanduiding'],
-        ['geboorte__datum', 'naam__geslachtsnaam'],
+         'verblijfplaats__huisnummer'),
+        ('verblijfplaats__identificatiecodenummeraanduiding',),
+        ('geboorte__datum', 'naam__geslachtsnaam'),
     ]
 
     # One or more can be used in combination with the combinations above
@@ -127,11 +127,14 @@ class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView)
     name = 'verblijfplaatshistorie'
 
     # For this Class parameters are not requiered, but if they are used, only certain combinations are valid
-    # Herefore the empty list is provided at index 0 of query_parameter_combinations
+    # Herefore the empty tuple is provided at index 2 of query_parameter_combinations
     query_parameter_combinations = [
-        [],
-        ['peildatum'],
-        ['datumVan', 'datumTotEnMet']
+        ('peildatum',),
+        ('datumVan', 'datumTotEnMet'),
+        ()
      ]
 
     optional_query_parameters = []
+
+    def _request_template_parameters(self, **kwargs):
+        return kwargs

@@ -20,7 +20,7 @@
 					<StUF:organisatie>Amsterdam</StUF:organisatie>
 					<StUF:applicatie>CGM</StUF:applicatie>
 				</StUF:ontvanger>
-				<StUF:referentienummer>TestJeroenHistorie</StUF:referentienummer>
+				<StUF:referentienummer>ARS000000001</StUF:referentienummer>
 				<StUF:tijdstipBericht>2020101508064822</StUF:tijdstipBericht>
 				<StUF:entiteittype>NPS</StUF:entiteittype>
 			</BG:stuurgegevens>
@@ -41,3 +41,4 @@
 			</BG:npsLv07>
 		</soapenv:Body>
 	</soapenv:Envelope>
+	
