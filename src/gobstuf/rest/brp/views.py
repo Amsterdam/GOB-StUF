@@ -126,7 +126,7 @@ class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView)
 
     name = 'verblijfplaatshistorie'
 
-    # For this Class parameters are not requiered, but if they are used, only certain combinations are valid
+    # For this Class parameters are not required, but if they are used, only certain combinations are valid
     # Herefore the empty tuple is provided at index 2 of query_parameter_combinations
     query_parameter_combinations = [
         ('peildatum',),
