@@ -120,6 +120,10 @@ class TestIngeschrevenpersonenBsnKinderenDetailView(TestCase):
         self.assertEqual('Ingeschreven kind voor persoon niet gevonden met burgerservicenummer BEE ES EN.',
                          IngeschrevenpersonenBsnKinderenDetailView().get_not_found_message(**kwargs))
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5390ce1 (some bug fixes)
 class TestIngeschrevenpersonenBsnVerblijfsplaatshistorieListView(TestCase):
     def test_get_not_found_message(self):
         kwargs = {'bsn': 'BEE ES EN'}

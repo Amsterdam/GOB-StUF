@@ -52,3 +52,7 @@ UNIQUE_ID_HEADER = 'X-Unique-ID'
 
 KEYCLOAK_AUTH_URL = _getenv('KEYCLOAK_AUTH_URL')
 KEYCLOAK_CLIENT_ID = _getenv('KEYCLOAK_CLIENT_ID')
+
+# API paths
+API_NUMMERAANDUIDINGEN = 'https://api.data.amsterdam.nl/gob/bag/nummeraanduidingen/'
+API_VERBLIJFSOBJECTEN = 'https://api.data.amsterdam.nl/gob/bag/verblijfsobjecten/'

@@ -87,8 +87,13 @@ class TestIngeschrevenpersonenBsnViewHistorie:
     ):
         """Test query parameters on the test client."""
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie?{urlencode(query_param)}", headers=jwt_header)
+<<<<<<< HEAD
 
 
+=======
+        
+        
+>>>>>>> 103ede2 (move filtering to base_response.py)
         assert response.status_code == result_code 
         assert len(response.json['_embedded']['verblijfplaatshistorie']) == 1 
 
