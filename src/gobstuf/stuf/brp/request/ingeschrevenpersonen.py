@@ -105,8 +105,9 @@ class IngeschrevenpersonenBsnKinderenStufRequest(IngeschrevenpersonenBsnStufRequ
 
 
 class IngeschrevenpersonenBsnHistorieStufRequest(IngeschrevenpersonenStufRequest):
-    content_root_elm = 'soapenv:Body BG:npsLa07'
+    content_root_elm = 'soapenv:Body BG:npsLv07'
     template = 'historie.xml'
+    soap_action = 'http://www.egem.nl/StUF/sector/bg/0310/npsLv07'
 
     parameter_paths = {
        'bsn': 'BG:gelijk BG:inp.bsn'
