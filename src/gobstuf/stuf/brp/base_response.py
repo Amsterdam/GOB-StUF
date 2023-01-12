@@ -529,16 +529,17 @@ class WildcardSearchResponseFilter(ResponseFilter):
 
         return f"^{query}$"
 
+
 class VerblijfplaatsHistorieFilter(ResponseFilter):
 
     @staticmethod
     def create_verblijfplaatsen_list(response_object):
         """
         Adds the current residence to the list of historic residences
-      
+
         """
         verblijfplaatsen = response_object['historiematerieel']
-        verblijfplaatsen.insert(0,response_object['verblijfplaats'])
+        verblijfplaatsen.insert(0, response_object['verblijfplaats'])
         return verblijfplaatsen
 
     def filter_response(self, response_object: dict) -> dict:
@@ -550,4 +551,3 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         verblijfplaatsen = self.create_verblijfplaatsen_list(response_object)
 
         return verblijfplaatsen
-        

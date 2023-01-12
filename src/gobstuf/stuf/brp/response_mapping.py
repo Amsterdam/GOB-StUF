@@ -207,7 +207,6 @@ class NPSMapping(Mapping):
             "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
         }
 
-
         return {
             'burgerservicenummer': 'BG:inp.bsn',
             'aNummer': 'BG:inp.a-nummer',
@@ -485,9 +484,9 @@ class NPSMapping(Mapping):
         :param mapped_object: The mapped response object
         :return:
         """
-        
+
         mapped_object['verblijfplaats'] = self._order_verblijfplaats(mapped_object['verblijfplaats'])
-        
+
         # Use overlijdensdatum for filtering
         is_overleden = mapped_object['overlijden']['indicatieOverleden']
         if is_overleden and not kwargs.get('inclusiefoverledenpersonen', False):
