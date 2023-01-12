@@ -175,7 +175,7 @@ class NPSMapping(Mapping):
             'datumIngangGeldigheid':
                 (MKSConverter.get_first_date_from_various,
                  'BG:verblijfsadres BG:begindatumVerblijf',
-                 'StUF:tijdvakGeldigheid StUF:beginGeldigheid'),  # TODO check if it's the correct one
+                 'StUF:tijdvakGeldigheid StUF:beginGeldigheid'),
             'datumTot': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:eindGeldigheid'),
             'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
             'datumVestigingInNederland':
@@ -300,7 +300,9 @@ class NPSMapping(Mapping):
 
     @classmethod
     def historie(cls, historie):
-
+        """
+        Orders content of historic residences
+        """
         return [cls._order_verblijfplaats(verblijfplaats) for verblijfplaats in historie]
 
     @property
