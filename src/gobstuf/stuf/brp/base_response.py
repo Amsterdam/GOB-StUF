@@ -528,3 +528,26 @@ class WildcardSearchResponseFilter(ResponseFilter):
         query = f"{query}.{{{len(match.group(3))}}}" if match.group(3) else query
 
         return f"^{query}$"
+
+
+class VerblijfplaatsHistorieFilter(ResponseFilter):
+
+    @staticmethod
+    def create_verblijfplaatsen_list(response_object):
+        """
+        Adds the current residence to the list of historic residences
+
+        """
+        verblijfplaatsen = response_object['historiematerieel']
+        verblijfplaatsen.insert(0, response_object['verblijfplaats'])
+        return verblijfplaatsen
+
+    def filter_response(self, response_object: dict) -> dict:
+        """
+        Filters the response object and gives back a list with the
+        actual and the historic residences.
+        """
+
+        verblijfplaatsen = self.create_verblijfplaatsen_list(response_object)
+
+        return verblijfplaatsen

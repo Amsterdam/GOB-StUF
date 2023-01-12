@@ -1,4 +1,4 @@
-from gobstuf.stuf.brp.base_response import StufMappedResponse
+from gobstuf.stuf.brp.base_response import StufMappedResponse, VerblijfplaatsHistorieFilter
 from gobstuf.stuf.brp.response.filters import (
     PartnersDetailResponseFilter,
     PartnersListResponseFilter,
@@ -43,3 +43,5 @@ class IngeschrevenpersonenStufKinderenListResponse(IngeschrevenpersonenStufRespo
 
 class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse):
     answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa07 BG:antwoord'
+
+    response_filters = [VerblijfplaatsHistorieFilter]
