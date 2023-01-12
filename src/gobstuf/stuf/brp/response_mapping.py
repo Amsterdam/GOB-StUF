@@ -138,6 +138,74 @@ class NPSMapping(Mapping):
                 'inOnderzoek': 'BG:inOnderzoek'
             }]
         }
+# verblijfplaats is reordered in `NPSMapping.filter`
+        verblijfplaats = {
+            'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
+            'woonadres': {
+                'naamOpenbareRuimte': 'BG:verblijfsadres BG:gor.openbareRuimteNaam',
+                'straat': 'BG:verblijfsadres BG:gor.straatnaam',
+                'huisnummer': 'BG:verblijfsadres BG:aoa.huisnummer',
+                'huisletter': 'BG:verblijfsadres BG:aoa.huisletter',
+                'huisnummertoevoeging': 'BG:verblijfsadres BG:aoa.huisnummertoevoeging',
+                'postcode': 'BG:verblijfsadres BG:aoa.postcode',
+                'woonplaats': 'BG:verblijfsadres BG:wpl.woonplaatsNaam',
+                'nummeraanduidingIdentificatie': 'BG:verblijfsadres BG:aoa.identificatie',
+                'locatiebeschrijving': 'BG:verblijfsadres BG:inp.locatiebeschrijving'
+            },
+            'briefadres': {
+                'naamOpenbareRuimte': 'BG:sub.correspondentieAdres BG:gor.openbareRuimteNaam',
+                'straat': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
+                'huisnummer': 'BG:sub.correspondentieAdres BG:aoa.huisnummer',
+                'huisletter': 'BG:sub.correspondentieAdres BG:aoa.huisletter',
+                'huisnummertoevoeging': 'BG:sub.correspondentieAdres BG:aoa.huisnummertoevoeging',
+                'postcode': 'BG:sub.correspondentieAdres BG:postcode',
+                'woonplaats': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
+                'nummeraanduidingIdentificatie': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
+                'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving'
+            },
+            'indicatieVestigingVanuitBuitenland':
+                (MKSConverter.true_if_exists, 'BG:inp.datumVestigingInNederland'),
+            'vanuitVertrokkenOnbekendWaarheen':
+                (MKSConverter.true_if_equals('0000'), (MKSConverter.as_code(4), 'BG:inp.immigratieLand')),
+            'datumAanvangAdreshouding':
+                (MKSConverter.get_first_date_from_various,
+                 'BG:verblijfsadres BG:begindatumVerblijf',
+                 'BG:inp.verblijftIn StUF:tijdvakRelatie StUF:beginRelatie'
+                 ),
+            'datumIngangGeldigheid':
+                (MKSConverter.get_first_date_from_various,
+                 'BG:verblijfsadres BG:begindatumVerblijf',
+                 'StUF:tijdvakGeldigheid StUF:beginGeldigheid'),
+            'datumTot': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:eindGeldigheid'),
+            'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
+            'datumVestigingInNederland':
+                (MKSConverter.as_datum_broken_down, 'BG:inp.datumVestigingInNederland',
+                 'BG:inp.datumVestigingInNederland@StUF:indOnvolledigeDatum'),
+            'gemeenteVanInschrijving': {
+                'code': (MKSConverter.as_gemeente_code, 'BG:inp.gemeenteVanInschrijving'),
+                'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.gemeenteVanInschrijving')
+            },
+            'landVanwaarIngeschreven': {
+                'code': (MKSConverter.as_code(4), 'BG:inp.immigratieLand'),
+                'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.immigratieLand')
+            },
+            'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
+                'adresRegel1': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland1',
+                'adresRegel2': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland2',
+                'adresRegel3': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland3',
+                'land': {
+                    'code':
+                        (MKSConverter.as_code(4), 'BG:sub.verblijfBuitenland BG:lnd.landcode'),
+                    # Find omschrijving from codetabel like we do with geboorteland, although MKS does return the
+                    # 'landnaam' in this case (as opposed to geboorteland for example). Just for consistency sake
+                    'omschrijving':
+                        (MKSConverter.get_land_omschrijving, 'BG:sub.verblijfBuitenland BG:lnd.landcode'),
+                },
+            }),
+            # BG:inOnderzoek returns multiple nodes.
+            # Returns the value for the node with groepsnaam attribute 'Verblijfplaats', otherwise None
+            "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
+        }
 
         return {
             'burgerservicenummer': 'BG:inp.bsn',
@@ -196,69 +264,8 @@ class NPSMapping(Mapping):
                 }
                 },
             # verblijfplaats is reordered in `NPSMapping.filter`
-            'verblijfplaats': {
-                'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
-                'woonadres': {
-                    'naamOpenbareRuimte': 'BG:verblijfsadres BG:gor.openbareRuimteNaam',
-                    'straat': 'BG:verblijfsadres BG:gor.straatnaam',
-                    'huisnummer': 'BG:verblijfsadres BG:aoa.huisnummer',
-                    'huisletter': 'BG:verblijfsadres BG:aoa.huisletter',
-                    'huisnummertoevoeging': 'BG:verblijfsadres BG:aoa.huisnummertoevoeging',
-                    'postcode': 'BG:verblijfsadres BG:aoa.postcode',
-                    'woonplaats': 'BG:verblijfsadres BG:wpl.woonplaatsNaam',
-                    'nummeraanduidingIdentificatie': 'BG:verblijfsadres BG:aoa.identificatie',
-                    'locatiebeschrijving': 'BG:verblijfsadres BG:inp.locatiebeschrijving'
-                },
-                'briefadres': {
-                    'naamOpenbareRuimte': 'BG:sub.correspondentieAdres BG:gor.openbareRuimteNaam',
-                    'straat': 'BG:sub.correspondentieAdres BG:gor.straatnaam',
-                    'huisnummer': 'BG:sub.correspondentieAdres BG:aoa.huisnummer',
-                    'huisletter': 'BG:sub.correspondentieAdres BG:aoa.huisletter',
-                    'huisnummertoevoeging': 'BG:sub.correspondentieAdres BG:aoa.huisnummertoevoeging',
-                    'postcode': 'BG:sub.correspondentieAdres BG:postcode',
-                    'woonplaats': 'BG:sub.correspondentieAdres BG:wpl.woonplaatsNaam',
-                    'nummeraanduidingIdentificatie': 'BG:sub.correspondentieAdres BG:aoa.identificatie',
-                    'locatiebeschrijving': 'BG:sub.correspondentieAdres BG:inp.locatiebeschrijving'
-                },
-                'indicatieVestigingVanuitBuitenland':
-                    (MKSConverter.true_if_exists, 'BG:inp.datumVestigingInNederland'),
-                'vanuitVertrokkenOnbekendWaarheen':
-                    (MKSConverter.true_if_equals('0000'), (MKSConverter.as_code(4), 'BG:inp.immigratieLand')),
-                'datumAanvangAdreshouding':
-                    (MKSConverter.get_datum_aanvang_adreshouding,
-                        'BG:verblijfsadres BG:begindatumVerblijf',
-                        'BG:inp.verblijftIn StUF:tijdvakRelatie StUF:beginRelatie'
-                     ),
-                'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
-                'datumVestigingInNederland':
-                    (MKSConverter.as_datum_broken_down, 'BG:inp.datumVestigingInNederland',
-                     'BG:inp.datumVestigingInNederland@StUF:indOnvolledigeDatum'),
-                'gemeenteVanInschrijving': {
-                    'code': (MKSConverter.as_gemeente_code, 'BG:inp.gemeenteVanInschrijving'),
-                    'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.gemeenteVanInschrijving')
-                },
-                'landVanwaarIngeschreven': {
-                    'code': (MKSConverter.as_code(4), 'BG:inp.immigratieLand'),
-                    'omschrijving': (MKSConverter.get_land_omschrijving, 'BG:inp.immigratieLand')
-                },
-                'verblijfBuitenland': (MKSConverter.get_verblijf_buitenland, {
-                    'adresRegel1': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland1',
-                    'adresRegel2': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland2',
-                    'adresRegel3': 'BG:sub.verblijfBuitenland BG:sub.adresBuitenland3',
-                    'land': {
-                        'code':
-                            (MKSConverter.as_code(4), 'BG:sub.verblijfBuitenland BG:lnd.landcode'),
-                        # Find omschrijving from codetabel like we do with geboorteland, although MKS does return the
-                        # 'landnaam' in this case (as opposed to geboorteland for example). Just for consistency sake
-                        'omschrijving':
-                            (MKSConverter.get_land_omschrijving, 'BG:sub.verblijfBuitenland BG:lnd.landcode'),
-                    },
-                }),
-                # BG:inOnderzoek returns multiple nodes.
-                # Returns the value for the node with groepsnaam attribute 'Verblijfplaats', otherwise None
-                "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
-                },
-            "verblijfstitel": (
+            'verblijfplaats': verblijfplaats,
+            'verblijfstitel': (
                     NPSMapping.verblijfstitel,
                     "BG:vbt.aanduidingVerblijfstitel",
                     "BG:ing.datumVerkrijgingVerblijfstitel",
@@ -266,7 +273,37 @@ class NPSMapping(Mapping):
                     ["BG:inOnderzoek", ".!.[@elementnaam='aanduidingVerblijfstitel']"],
                     ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"],
                 ),
+            'historiematerieel': (NPSMapping.historie, ["BG:historieMaterieel", verblijfplaats])
         }
+
+    @staticmethod
+    def _order_verblijfplaats(verblijfplaats):
+        adres = {}
+        functie = None
+
+        for functie_adres in ['woonadres', 'briefadres']:
+            cur_adres = verblijfplaats.pop(functie_adres, {})
+
+            if any(cur_adres.values()):
+                adres = cur_adres
+                functie = functie_adres
+
+        reordered = {
+            'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
+            'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
+            'functieAdres': functie,
+            'indicatieVestigingVanuitBuitenland':
+                verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
+            'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
+        }
+        return {**adres, **reordered, **verblijfplaats}
+
+    @classmethod
+    def historie(cls, historie):
+        """
+        Orders content of historic residences
+        """
+        return [cls._order_verblijfplaats(verblijfplaats) for verblijfplaats in historie]
 
     @property
     def related(self):  # pragma: no cover
@@ -449,27 +486,8 @@ class NPSMapping(Mapping):
         :param mapped_object: The mapped response object
         :return:
         """
-        verblijfplaats = mapped_object['verblijfplaats']
 
-        adres = {}
-        functie = None
-
-        for functie_adres in ['woonadres', 'briefadres']:
-            cur_adres = verblijfplaats.pop(functie_adres, {})
-
-            if any(cur_adres.values()):
-                adres = cur_adres
-                functie = functie_adres
-
-        reordered = {
-            'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
-            'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
-            'functieAdres': functie,
-            'indicatieVestigingVanuitBuitenland':
-                verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
-            'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
-        }
-        mapped_object['verblijfplaats'] = {**adres, **reordered, **verblijfplaats}
+        mapped_object['verblijfplaats'] = self._order_verblijfplaats(mapped_object['verblijfplaats'])
 
         # Use overlijdensdatum for filtering
         is_overleden = mapped_object['overlijden']['indicatieOverleden']
