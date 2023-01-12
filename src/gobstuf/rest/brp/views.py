@@ -115,22 +115,19 @@ class IngeschrevenpersonenBsnKinderenDetailView(IngeschrevenpersonenBsnView):
 
 
 class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView):
+    def get_not_found_message(self, **kwargs):
+        return f"Verblijfsplaatshistorie niet gevonden voor burgerservicenummer {kwargs['bsn']}."
+
     request_template = IngeschrevenpersonenBsnHistorieStufRequest
     response_template = IngeschrevenpersonenStufHistorieResponse
-
-    @property
-    def functional_query_parameters(self):
-        return {
-            **super().functional_query_parameters,
-        }
 
     name = 'verblijfplaatshistorie'
 
     # For this Class parameters are not required, but if they are used, only certain combinations are valid
     # Herefore the empty tuple is provided at index 2 of query_parameter_combinations
     query_parameter_combinations = [
-        ('peildatum',),
         ('datumVan', 'datumTotEnMet'),
+        ('peildatum',),
         ()
      ]
 

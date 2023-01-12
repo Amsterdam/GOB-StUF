@@ -323,7 +323,7 @@ class MKSConverter:
         return verblijf_buitenland_parameters
 
     @classmethod
-    def get_datum_aanvang_adreshouding(cls, *args):
+    def get_first_date_from_various(cls, *args):
         for arg in args:
             if arg:
                 return cls.as_datum_broken_down(arg)
