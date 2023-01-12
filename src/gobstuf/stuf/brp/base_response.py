@@ -4,12 +4,14 @@ from abc import ABC, abstractmethod
 from flask import request
 from typing import List, Optional
 from xml.etree.ElementTree import Element
+from datetime import datetime
 
 from gobstuf.lib.utils import get_value
 from gobstuf.rest.brp.argument_checks import WILDCARD_CHARS
 from gobstuf.stuf.message import StufMessage
 from gobstuf.stuf.exception import NoStufAnswerException
 from gobstuf.stuf.brp.response_mapping import StufObjectMapping, Mapping, RelatedMapping
+from gobstuf.config import API_NUMMERAANDUIDINGEN, API_VERBLIJFSOBJECTEN
 
 
 class StufResponse(ABC):
@@ -531,6 +533,204 @@ class WildcardSearchResponseFilter(ResponseFilter):
 
 
 class VerblijfplaatsHistorieFilter(ResponseFilter):
+
+    @staticmethod
+    def create_verblijfplaatsen_list(response_object):
+        """
+        Adds the current residence to the list of historic residences
+
+        """
+        verblijfplaatsen = response_object['historiematerieel']
+        verblijfplaatsen.insert(0, response_object['verblijfplaats'])
+        return verblijfplaatsen
+
+    def get_adresregels(self, ind, verblijfplaats):
+        """
+        Returns the adresregels by combining the different address fields
+
+        the parameter ind refers to the number of the adresRegel e.g. adresRegel1
+
+        """
+        # Return adresregel if adres in buitenland and the adresregel exists
+        verblijfplaatsbuitenland = verblijfplaats.get('verblijfBuitenland')
+        if verblijfplaatsbuitenland:
+            adresregel = verblijfplaatsbuitenland.get(f'adresRegel{ind}')
+            if adresregel:
+                return adresregel
+
+    def create_links(self, verblijfplaats):
+        """
+        Returns the links to the address and the adresseerbaarobject
+        if the identification exists in the residence object
+
+        """
+        d = {}
+
+        nummeraanduiding = verblijfplaats.get('nummeraanduidingIdentificatie')
+        if nummeraanduiding:
+            d["adres"] = {
+                "href": API_NUMMERAANDUIDINGEN+nummeraanduiding,
+                "templated": True,
+                "title": "string"
+            }
+
+        adresseerbaarobject = verblijfplaats.get('adresseerbaarObjectIdentificatie')
+        if adresseerbaarobject:
+            d['adresseerbaarObject'] = {
+                "href": API_VERBLIJFSOBJECTEN+adresseerbaarobject,
+                "templated": True,
+                "title": "string"
+            }
+
+        if d:
+            return d
+        else:
+            return None
+
+    def get_land(self, verblijfplaats):
+        """
+        Returns the country of the historic residence if
+        the residence was in a foreign country
+
+        """
+        verblijfBuitenland = verblijfplaats.get('verblijfBuitenland')
+        if verblijfBuitenland:
+            land = verblijfBuitenland.get('land')
+            if land:
+                code = land.get('code')
+                omschrijving = land.get('omschrijving')
+                if code or omschrijving:
+                    return {
+                        'code': code,
+                        'omschrijving': omschrijving
+                    }
+
+    def get_date_type(self, datum, jaar, maand, dag):
+        """
+        Returns date as correct datetype
+
+        """
+
+        if datum and len(datum) == 10:
+            return datetime.strptime(datum, '%Y-%m-%d').date()
+
+        if jaar and not maand and not dag:
+            return datetime.strptime(f'{jaar}-01-01', '%Y-%m-%d').date()
+
+        if jaar and maand and not dag:
+            return datetime.strptime(f'{jaar}-{maand}-01', '%Y-%m-%d').date()
+
+        if jaar and maand and dag:
+            return datetime.strptime(f'{jaar}-{maand}-{dag}', '%Y-%m-%d').date()
+
+        #return datetime.strptime(f'0001-01-01', '%Y-%m-%d').date()
+
+
+    def get_date(self, date_obj):
+        """
+        Converts the date_obj to a datetime date object
+
+        """
+
+        if not date_obj:
+            return None
+
+        # the request args are no dicts
+        if not isinstance(date_obj, dict):
+            return datetime.strptime(date_obj, '%Y-%m-%d').date()
+
+        datum = date_obj.get('datum')
+        jaar = date_obj.get('jaar')
+        maand = date_obj.get('maand')
+        dag = date_obj.get('dag')
+
+        return self.get_date_type(datum, jaar, maand, dag)
+
+    def filter_on_peildatum(self, peildatum, verblijfplaats):
+        """
+        Filters on peildatum
+
+        """
+
+        vp_datuminganggeldigheid = self.get_date(verblijfplaats.get('datumIngangGeldigheid'))
+        vp_datumtot = self.get_date(verblijfplaats.get('datumTot'))
+        if not vp_datumtot:
+            vp_datumtot = datetime.today().date()
+
+        if vp_datuminganggeldigheid < peildatum < vp_datumtot:
+            return verblijfplaats
+
+    def filter_on_datumtotenmet(self, datumtotenmet, verblijfplaats):
+        """
+        Filters on datumtotenmet
+
+        """
+
+        vp_datuminganggeldigheid = self.get_date(verblijfplaats.get('datumIngangGeldigheid'))
+        if vp_datuminganggeldigheid < datumtotenmet:
+            return verblijfplaats
+
+    def filter_on_datumvan(self, datumvan, verblijfplaats):
+        """
+        Filters on datumvan
+
+        """
+
+        vp_datumtot = self.get_date(verblijfplaats.get('datumTot'))
+        if not vp_datumtot:
+            vp_datumtot = datetime.today().date()
+        if vp_datumtot > datumvan:
+            return verblijfplaats
+
+    def filter_on_datumvan_datumtotenmet(self, datumvan, datumtotenmet, verblijfplaats):
+        """
+        Filters on datumvan and datumtotenmet
+
+        """
+
+        vp_datuminganggeldigheid = self.get_date(verblijfplaats.get('datumIngangGeldigheid'))
+        vp_datumtot = self.get_date(verblijfplaats.get('datumTot'))
+        if not vp_datumtot:
+            vp_datumtot = datetime.today().date()
+        if vp_datumtot > datumvan and not vp_datuminganggeldigheid > datumtotenmet:
+            return verblijfplaats
+
+
+
+    def filter_on_request_args(self, verblijfplaats, **kwargs):
+        """
+        Filters the data on the request args and retruns the new filtered data
+
+        """
+
+        if not kwargs:
+            return verblijfplaats
+
+
+
+        peildatum = self.get_date(kwargs.get('peildatum'))
+        datumvan = self.get_date(kwargs.get('datumVan'))
+        datumtotenmet = self.get_date(kwargs.get('datumTotEnMet'))
+
+        # Checks peildatum first, if there are other query parameters next to peildatum
+        # Only the peildatum is used as a filter
+        if peildatum:
+            return self.filter_on_peildatum(peildatum, verblijfplaats)
+
+        elif datumvan or datumtotenmet:
+            # Check if there is only a datumtotenmet
+            # If so, filter on datumtotenmet
+            if not datumvan:
+                return self.filter_on_datumtotenmet(datumtotenmet, verblijfplaats)
+
+            # Check if there is only a datumvan
+            # If so, filter on datumvan
+            if not datumtotenmet:
+                return self.filter_on_datumvan(datumvan, verblijfplaats)
+
+            # Filter on both datumvan and datumtotenmet
+            return self.filter_on_datumvan_datumtotenmet(datumvan, datumtotenmet, verblijfplaats)
+
 
     @staticmethod
     def create_verblijfplaatsen_list(response_object):
