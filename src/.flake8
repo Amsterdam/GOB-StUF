@@ -1,17 +1,19 @@
 [flake8]
-exclude=.git,
-        .cfg,
-        .ini,
-        .sh,
-        .yml,
-        __pycache__,
-        ./.uwsgi_plugins_builder/*,
-        ./uwsgi-consul,
-        migrations,
-        docs,
-        tests,
-        scripts,
-        */settings_commons.py,
-        gobcore
-max-complexity=6
-max-line-length = 119
+exclude = .git,
+          .cfg,
+          .ini,
+          .sh,
+          .yml,
+          __pycache__,
+          ./.uwsgi_plugins_builder/*,
+          ./uwsgi-consul,
+          migrations,
+          docs,
+          tests,
+          scripts,
+          */settings_commons.py,
+          gobcore
+max-complexity = 6
+max-line-length = 120
+ignore = D100, D101, D102, D103, D104, D105, D106, D107, D200, D202, D204, D205,
+         D400, D401, D403, E123, E121, E126, E226, E241, W503, W504
