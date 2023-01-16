@@ -45,3 +45,13 @@ class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse)
     answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa07 BG:antwoord'
 
     response_filters = [VerblijfplaatsHistorieFilter]
+
+    def get_all_answer_objects(self) -> list[dict]:
+        """
+        Returns verblijfsplaatshistorie objects as a list of dictionaries.
+
+        Because we are actually mapping 1 NPS and returning multiple Verblijfplaats,
+        we need to fetch the first object here.
+        Otherwise the return value will be list[list[dict, ...]]
+        """
+        return super().get_all_answer_objects()[0]
