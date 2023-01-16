@@ -538,7 +538,7 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         Adds the current residence to the list of historic residences
 
         """
-        verblijfplaatsen = response_object['historiematerieel']
+        verblijfplaatsen = response_object['historieMaterieel']
         verblijfplaatsen.insert(0, response_object['verblijfplaats'])
         return verblijfplaatsen
 

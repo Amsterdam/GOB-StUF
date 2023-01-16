@@ -1,9 +1,8 @@
-import freezegun
 import pytest
 from urllib.parse import urlencode
-import xml.etree.ElementTree as ET
 
 from datetime import datetime
+
 
 class TestIngeschrevenpersonenBsnViewHistorie:
 
@@ -26,37 +25,26 @@ class TestIngeschrevenpersonenBsnViewHistorie:
         assert response.status_code == 400
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
+    def test_response_list_of_dict(self, stuf_310_response, app_base_path, client, jwt_header):
+        """Test the return types."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
+        objs = response.json["_embedded"]["verblijfplaatshistorie"]
+        assert response.status_code == 200
+        assert isinstance(objs, list) and all(isinstance(obj, dict) for obj in objs)
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     @pytest.mark.parametrize(
         "query_param, result_code, err_on",
-        [   ({
-                 "datumVan": "1900-02-01",
-                 "peildatum": "2018-02-01"
-             }, 200, None),
+        [
+            ({"datumVan": "1900-02-01", "peildatum": "2018-02-01"}, 200, None),
             ({}, 200, None),
-            ({
-                 "datumTotEnMet": "2000-02-01"
-             }, 200, None),
-            ({
-                 "datumVan": "2000-02-01"
-             }, 200, None),
-            ({
-                 "peildatum": "2018-02-01"
-             }, 200, None),
+            ({"datumTotEnMet": "2000-02-01"}, 200, None),
+            ({"datumVan": "2000-02-01"}, 200, None),
+            ({"peildatum": "2018-02-01"}, 200, None),
             ({}, 200, None),
-            ({
-                 "datumVan": "2000-02-01",
-                 "datumTotEnMet": "2012-11-02"
-             }, 200, None), 
-             ({
-                 "peildatum": "20005-02-01",
-             }, 400, [
-                 {"name": "peildatum", "code": "invalidFormat"}
-             ]),
-             ({
-                 "peildatum": "2005-13-13",
-             }, 400, [
-                 {"name": "peildatum", "code": "invalidDate"}
-             ])
+            ({"datumVan": "2000-02-01", "datumTotEnMet": "2012-11-02"}, 200, None),
+            ({"peildatum": "20005-02-01"}, 400, [{"name": "peildatum", "code": "invalidFormat"}]),
+            ({"peildatum": "2005-13-13"}, 400, [{"name": "peildatum", "code": "invalidDate"}])
         ]
     )
     def test_query_parameters(
@@ -75,11 +63,8 @@ class TestIngeschrevenpersonenBsnViewHistorie:
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     @pytest.mark.parametrize(
-        "query_param, result_code, err_on",
-        [   ({
-                 "datumVan": "1900-02-01",
-                 "peildatum": "2018-02-01"
-             }, 200, None),
+        "query_param, result_code, err_on", [
+            ({"datumVan": "1900-02-01", "peildatum": "2018-02-01"}, 200, None)
         ]
     )
     def test_peildatum_with_other_parameters(
@@ -87,7 +72,6 @@ class TestIngeschrevenpersonenBsnViewHistorie:
     ):
         """Test query parameters on the test client."""
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie?{urlencode(query_param)}", headers=jwt_header)
-
 
         assert response.status_code == result_code 
         assert len(response.json['_embedded']['verblijfplaatshistorie']) == 1 

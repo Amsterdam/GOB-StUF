@@ -174,8 +174,9 @@ class NPSMapping(Mapping):
                  ),
             'datumIngangGeldigheid':
                 (MKSConverter.get_first_date_from_various,
-                 'BG:verblijfsadres BG:begindatumVerblijf',
-                 'StUF:tijdvakGeldigheid StUF:beginGeldigheid'),
+                 'StUF:tijdvakGeldigheid StUF:beginGeldigheid',  # only available for verblijfplaatshistorie
+                 'BG:verblijfsadres BG:begindatumVerblijf'  # fallback: location datumAanvangAdreshouding
+                 ),
             'datumTot': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:eindGeldigheid'),
             'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
             'datumVestigingInNederland':
@@ -273,7 +274,7 @@ class NPSMapping(Mapping):
                     ["BG:inOnderzoek", ".!.[@elementnaam='aanduidingVerblijfstitel']"],
                     ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"],
                 ),
-            'historiematerieel': (NPSMapping.historie, ["BG:historieMaterieel", verblijfplaats])
+            'historieMaterieel': (NPSMapping.historie, ["BG:historieMaterieel", verblijfplaats])
         }
 
     @staticmethod
@@ -303,7 +304,8 @@ class NPSMapping(Mapping):
         """
         Orders content of historic residences
         """
-        return [cls._order_verblijfplaats(verblijfplaats) for verblijfplaats in historie]
+        if historie:
+            return [cls._order_verblijfplaats(verblijfplaats) for verblijfplaats in historie]
 
     @property
     def related(self):  # pragma: no cover
