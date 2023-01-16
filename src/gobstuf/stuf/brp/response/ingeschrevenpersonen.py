@@ -50,7 +50,8 @@ class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse)
         """
         Returns verblijfsplaatshistorie objects as a list of dictionaries.
 
-        Because we are actually mapping 1 NPS and returning multiple Verblijfplaats, we need to fetch the first object here.
+        Because we are actually mapping 1 NPS and returning multiple Verblijfplaats,
+        we need to fetch the first object here.
         Otherwise the return value will be list[list[dict, ...]]
         """
         return super().get_all_answer_objects()[0]

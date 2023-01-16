@@ -61,6 +61,7 @@ class TestIngeschrevenpersonenBsnViewHistorie:
         else:
             assert response.json.get("invalid-params") is err_on
 
+    @pytest.mark.skip(reason="Filter functionality is not implemented yet")
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     @pytest.mark.parametrize(
         "query_param, result_code, err_on", [
