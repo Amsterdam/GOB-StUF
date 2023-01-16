@@ -1,7 +1,6 @@
 import freezegun
 import pytest
 from urllib.parse import urlencode
-import xml.etree.ElementTree as ET
 
 from gobstuf.stuf.message import StufMessage
 
@@ -11,7 +10,8 @@ class TestIngeschrevenpersonenBsnView:
     @pytest.mark.parametrize("key_path,expected", [
         (["verblijfplaats", "adresseerbaarObjectIdentificatie"], "0518010000784987"),
         (["nationaliteiten"], [{'nationaliteit': {'code': '0315'}}]),
-        (["verblijfplaats", "datumAanvangAdreshouding"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20})
+        (["verblijfplaats", "datumAanvangAdreshouding"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20}),
+        (["verblijfplaats", "datumIngangGeldigheid"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20})
     ])
     def test_various_keys(self, key_path, expected, stuf_310_response, app_base_path, client, jwt_header):
         """Asserts if various keys are found in the correct 310 response."""
@@ -283,3 +283,10 @@ class TestIngeschrevenpersonenBsnView:
 
         for path, value in expected_elms.items():
             assert message.get_elm_value(path, gelijk_elm) == value
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310.xml"], indirect=True)
+    def test_no_historie(self, app_base_path, stuf_310_response, client, jwt_header):
+        """Test unwanted keys for ingeschrevenpersonen. Only returned on verblijfsplaatshistorie endpoint."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789", headers=jwt_header)
+        assert response.status_code == 200
+        assert "historieMaterieel" not in response.json
