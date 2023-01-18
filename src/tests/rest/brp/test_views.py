@@ -11,7 +11,6 @@ class TestIngeschrevenpersonenBsnView:
         (["verblijfplaats", "adresseerbaarObjectIdentificatie"], "0518010000784987"),
         (["nationaliteiten"], [{'nationaliteit': {'code': '0315'}}]),
         (["verblijfplaats", "datumAanvangAdreshouding"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20}),
-        (["verblijfplaats", "datumIngangGeldigheid"], {'datum': '1995-10-20', 'jaar': 1995, 'maand': 10, 'dag': 20})
     ])
     def test_various_keys(self, key_path, expected, stuf_310_response, app_base_path, client, jwt_header):
         """Asserts if various keys are found in the correct 310 response."""

@@ -172,11 +172,8 @@ class NPSMapping(Mapping):
                  'BG:verblijfsadres BG:begindatumVerblijf',
                  'BG:inp.verblijftIn StUF:tijdvakRelatie StUF:beginRelatie'
                  ),
-            'datumIngangGeldigheid':
-                (MKSConverter.get_first_date_from_various,
-                 'StUF:tijdvakGeldigheid StUF:beginGeldigheid',  # only available for verblijfplaatshistorie
-                 'BG:verblijfsadres BG:begindatumVerblijf'  # fallback: location datumAanvangAdreshouding
-                 ),
+            # only available for verblijfplaatshistorie, not actual
+            'datumIngangGeldigheid': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:beginGeldigheid'),
             'datumTot': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:eindGeldigheid'),
             'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
             'datumVestigingInNederland':

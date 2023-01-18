@@ -54,4 +54,5 @@ class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse)
         we need to fetch the first object here.
         Otherwise the return value will be list[list[dict, ...]]
         """
-        return super().get_all_answer_objects()[0]
+        answer_objects = super().get_all_answer_objects()
+        return answer_objects[0] if answer_objects else answer_objects
