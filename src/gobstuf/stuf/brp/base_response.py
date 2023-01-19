@@ -1,6 +1,7 @@
 import re
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from flask import request
 from typing import List, Optional
 from xml.etree.ElementTree import Element
@@ -532,22 +533,136 @@ class WildcardSearchResponseFilter(ResponseFilter):
 
 class VerblijfplaatsHistorieFilter(ResponseFilter):
 
-    @staticmethod
-    def create_verblijfplaatsen_list(response_object):
+    def get_date_type(self, datum, jaar, maand, dag):
+        """
+        Returns date as correct datetype
+        """
+
+        if datum and len(datum) == 10:
+            return datetime.strptime(datum, '%Y-%m-%d').date()
+
+        if jaar and not maand and not dag:
+            return datetime.strptime(f'{jaar}-01-01', '%Y-%m-%d').date()
+
+        if jaar and maand and not dag:
+            return datetime.strptime(f'{jaar}-{maand}-01', '%Y-%m-%d').date()
+
+        if jaar and maand and dag:
+            return datetime.strptime(f'{jaar}-{maand}-{dag}', '%Y-%m-%d').date()
+
+    def get_date(self, date_obj):
+        """
+        Converts the date_obj to a datetime date object
+        """
+        if not date_obj:
+            return None
+
+        # In case the response_obj is a string
+        if isinstance(date_obj, str):
+            return datetime.strptime(date_obj, '%Y-%m-%d').date()
+
+        datum = date_obj.get('datum')
+        jaar = date_obj.get('jaar')
+        maand = date_obj.get('maand')
+        dag = date_obj.get('dag')
+
+        return self.get_date_type(datum, jaar, maand, dag)
+
+    def get_datumtot(self, date_obj):
+        datum = self.get_date(date_obj)
+        if datum:
+            return datum
+        return datetime.today().date()
+
+    def get_inganggeldigheid(self, date_obj):
+        datum = self.get_date(date_obj)
+        if datum:
+            return datum
+        return datetime.min.date()
+
+    def filter_on_peildatum(self, peildatum, verblijfplaats):
+        """
+        Filters on peildatum
+        """
+        vp_datuminganggeldigheid = self.get_inganggeldigheid(verblijfplaats.get('datumIngangGeldigheid'))
+        vp_datumtot = self.get_datumtot(verblijfplaats.get('datumTot'))
+        if vp_datuminganggeldigheid < peildatum < vp_datumtot:
+            return verblijfplaats
+
+    def filter_on_datumtotenmet(self, datumtotenmet, verblijfplaats):
+        """
+        Filters on datumtotenmet
+        """
+        vp_datuminganggeldigheid = self.get_inganggeldigheid(verblijfplaats.get('datumIngangGeldigheid'))
+        if vp_datuminganggeldigheid < datumtotenmet:
+            return verblijfplaats
+
+    def filter_on_datumvan(self, datumvan, verblijfplaats):
+        """
+        Filters on datumvan
+        """
+        vp_datumtot = self.get_datumtot(verblijfplaats.get('datumTot'))
+        if vp_datumtot > datumvan:
+            return verblijfplaats
+
+    def filter_on_datumvan_datumtotenmet(self, datumvan, datumtotenmet, verblijfplaats):
+        """
+        Filters on datumvan and datumtotenmet
+        """
+        vp_datuminganggeldigheid = self.get_inganggeldigheid(verblijfplaats.get('datumIngangGeldigheid'))
+
+        vp_datumtot = self.get_datumtot(verblijfplaats.get('datumTot'))
+        if vp_datumtot > datumvan and not vp_datuminganggeldigheid > datumtotenmet:
+            return verblijfplaats
+
+    def filter_on_request_args(self, verblijfplaats, **kwargs):
+        """
+        Filters the data on the request args and retruns the new filtered data
+        """
+        if not kwargs:
+            return verblijfplaats
+
+        peildatum = self.get_date(kwargs.get('peildatum'))
+        datumvan = self.get_date(kwargs.get('datumVan'))
+        datumtotenmet = self.get_date(kwargs.get('datumTotEnMet'))
+
+        # Checks peildatum first, if there are other query parameters next to peildatum
+        # Only the peildatum is used as a filter
+        if peildatum:
+            return self.filter_on_peildatum(peildatum, verblijfplaats)
+
+        elif datumvan or datumtotenmet:
+            # Check if there is only a datumtotenmet
+            # If so, filter on datumtotenmet
+            if not datumvan:
+                return self.filter_on_datumtotenmet(datumtotenmet, verblijfplaats)
+
+            # Check if there is only a datumvan
+            # If so, filter on datumvan
+            if not datumtotenmet:
+                return self.filter_on_datumvan(datumvan, verblijfplaats)
+
+            # Filter on both datumvan and datumtotenmet
+            return self.filter_on_datumvan_datumtotenmet(datumvan, datumtotenmet, verblijfplaats)
+
+    def create_verblijfplaatsen_list(self, response_object, **kwargs):
         """
         Adds the current residence to the list of historic residences
-
         """
-        verblijfplaatsen = response_object['historieMaterieel']
-        verblijfplaatsen.insert(0, response_object['verblijfplaats'])
-        return verblijfplaatsen
+        verblijfplaatsen = response_object.get('historieMaterieel', [])
+        verblijfplaats = response_object.get('verblijfplaats')
+        if verblijfplaats:
+            verblijfplaatsen.insert(0, verblijfplaats)
+
+        return [self.filter_on_request_args(verblijfplaats, **kwargs)
+                for verblijfplaats in verblijfplaatsen
+                if self.filter_on_request_args(verblijfplaats, **kwargs) is not None]
 
     def filter_response(self, response_object: dict) -> dict:
         """
         Filters the response object and gives back a list with the
         actual and the historic residences.
         """
-
-        verblijfplaatsen = self.create_verblijfplaatsen_list(response_object)
+        verblijfplaatsen = self.create_verblijfplaatsen_list(response_object, **request.args)
 
         return verblijfplaatsen

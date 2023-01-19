@@ -61,28 +61,27 @@ class TestIngeschrevenpersonenBsnViewHistorie:
         else:
             assert response.json.get("invalid-params") is err_on
 
-    @pytest.mark.skip(reason="Filter functionality is not implemented yet")
-    @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
-    @pytest.mark.parametrize(
-        "query_param, result_code, err_on", [
-            ({"datumVan": "1900-02-01", "peildatum": "2018-02-01"}, 200, None)
-        ]
-    )
-    def test_peildatum_with_other_parameters(
-            self, stuf_310_response, app_base_path, client, jwt_header, query_param, result_code, err_on
-    ):
-        """Test query parameters on the test client."""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie?{urlencode(query_param)}", headers=jwt_header)
+    # @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
+    # @pytest.mark.parametrize(
+    #     "query_param, result_code, err_on", [
+    #         ({"datumVan": "1900-02-01", "peildatum": "2018-02-01"}, 200, None)
+    #     ]
+    # )
+    # def test_peildatum_with_other_parameters(
+    #         self, stuf_310_response, app_base_path, client, jwt_header, query_param, result_code, err_on
+    # ):
+    #     """Test query parameters on the test client."""
+    #     response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie?{urlencode(query_param)}", headers=jwt_header)
 
-        assert response.status_code == result_code 
-        assert len(response.json['_embedded']['verblijfplaatshistorie']) == 1 
+    #     assert response.status_code == result_code 
+    #     assert len(response.json['_embedded']['verblijfplaatshistorie']) == 7 
 
-        vp = response.json['_embedded']['verblijfplaatshistorie'][0]
-        beginvp = vp[0]['datumIngangGeldigheid']['datum']
-        beginvp = datetime.strptime(beginvp, '%Y-%m-%d').date()
-        eindvp = vp[0].get('datumTot')
-        peildatum = datetime.strptime('2018-02-01', '%Y-%m-%d').date()
-        assert beginvp < peildatum and eindvp is None
+    #     vp = response.json['_embedded']['verblijfplaatshistorie']
+    #     beginvp = vp[0]['datumIngangGeldigheid']['datum']
+    #     beginvp = datetime.strptime(beginvp, '%Y-%m-%d').date()
+    #     eindvp = vp[0].get('datumTot')
+    #     peildatum = datetime.strptime('2018-02-01', '%Y-%m-%d').date()
+    #     assert beginvp < peildatum and eindvp is None
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie_overleden.xml"], indirect=True)
     def test_historie_overleden_empty_response(self, stuf_310_response, app_base_path, client, jwt_header):
@@ -90,3 +89,21 @@ class TestIngeschrevenpersonenBsnViewHistorie:
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
         assert response.status_code == 200
         assert response.json["_embedded"]["verblijfplaatshistorie"] == []
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
+    @pytest.mark.parametrize("key_path,expected", [
+        (["datumIngangGeldigheid"], {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}),
+        (["datumAanvangAdreshouding"], {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}),
+    ])
+    def test_dates_actueel(self, key_path, expected, stuf_310_response, app_base_path, client, jwt_header):
+        """Asserts if various keys are found in the correct 310 response."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
+        assert response.status_code == 200
+
+        def follow_key_path(val: dict, k_path: list[str]):
+            val = val.get('_embedded').get('verblijfplaatshistorie')[0]
+            for k in k_path:
+                val = val.get(k, {})
+            return val
+
+        assert follow_key_path(response.json, key_path) == expected

@@ -1,8 +1,10 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call
+from datetime import date
 
 from gobstuf.stuf.brp.base_response import StufResponse, StufMappedResponse, NoStufAnswerException, Mapping, \
-    MappedObjectWrapper, RelatedDetailResponseFilter, RelatedListResponseFilter, WildcardSearchResponseFilter
+    MappedObjectWrapper, RelatedDetailResponseFilter, RelatedListResponseFilter, WildcardSearchResponseFilter, \
+    VerblijfplaatsHistorieFilter
 from gobstuf.stuf.brp.response_mapping import RelatedMapping
 
 
@@ -722,3 +724,66 @@ class TestWildcardSearchResponseFilter(TestCase):
 
         for query, expected in cases:
             self.assertEqual(expected, filter._convert_wildcard_query(query))
+
+
+class TestVerblijfplaatsHistorieFilter(TestCase):
+    mock_response = MagicMock()
+    resp = VerblijfplaatsHistorieFilter(mock_response)
+
+    def test_filter_response(self):
+        mock_request = MagicMock()
+
+        with patch("gobstuf.stuf.brp.base_response.request", mock_request):
+            mock_request.args = {'peildatum': '2000-01-01'}
+            resp = VerblijfplaatsHistorieFilter(self.mock_response)
+
+            mapped_object = {
+                    'historieMaterieel': [
+                        {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}},
+                        {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+                        'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+                        {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}
+                    ],
+                }
+
+            expected = [{'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+    def test_filter_response_incomplete_dates(self):
+        mock_request = MagicMock()
+
+        with patch("gobstuf.stuf.brp.base_response.request", mock_request):
+            mock_request.args = {'peildatum': '2000-01-01'}
+            resp = VerblijfplaatsHistorieFilter(self.mock_response)
+
+            mapped_object = {
+                    'historieMaterieel': [
+                        {'datumIngangGeldigheid': {'datum': None, 'jaar': None, 'maand': None, 'dag': None},
+                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}},
+                        {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+                        'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+                    ],
+                }
+
+            expected = [{'datumIngangGeldigheid': {'datum': None, 'jaar': None, 'maand': None, 'dag': None},
+                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+    def test_get_date_type(self):
+        resp = VerblijfplaatsHistorieFilter(self.mock_response)
+
+        tests = [
+            (2006, None, None, date(2006,1,1)),
+            (2006, 10, None, date(2006,10,1)),
+            (2006, 10, 10, date(2006,10,10))
+        ]
+
+        for jaar, maand, dag ,expected in tests:
+            result = resp.get_date_type(None, jaar, maand, dag)
+            self.assertEqual(result, expected)
