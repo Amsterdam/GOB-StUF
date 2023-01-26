@@ -762,15 +762,13 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
 
             mapped_object = {
                     'historieMaterieel': [
-                        {'datumIngangGeldigheid': {'datum': None, 'jaar': None, 'maand': None, 'dag': None},
-                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}},
+                        {'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}},
                         {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
                         'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
                     ],
                 }
 
-            expected = [{'datumIngangGeldigheid': {'datum': None, 'jaar': None, 'maand': None, 'dag': None},
-                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}]
+            expected = [{'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}]
 
             result = resp.filter_response(mapped_object)
             self.assertEqual(result, expected)
@@ -779,11 +777,11 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
         resp = VerblijfplaatsHistorieFilter(self.mock_response)
 
         tests = [
-            (2006, None, None, date(2006,1,1)),
-            (2006, 10, None, date(2006,10,1)),
-            (2006, 10, 10, date(2006,10,10))
+            ({'datum': None, 'jaar': 2006, 'maand': None, 'dag': None}, date(2006,1,1)),
+            ({'datum': None, 'jaar': 2006, 'maand': 10, 'dag': None}, date(2006,10,1)),
+            ({'datum': None, 'jaar': 2006, 'maand': 10, 'dag': 10}, date(2006,10,10))  
         ]
 
-        for jaar, maand, dag ,expected in tests:
-            result = resp.get_date_type(None, jaar, maand, dag)
+        for datum, expected in tests:
+            result = resp.convert_to_date_vb_date(datum)
             self.assertEqual(result, expected)
