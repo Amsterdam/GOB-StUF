@@ -619,7 +619,7 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
 
     def create_verblijfplaatsen_list(self, response_object) -> list[dict]:
         """
-        Adds the current residence to the list of historic residences
+        Adds the current verblijfplaats to the list of historic verblijfplaatsen
         """
 
         verblijfplaatsen = response_object.get('historieMaterieel', [])
@@ -632,7 +632,7 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
     def filter_response(self, response_object: dict) -> list[dict]:
         """
         Filters the response object and gives back a list with the
-        actual and the historic residences.
+        actual and the historic verblijfplaatsen.
         """
         # Convert query paramters to date range
         qp_datumvan, qp_datumtotenmet = self.get_date_range_request_args(**request.args)
