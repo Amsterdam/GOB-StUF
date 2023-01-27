@@ -1,6 +1,7 @@
 import re
 
 from abc import ABC, abstractmethod
+from datetime import date
 from flask import request
 from typing import List, Optional
 from xml.etree.ElementTree import Element
@@ -532,22 +533,121 @@ class WildcardSearchResponseFilter(ResponseFilter):
 
 class VerblijfplaatsHistorieFilter(ResponseFilter):
 
-    @staticmethod
-    def create_verblijfplaatsen_list(response_object):
+    def convert_to_date_vb_date(self, date_obj: Optional[dict]) -> Optional[date]:
         """
-        Adds the current residence to the list of historic residences
+        Returns date as correct datetype and completes incomplete dates.
+
+        For example, if the day is None, it will be replaced by 1
 
         """
-        verblijfplaatsen = response_object['historieMaterieel']
-        verblijfplaatsen.insert(0, response_object['verblijfplaats'])
+
+        if not date_obj:
+            return
+
+        jaar = date_obj.get('jaar')
+        maand = date_obj.get('maand')
+        dag = date_obj.get('dag')
+
+        jaar = int(jaar)
+        maand = int(maand) if maand else 1
+        dag = int(dag) if dag else 1
+        return date(jaar, maand, dag)
+
+    def convert_to_date_request_arg(self, datum) -> date:
+        """
+        Convert request arg date string to date
+        """
+
+        jaar, maand, dag = datum.split('-')
+        return date(int(jaar), int(maand), int(dag))
+
+    def get_date_range_request_args(self, **kwargs) -> tuple[date]:
+        """
+        Returns the request args as date range
+        """
+
+        pdatum = kwargs.get('peildatum')
+        if pdatum:
+            peildatum = self.convert_to_date_request_arg(pdatum)
+            return peildatum, peildatum
+
+        datumv = kwargs.get('datumVan')
+        datumtm = kwargs.get('datumTotEnMet')
+        datumvan = self.convert_to_date_request_arg(datumv) if datumv else date.min
+        datumtotenmet = self.convert_to_date_request_arg(datumtm) if datumtm else date.max
+        return datumvan, datumtotenmet
+
+    def get_date_range_vb(self, verblijfplaats) -> tuple[date]:
+        """
+        Converts verblijfplaats dates to date range
+        """
+        vp_datuminganggeldigheid = self.convert_to_date_vb_date(verblijfplaats.get('datumIngangGeldigheid'))
+        if not vp_datuminganggeldigheid:
+            vp_datuminganggeldigheid = date.min
+
+        vp_datumtot = self.convert_to_date_vb_date(verblijfplaats.get('datumTot'))
+        if not vp_datumtot:
+            vp_datumtot = date.today()
+
+        return vp_datuminganggeldigheid, vp_datumtot
+
+    def filter_on_request_args(self, verblijfplaats, qp_datumvan, qp_datumtotenmet) -> Optional[dict]:
+        """
+        Converts the query parameters dates and verblijfplaats dates to date range dicts
+        Filters the data on the request args and retruns the new filtered data
+        """
+        # Convert verblijfplaats dates to date range
+        vp_datuminganggeldigheid, vp_datumtot = self.get_date_range_vb(verblijfplaats)
+
+        # Check if query param date interval is (partly) within verblijfplaats date interval
+        query_parameter_between_verblijfplaats_dates = (
+            vp_datuminganggeldigheid <= qp_datumvan < vp_datumtot or
+            vp_datuminganggeldigheid <= qp_datumtotenmet < vp_datumtot
+        )
+
+        # Check if verblijfplaats date interval is (partly) within query param date interval
+        verblijfplaats_date_between_query_param_dates = (
+            qp_datumvan < vp_datumtot < qp_datumtotenmet or
+            qp_datumvan <= vp_datuminganggeldigheid <= qp_datumtotenmet
+        )
+
+        if (
+            query_parameter_between_verblijfplaats_dates or
+            verblijfplaats_date_between_query_param_dates
+        ):
+            return verblijfplaats
+
+    def create_verblijfplaatsen_list(self, response_object) -> list[dict]:
+        """
+        Adds the current verblijfplaats to the list of historic verblijfplaatsen
+        """
+
+        verblijfplaatsen = response_object.get('historieMaterieel', [])
+        verblijfplaats = response_object.get('verblijfplaats')
+        if verblijfplaats:
+            verblijfplaatsen.insert(0, verblijfplaats)
+
         return verblijfplaatsen
 
-    def filter_response(self, response_object: dict) -> dict:
+    def filter_response(self, response_object: dict) -> list[dict]:
         """
         Filters the response object and gives back a list with the
-        actual and the historic residences.
+        actual and the historic verblijfplaatsen.
         """
+        # Convert query paramters to date range
+        qp_datumvan, qp_datumtotenmet = self.get_date_range_request_args(**request.args)
 
+        # Return empty list if query param datumTotEnMet is smaller than query param datumVan
+        if qp_datumtotenmet < qp_datumvan:
+            return []
+
+        # Create a list of verblijfplaatsen
         verblijfplaatsen = self.create_verblijfplaatsen_list(response_object)
 
-        return verblijfplaatsen
+        # Filter the verblijfplaatsenlist with query params
+        verblijfplaatsen_filtered = []
+        for verblijfplaats in verblijfplaatsen:
+            if self.filter_on_request_args(verblijfplaats, qp_datumvan, qp_datumtotenmet):
+                verblijfplaatsen_filtered.append(verblijfplaats)
+
+        return verblijfplaatsen_filtered
