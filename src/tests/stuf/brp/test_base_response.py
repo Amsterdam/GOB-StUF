@@ -730,30 +730,131 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
     mock_response = MagicMock()
     resp = VerblijfplaatsHistorieFilter(mock_response)
 
-    def test_filter_response(self):
+    def test_filter_response_different_query_params(self):
         mock_request = MagicMock()
+        mapped_object = {
+        'historieMaterieel': [
+            {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}
+        ],
+        }
+        resp = VerblijfplaatsHistorieFilter(self.mock_response)
 
         with patch("gobstuf.stuf.brp.base_response.request", mock_request):
+            
+            # peildatum within a range
             mock_request.args = {'peildatum': '2000-01-01'}
-            resp = VerblijfplaatsHistorieFilter(self.mock_response)
-
-            mapped_object = {
-                    'historieMaterieel': [
-                        {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
-                        'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}},
-                        {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
-                        'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
-                        {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}
-                    ],
-                }
-
             expected = [{'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
                         'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}]
 
             result = resp.filter_response(mapped_object)
             self.assertEqual(result, expected)
 
-    def test_filter_response_incomplete_dates(self):
+            # peildatum on a datumIngangGeldigheid
+            mock_request.args = {'peildatum': '2020-09-21'}
+            expected = [{'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # peildatum before date ranges
+            mock_request.args = {'peildatum': '1950-09-21'}
+            expected = []
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # peildatum after date ranges before present
+            mock_request.args = {'peildatum': '2022-09-21'}
+            expected = [{'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # peildatum in the future and correct datumvan
+            mock_request.args = {'peildatum': '2200-09-21', 'datumVan' : '2003-01-01'}
+            expected = []
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumVan in the future
+            mock_request.args = {'datumVan': '2200-09-21'}
+            expected = []
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumVan far in the past
+            mock_request.args = {'datumVan': '1900-09-21'}
+            expected = [
+            {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}
+            ]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumTotenMet far in the future
+            mock_request.args = {'datumTotEnMet': '2200-09-21'}
+            expected = [
+            {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}
+            ]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumTotenMet far in the past
+            mock_request.args = {'datumTotEnMet': '1900-09-21'}
+            expected = []
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumTotEnMet on datumInganggeldigheid
+            mock_request.args = {'datumTotEnMet': '2020-09-21'}
+            expected = [
+            {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}
+            ]
+
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumVan smaller than smalles datumIngangGeldigheid and datumTotEnMet bigger than biggest datumTot
+            mock_request.args = {'datumVan': '1980-09-21', 'datumTotEnMet': '2021-09-21'}
+            expected = [
+            {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}},
+            {'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+            'datumTot' : {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}}
+            ]
+            
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+            # datumVan on datumIngangGeldigheid
+            mock_request.args = {'datumVan': '2020-09-21', 'datumTotEnMet': '2222-09-21'}
+            expected = [{'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}]
+            
+            result = resp.filter_response(mapped_object)
+            self.assertEqual(result, expected)
+
+    def test_filter_response_missing_datumInangGeldigheid(self):
         mock_request = MagicMock()
 
         with patch("gobstuf.stuf.brp.base_response.request", mock_request):

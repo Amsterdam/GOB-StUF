@@ -40,6 +40,7 @@ class TestIngeschrevenpersonenBsnViewHistorie:
             ({}, 200, None),
             ({"datumTotEnMet": "2000-02-01"}, 200, None),
             ({"datumVan": "2000-02-01"}, 200, None),
+            ({'datumVan': "2020-02-01", 'datumTotEnMet': '1990-01-01'}, 200, None),
             ({"peildatum": "2018-02-01"}, 200, None),
             ({}, 200, None),
             ({"datumVan": "2000-02-01", "datumTotEnMet": "2012-11-02"}, 200, None),
