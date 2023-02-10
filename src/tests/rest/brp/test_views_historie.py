@@ -1,8 +1,6 @@
 import pytest
 from urllib.parse import urlencode
 
-from datetime import datetime
-
 
 class TestIngeschrevenpersonenBsnViewHistorie:
 
