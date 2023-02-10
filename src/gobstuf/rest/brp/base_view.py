@@ -398,6 +398,7 @@ class StufRestFilterView(StufRestView):
         """
         for combination in self.query_parameter_combinations:
             args = {arg: self._transform_query_parameter_value(request.args.get(arg)) for arg in combination}
+
             if all(args.values()):
                 # Get all optional query parameters with their values
                 optional_args = {k: v for k, v in {

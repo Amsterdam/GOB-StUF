@@ -134,4 +134,5 @@ class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView)
     optional_query_parameters = []
 
     def _request_template_parameters(self, **kwargs):
+        self._get_query_parameters()  # just validate, dont pass to request xml
         return kwargs

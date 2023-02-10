@@ -34,16 +34,19 @@ class TestIngeschrevenpersonenBsnViewHistorie:
     @pytest.mark.parametrize(
         "query_param, result_code, err_on",
         [
-            ({"datumVan": "1900-02-01", "peildatum": "2018-02-01"}, 200, None),
             ({}, 200, None),
-            ({"datumTotEnMet": "2000-02-01"}, 200, None),
-            ({"datumVan": "2000-02-01"}, 200, None),
-            ({'datumVan': "2020-02-01", 'datumTotEnMet': '1990-01-01'}, 200, None),
             ({"peildatum": "2018-02-01"}, 200, None),
-            ({}, 200, None),
+            ({"datumVan": "2020-02-01", "datumTotEnMet": "1990-01-01"}, 200, None),
             ({"datumVan": "2000-02-01", "datumTotEnMet": "2012-11-02"}, 200, None),
+
+            ({"datumVan": "1900-02-01", "peildatum": "2018-02-01"}, 200, None),  # datumVan ignored
+            ({"datumTotEnMet": "2000-02-01"}, 200, None),  # ignored, not valid combination
+            ({"datumVan": "2000-02-01"}, 200, None),  # ignored, not valid combination
+
             ({"peildatum": "20005-02-01"}, 400, [{"name": "peildatum", "code": "invalidFormat"}]),
-            ({"peildatum": "2005-13-13"}, 400, [{"name": "peildatum", "code": "invalidDate"}])
+            ({"peildatum": "2005-13-13"}, 400, [{"name": "peildatum", "code": "invalidDate"}]),
+            ({"peildatum": "2000-00-00"}, 400, [{"name": "peildatum", "code": "invalidDate"}]),
+            ({"datumVan": "2000-00-00", "datumTotEnMet": "1990-01-01"}, 400, [{"name": "datumVan", "code": "invalidDate"}]),
         ]
     )
     def test_query_parameters(

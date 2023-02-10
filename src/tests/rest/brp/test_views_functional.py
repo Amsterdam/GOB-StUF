@@ -120,8 +120,20 @@ class TestIngeschrevenpersonenBsnKinderenDetailView(TestCase):
         self.assertEqual('Ingeschreven kind voor persoon niet gevonden met burgerservicenummer BEE ES EN.',
                          IngeschrevenpersonenBsnKinderenDetailView().get_not_found_message(**kwargs))
 
+
 class TestIngeschrevenpersonenBsnVerblijfsplaatshistorieListView(TestCase):
     def test_get_not_found_message(self):
-        kwargs = {'bsn': 'BEE ES EN'}
-        self.assertEqual('Verblijfsplaatshistorie niet gevonden voor burgerservicenummer BEE ES EN.',
-                         IngeschrevenpersonenBsnVerblijfsplaatshistorieListView().get_not_found_message(**kwargs))
+        kwargs = {"bsn": "BEE ES EN"}
+        result = IngeschrevenpersonenBsnVerblijfsplaatshistorieListView().get_not_found_message(**kwargs)
+        expected = "Verblijfsplaatshistorie niet gevonden voor burgerservicenummer BEE ES EN."
+        assert result == expected
+
+    @patch("gobstuf.rest.brp.base_view.StufRestFilterView._get_query_parameters")
+    def test_request_template_parameters(self, mock_get_query_param):
+        """Test only validation takes place and kwargs are not modified."""
+        view = IngeschrevenpersonenBsnVerblijfsplaatshistorieListView()
+        kwargs = {"kwarg": 1}
+        result = view._request_template_parameters(**kwargs)
+
+        assert result == kwargs
+        mock_get_query_param.assert_called()
