@@ -52,3 +52,5 @@ UNIQUE_ID_HEADER = 'X-Unique-ID'
 
 KEYCLOAK_AUTH_URL = _getenv('KEYCLOAK_AUTH_URL')
 KEYCLOAK_CLIENT_ID = _getenv('KEYCLOAK_CLIENT_ID')
+
+BAG_API_URL = "https://api.data.amsterdam.nl/v1/bag"

@@ -5,6 +5,7 @@ from typing import Type, Optional, Union
 from abc import ABC, abstractmethod
 
 from gobstuf.auth.routes import get_auth_url
+from gobstuf.config import BAG_API_URL
 from gobstuf.indications import Geslachtsaanduiding
 from gobstuf.mks_utils import MKSConverter
 from gobstuf.lib.utils import get_value
@@ -534,23 +535,10 @@ class NPSMapping(Mapping):
         """
         links = super().get_links(mapped_object)
 
-        if mapped_object.get('verblijfplaats', {}).get('woonadres', {}).get('nummeraanduidingIdentificatie'):
-            nummeraanduiding = mapped_object['verblijfplaats']['woonadres']['nummeraanduidingIdentificatie']
-            links['verblijfplaatsNummeraanduiding'] = {
-                'href': f"https://api.data.amsterdam.nl/gob/bag/nummeraanduidingen/{nummeraanduiding}/"
-            }
-
         if mapped_object.get('burgerservicenummer'):
             links['self'] = {
                 'href': get_auth_url('brp_ingeschrevenpersonen_bsn', bsn=mapped_object['burgerservicenummer'])
             }
-
-        self._add_related_object_links(
-            mapped_object,
-            links,
-            'partners',
-            'brp_ingeschrevenpersonen_bsn_partners_detail'
-        )
 
         self._add_related_object_links(
             mapped_object,
@@ -565,6 +553,21 @@ class NPSMapping(Mapping):
             'kinderen',
             'brp_ingeschrevenpersonen_bsn_kinderen_detail'
         )
+        self._add_related_object_links(
+            mapped_object,
+            links,
+            'partners',
+            'brp_ingeschrevenpersonen_bsn_partners_detail'
+        )
+
+        if self_url := links.get('self'):
+            links["verblijfplaatshistorie"] = {"href": f"{self_url['href']}/verblijfplaatshistorie"}
+
+        if mapped_object.get('verblijfplaats', {}).get('woonadres', {}).get('nummeraanduidingIdentificatie'):
+            nummeraanduiding = mapped_object['verblijfplaats']['woonadres']['nummeraanduidingIdentificatie']
+            links['verblijfplaatsNummeraanduiding'] = {
+                'href': f"{BAG_API_URL}/nummeraanduidingen/{nummeraanduiding}/"
+            }
 
         return links
 

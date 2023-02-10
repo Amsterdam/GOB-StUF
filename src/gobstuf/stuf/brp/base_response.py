@@ -6,6 +6,7 @@ from flask import request
 from typing import List, Optional
 from xml.etree.ElementTree import Element
 
+from gobstuf.config import BAG_API_URL
 from gobstuf.lib.utils import get_value
 from gobstuf.rest.brp.argument_checks import WILDCARD_CHARS
 from gobstuf.stuf.message import StufMessage
@@ -623,6 +624,20 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
             verblijfplaats_date_between_query_param_dates
         ):
             return verblijfplaats
+
+    @staticmethod
+    def _add_links(verblijfplaats: dict):
+        links = {}
+
+        if nr_id := verblijfplaats.get("nummeraanduidingIdentificatie"):
+            links["adres"] = {"href": f"{BAG_API_URL}/nummeraanduidingen/{nr_id}"}
+
+        # TODO ligplaats/standplaats/verblijfsobject
+        if adrsobj_id := verblijfplaats.get("adresseerbaarObjectIdentificatie"):
+            links["adresseerbaarObject"] = {"href": f"{BAG_API_URL}/verblijfsobjecten/{adrsobj_id}"}
+
+        if links:
+            verblijfplaats["_links"] = links
 
     def filter_response(self, response_object: dict) -> dict:
         """Filters the response object based on query parameters."""

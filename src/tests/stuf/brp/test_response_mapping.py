@@ -578,10 +578,13 @@ class TestNPSMapping(TestCase):
 
         self.assertEqual({
             'verblijfplaatsNummeraanduiding': {
-                'href': 'https://api.data.amsterdam.nl/gob/bag/nummeraanduidingen/036digitdigitdigit/',
+                'href': 'https://api.data.amsterdam.nl/v1/bag/nummeraanduidingen/036digitdigitdigit/',
             },
             'self': {
                 'href': 'http(s)://thishost/brp_ingeschrevenpersonen_bsn/digitdigitdigit'
+            },
+            'verblijfplaatshistorie': {
+                'href': 'http(s)://thishost/brp_ingeschrevenpersonen_bsn/digitdigitdigit/verblijfplaatshistorie'
             },
             'partners': [
                 {'href': 'http(s)://thishost/brp_ingeschrevenpersonen_bsn_partners_detail/digitdigitdigit'},
