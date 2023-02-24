@@ -757,7 +757,12 @@ class NPSFamilieRelatedMapping(RelatedMapping):
             # Compares only the same number of characters as the given string, to match precision
             return None
         elif not naam.get('geslachtsnaam') and not naam.get('voornamen') and not mapped_object.get('geboorte'):
-            return None
+            # https://github.com/BRP-API/Haal-Centraal-BRP-bevragen/blob/master/features/ouders.feature
+            # Strictly one of the attributes above need to be present according to haalcentraal specs
+            # A client may not have authorisation in MKS for above attributes, so they appear empty
+            # In that case, also check for burgerservicenummer so we return the ouder if present
+            if not mapped_object.get("burgerservicenummer"):
+                return None
 
         # Delete keys that were only included for filtering.
         mapped_object.pop('aanduidingStrijdigheidNietigheid', None)

@@ -709,6 +709,9 @@ class TestNPSFamilieRelatedMapping(TestCase):
         self.assertIsNotNone(mapping.filter({'naam': {'geslachtsnaam': 'Geslachtsnaam'}}))
         self.assertIsNotNone(mapping.filter({'geboorte': {'some': 'thing'}}))
 
+        self.assertIsNotNone(mapping.filter({"burgerservicenummer": "123456789"}))
+        self.assertIsNotNone(mapping.filter({'burgerservicenummer': "123456789", "naam": {"voornamen": "Kees"}}))
+
         with freezegun.freeze_time('20200831'):
             obj = {
                 'aanduidingStrijdigheidNietigheid': 'not true',
