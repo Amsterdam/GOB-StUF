@@ -132,10 +132,10 @@ class TestIngeschrevenpersonenBsnVerblijfsplaatshistorieListView(TestCase):
     def test_request_template_parameters(self, mock_get_query_param):
         """Test only validation takes place and kwargs are not modified."""
         view = IngeschrevenpersonenBsnVerblijfsplaatshistorieListView()
-        kwargs = {"bsn": 12345}
-        result = view._request_template_parameters()
+        kwargs = {"bsn": 12345, "some_other_key": None}
+        result = view._request_template_parameters(**kwargs)
 
-        assert result == kwargs
+        assert result == {"bsn": 12345}
         mock_get_query_param.assert_called()
 
         with self.assertRaises(KeyError):
