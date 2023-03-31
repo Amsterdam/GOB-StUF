@@ -6,7 +6,7 @@ from flask import request
 from typing import List, Optional
 from xml.etree.ElementTree import Element
 
-from gobstuf.config import BAG_API_URL
+from gobstuf.config import BAG_VBO_ENDPOINT, BAG_LPS_ENDPOINT, BAG_SPS_ENDPOINT, BAG_NAG_ENDPOINT
 from gobstuf.lib.utils import get_value
 from gobstuf.rest.brp.argument_checks import WILDCARD_CHARS
 from gobstuf.stuf.message import StufMessage
@@ -630,13 +630,15 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         links = {}
 
         if nr_id := verblijfplaats.get("nummeraanduidingIdentificatie"):
-            links["adres"] = {"href": f"{BAG_API_URL}/nummeraanduidingen/{nr_id}"}
+            links["adres"] = {"href": f"{BAG_NAG_ENDPOINT}/{nr_id}"}
 
         if adrsobj_id := verblijfplaats.get("adresseerbaarObjectIdentificatie"):
-            catalog_mapper = {"01": "verblijfsobjecten", "02": "ligplaatsen", "03": "standplaatsen"}
-            links["adresseerbaarObject"] = {
-                "href": "/".join([BAG_API_URL, catalog_mapper[adrsobj_id[4:6]], adrsobj_id])
-            }
+            endpoint = {
+                "01": BAG_VBO_ENDPOINT,
+                "02": BAG_LPS_ENDPOINT,
+                "03": BAG_SPS_ENDPOINT
+            }[adrsobj_id[4:6]]
+            links["adresseerbaarObject"] = {"href": f"{endpoint}/{adrsobj_id}"}
 
         if links:
             verblijfplaats["_links"] = links

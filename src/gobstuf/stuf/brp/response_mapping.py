@@ -5,7 +5,7 @@ from typing import Type, Optional, Union
 from abc import ABC, abstractmethod
 
 from gobstuf.auth.routes import get_auth_url
-from gobstuf.config import BAG_API_URL
+from gobstuf.config import BAG_NAG_ENDPOINT
 from gobstuf.indications import Geslachtsaanduiding
 from gobstuf.mks_utils import MKSConverter
 from gobstuf.lib.utils import get_value
@@ -566,9 +566,7 @@ class NPSMapping(Mapping):
         # 'verblijfplaatsNummeraanduiding' is deprecated, the HC api uses 'adres' now
         if mapped_object.get("verblijfplaats", {}).get("woonadres", {}).get("nummeraanduidingIdentificatie"):
             nummeraanduiding = mapped_object["verblijfplaats"]["woonadres"]["nummeraanduidingIdentificatie"]
-            links["verblijfplaatsNummeraanduiding"] = {
-                "href": f"{BAG_API_URL}/nummeraanduidingen/{nummeraanduiding}/"
-            }
+            links["verblijfplaatsNummeraanduiding"] = {"href": f"{BAG_NAG_ENDPOINT}/{nummeraanduiding}"}
 
         return links
 
