@@ -27,14 +27,16 @@ node() {
         }
 
         stage('Test') {
-            tryStep "test", {
-                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml up --detach --force-recreate rabbitmq"
-                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml build --no-cache && " +
-                   "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml run --rm test"
-                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml down"
+            lock("gob-stuf-test") {
+		            tryStep "test", {
+		                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml up --detach --force-recreate rabbitmq"
+		                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml build --no-cache && " +
+		                   "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml run --rm test"
+		                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml down"
 
-            }, {
-                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml down"
+		            }, {
+		                sh "docker-compose -p gob_stuf_service_${env.BRANCH_NAME} -f src/.jenkins/test/docker-compose.yml down"
+		            }
             }
         }
 
