@@ -563,10 +563,11 @@ class NPSMapping(Mapping):
         if self_url := links.get('self'):
             links["verblijfplaatshistorie"] = {"href": f"{self_url['href']}/verblijfplaatshistorie"}
 
-        if mapped_object.get('verblijfplaats', {}).get('woonadres', {}).get('nummeraanduidingIdentificatie'):
-            nummeraanduiding = mapped_object['verblijfplaats']['woonadres']['nummeraanduidingIdentificatie']
-            links['verblijfplaatsNummeraanduiding'] = {
-                'href': f"{BAG_API_URL}/nummeraanduidingen/{nummeraanduiding}/"
+        # 'verblijfplaatsNummeraanduiding' is deprecated, the HC api uses 'adres' now
+        if mapped_object.get("verblijfplaats", {}).get("woonadres", {}).get("nummeraanduidingIdentificatie"):
+            nummeraanduiding = mapped_object["verblijfplaats"]["woonadres"]["nummeraanduidingIdentificatie"]
+            links["verblijfplaatsNummeraanduiding"] = {
+                "href": f"{BAG_API_URL}/nummeraanduidingen/{nummeraanduiding}/"
             }
 
         return links

@@ -632,9 +632,11 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         if nr_id := verblijfplaats.get("nummeraanduidingIdentificatie"):
             links["adres"] = {"href": f"{BAG_API_URL}/nummeraanduidingen/{nr_id}"}
 
-        # TODO ligplaats/standplaats/verblijfsobject
         if adrsobj_id := verblijfplaats.get("adresseerbaarObjectIdentificatie"):
-            links["adresseerbaarObject"] = {"href": f"{BAG_API_URL}/verblijfsobjecten/{adrsobj_id}"}
+            catalog_mapper = {"01": "verblijfsobjecten", "02": "ligplaatsen", "03": "standplaatsen"}
+            links["adresseerbaarObject"] = {
+                "href": "/".join([BAG_API_URL, catalog_mapper[adrsobj_id[4:6]], adrsobj_id])
+            }
 
         if links:
             verblijfplaats["_links"] = links
