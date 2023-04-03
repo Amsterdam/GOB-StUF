@@ -9,7 +9,7 @@ from xml.etree.ElementTree import Element
 from gobstuf.lib.utils import get_value
 from gobstuf.rest.brp.argument_checks import WILDCARD_CHARS
 from gobstuf.stuf.message import StufMessage
-from gobstuf.stuf.exception import NoStufAnswerException
+from gobstuf.stuf.exception import NoStufAnswerException, NoStufAnswerFilterException
 from gobstuf.stuf.brp.response_mapping import StufObjectMapping, Mapping, RelatedMapping
 
 
@@ -206,11 +206,12 @@ class StufMappedResponse(StufResponse):
         answer_object = self.create_object_from_element(object)
 
         # Filter the response if a response type is defined
-        for filter in self.response_filters_instances:
-            answer_object = filter.filter_response(answer_object)
+        if answer_object is not None:
+            for filter in self.response_filters_instances:
+                answer_object = filter.filter_response(answer_object)
 
         if not answer_object:
-            raise NoStufAnswerException()
+            raise NoStufAnswerFilterException()
 
         return answer_object
 

@@ -2,7 +2,7 @@ import traceback
 import logging
 
 from flask.views import MethodView
-from flask import g, request
+from flask import g, request, Response
 from requests.exceptions import HTTPError
 from abc import abstractmethod
 
@@ -10,7 +10,7 @@ from gobstuf.certrequest import cert_post
 from gobstuf.auth.routes import MKS_USER_KEY, MKS_APPLICATION_KEY
 from gobstuf.stuf.brp.base_request import StufRequest
 from gobstuf.stuf.brp.base_response import StufMappedResponse
-from gobstuf.stuf.exception import NoStufAnswerException
+from gobstuf.stuf.exception import NoStufAnswerException, NoStufAnswerFilterException
 from gobstuf.stuf.brp.error_response import StufErrorResponse, UnknownErrorCode
 from gobstuf.rest.brp.rest_response import RESTResponse
 from gobstuf.config import ROUTE_SCHEME, ROUTE_NETLOC, ROUTE_PATH_310, CORRELATION_ID_HEADER
@@ -208,7 +208,7 @@ class StufRestView(MethodView):
         """
         try:
             data = response_obj.get_answer_object()
-        except NoStufAnswerException:
+        except (NoStufAnswerException, NoStufAnswerFilterException):
             # Return 404, answer section is empty
             return RESTResponse.not_found(detail=self.get_not_found_message(**kwargs))
         else:
@@ -439,3 +439,36 @@ class StufRestFilterView(StufRestView):
         def __init__(self, err=None):
             self.err = err
             super().__init__()
+
+
+class StufRestViewAsList(StufRestView):
+    """
+    StufRestViewAsList is a StufRestView which returns a list response from a single object.
+    Override StufMappedResponse.get_answer_object() to customize the response (type).
+
+    Use case:
+      - When a resource (bsn) is not found, return 404
+      - When a resource is found, but all results are filtered, return empty list
+      - When a resource is found and a response, return value from get_answer_object()
+    """
+
+    @property
+    @abstractmethod
+    def name(self) -> str:  # pragma: no cover
+        """
+        Return the name of the root element of this collection of objects.
+        _embedded: {
+            self.name: []
+        }
+        """
+        pass
+
+    def _build_response(self, response_obj: StufMappedResponse, **kwargs) -> Response:
+        try:
+            data = response_obj.get_answer_object()
+        except NoStufAnswerException:
+            return RESTResponse.not_found(detail=self.get_not_found_message(**kwargs))
+        except NoStufAnswerFilterException:
+            data = []
+
+        return RESTResponse.ok(data={"_embedded": {self.name: data}}, links={})

@@ -9,6 +9,7 @@ from gobstuf.stuf.brp.base_response import StufResponse, StufMappedResponse, NoS
     MappedObjectWrapper, RelatedDetailResponseFilter, RelatedListResponseFilter, WildcardSearchResponseFilter, \
     VerblijfplaatsHistorieFilter
 from gobstuf.stuf.brp.response_mapping import RelatedMapping
+from gobstuf.stuf.exception import NoStufAnswerFilterException
 
 
 @patch("gobstuf.stuf.brp.base_response.StufMessage")
@@ -321,7 +322,7 @@ class StufMappedResponseTest(TestCase):
         resp.get_object_elm = MagicMock()
         resp.create_object_from_element = MagicMock(return_value=None)
 
-        with self.assertRaises(NoStufAnswerException):
+        with self.assertRaises(NoStufAnswerFilterException):
             result = resp.get_answer_object()
 
     def test_get_answer_object_related(self):
