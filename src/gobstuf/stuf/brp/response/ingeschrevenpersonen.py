@@ -10,7 +10,8 @@ from gobstuf.stuf.brp.response.filters import (
 
 
 class IngeschrevenpersonenStufResponse(StufMappedResponse):
-    answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa01 BG:antwoord'
+    answer_code = "npsLa01"
+    answer_section = f"soapenv:Envelope soapenv:Body BG:{answer_code} BG:antwoord"
     object_elm = 'BG:object'
 
     # These properties are passed to the filter method of the mapped object
@@ -41,8 +42,10 @@ class IngeschrevenpersonenStufKinderenListResponse(IngeschrevenpersonenStufRespo
     response_filters = [KinderenListResponseFilter]
 
 
-class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse):
-    answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa07 BG:antwoord'
+class IngeschrevenpersonenStufHistorieResponse(StufMappedResponse):
+    answer_code = "npsLa07"
+    answer_section = f"soapenv:Envelope soapenv:Body BG:{answer_code} BG:antwoord"
+    object_elm = "BG:object"
 
     response_filters = [VerblijfplaatsHistorieFilter]
 

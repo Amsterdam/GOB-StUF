@@ -266,7 +266,7 @@ class StufMappedResponse(StufResponse):
         :return:
         """
         stuf_entity_type = element.attrib.get('{%s}entiteittype' % self.namespaces['StUF'])
-        return StufObjectMapping.get_for_entity_type(stuf_entity_type)
+        return StufObjectMapping.get_for_entity_type(self.answer_code, stuf_entity_type)
 
     def _get_mapped_related_object(self, mapping: RelatedMapping, wrapper_element: Element):
         """Returns the mapping for the inner entity of RelatedMapping
@@ -358,6 +358,12 @@ class StufMappedResponse(StufResponse):
         else:
             # Plain element value
             return self.stuf_message.get_elm_value(mapping, obj)
+
+    @property
+    @abstractmethod
+    def answer_code(self):
+        """The type of response in the StUF message."""
+        pass  # pragma: no cover
 
     @property
     @abstractmethod
