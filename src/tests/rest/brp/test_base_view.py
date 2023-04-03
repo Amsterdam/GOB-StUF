@@ -5,9 +5,11 @@ from gobstuf.auth.routes import MKS_USER_KEY, MKS_APPLICATION_KEY
 from gobstuf.rest.brp.base_view import (
     StufRestView, HTTPError,
     NoStufAnswerException,
-    StufRestFilterView
+    StufRestFilterView, StufRestViewAsList
 )
+from gobstuf.stuf.brp.base_response import StufMappedResponse
 from gobstuf.stuf.brp.error_response import UnknownErrorCode
+from gobstuf.stuf.exception import NoStufAnswerFilterException
 
 
 class TestStufRestView(TestCase):
@@ -467,4 +469,38 @@ class TestStufRestFilterView(TestCase):
                 'code': 'paramsValidation',
             }, view._validate_request_args(some='kwargs'))
             view._request_template_parameters.assert_called_with(some='kwargs')
+
+
+class TestStufRestViewAsList(TestCase):
+
+    @patch("gobstuf.rest.brp.base_view.RESTResponse")
+    def test_build_response(self, mock_rest_response):
+        class MyListView(StufRestViewAsList):
+            name = "my_list_view"
+            request_template = None
+            response_template = None
+
+            def get_not_found_message(self, **kwargs):
+                return "not found!"
+
+        view = MyListView()
+        response_obj = MagicMock(spec=StufMappedResponse)
+        response_obj.get_answer_object.return_value = [{'object': 'A'}, {'object': 'B'}]
+
+        assert mock_rest_response.ok.return_value == view._build_response(response_obj)
+        mock_rest_response.ok.assert_called_with(
+            data={'_embedded': {'my_list_view': [{'object': 'A'}, {'object': 'B'}]}},
+            links={}
+        )
+
+        response_obj.get_answer_object.side_effect = NoStufAnswerException
+        view._build_response(response_obj)
+        mock_rest_response.not_found.assert_called_with(detail="not found!")
+
+        response_obj.get_answer_object.side_effect = NoStufAnswerFilterException
+        view._build_response(response_obj)
+        mock_rest_response.ok.assert_called_with(
+            data={"_embedded": {"my_list_view": []}},
+            links={}
+        )
 
