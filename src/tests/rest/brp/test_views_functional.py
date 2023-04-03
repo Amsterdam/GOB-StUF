@@ -127,16 +127,3 @@ class TestIngeschrevenpersonenBsnVerblijfsplaatshistorieListView(TestCase):
         result = IngeschrevenpersonenBsnVerblijfsplaatshistorieListView().get_not_found_message(**kwargs)
         expected = "Verblijfsplaatshistorie niet gevonden voor burgerservicenummer BEE ES EN."
         assert result == expected
-
-    @patch("gobstuf.rest.brp.base_view.StufRestFilterView._get_query_parameters")
-    def test_request_template_parameters(self, mock_get_query_param):
-        """Test only validation takes place and kwargs are not modified."""
-        view = IngeschrevenpersonenBsnVerblijfsplaatshistorieListView()
-        kwargs = {"bsn": 12345, "some_other_key": None}
-        result = view._request_template_parameters(**kwargs)
-
-        assert result == {"bsn": 12345}
-        mock_get_query_param.assert_called()
-
-        with self.assertRaises(KeyError):
-            view._request_template_parameters(should_be_bsn=0)

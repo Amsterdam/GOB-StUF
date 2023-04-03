@@ -18,9 +18,11 @@ class IngeschrevenpersonenStufRequest(StufRequest, ABC):
         ArgumentCheck.is_integer
     ]
 
+    message_type = "Lv01"
     template = 'ingeschrevenpersonen.xml'
-    content_root_elm = 'soapenv:Body BG:npsLv01'
-    soap_action = 'http://www.egem.nl/StUF/sector/bg/0310/npsLv01'
+
+    content_root_elm = f'soapenv:Body BG:nps{message_type}'
+    soap_action = f'http://www.egem.nl/StUF/sector/bg/0310/nps{message_type}'
 
 
 class IngeschrevenpersonenFilterStufRequest(IngeschrevenpersonenStufRequest):
@@ -105,17 +107,15 @@ class IngeschrevenpersonenBsnKinderenStufRequest(IngeschrevenpersonenBsnStufRequ
 
 
 class IngeschrevenpersonenBsnHistorieStufRequest(IngeschrevenpersonenStufRequest):
-    content_root_elm = 'soapenv:Body BG:npsLv07'
-    template = 'historie.xml'
-    soap_action = 'http://www.egem.nl/StUF/sector/bg/0310/npsLv07'
+    message_type = "Lv07"
+    template = "historie.xml"
 
-    parameter_paths = {
-       'bsn': 'BG:gelijk BG:inp.bsn'
-    }
+    parameter_paths = {"bsn": "BG:gelijk BG:inp.bsn"}
 
     parameter_checks = {
-        'bsn': IngeschrevenpersonenStufRequest.bsn_check,
-        'peildatum': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
-        'datumVan': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
-        'datumTotEnMet': [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date]
+        "bsn": IngeschrevenpersonenStufRequest.bsn_check,
+        # just check validity parameters here, don"t pass to the request
+        "peildatum": [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
+        "datumVan": [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date],
+        "datumTotEnMet": [ArgumentCheck.is_valid_date_format, ArgumentCheck.is_valid_date]
     }

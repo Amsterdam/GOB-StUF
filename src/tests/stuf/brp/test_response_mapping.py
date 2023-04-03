@@ -15,6 +15,7 @@ class MappingImpl(Mapping):
 class MappingImpl2(Mapping):
     mapping = {}
     entity_type = 'TST2'
+    answer_type = 'La07'
 
 
 class TestMapping(TestCase):
@@ -69,15 +70,15 @@ class TestStufObjectMapping(TestCase):
         StufObjectMapping.register(MappingImpl)
         StufObjectMapping.register(MappingImpl2)
 
-        self.assertIsInstance(StufObjectMapping.get_for_entity_type('TST'), MappingImpl)
-        self.assertIsInstance(StufObjectMapping.get_for_entity_type('TST2'), MappingImpl2)
+        self.assertIsInstance(StufObjectMapping.get_for_entity_type("La01", 'TST'), MappingImpl)
+        self.assertIsInstance(StufObjectMapping.get_for_entity_type("La07", 'TST2'), MappingImpl2)
 
         # Should return different instances
-        self.assertNotEqual(StufObjectMapping.get_for_entity_type('TST'),
-                            StufObjectMapping.get_for_entity_type('TST'))
+        self.assertNotEqual(StufObjectMapping.get_for_entity_type("La01", 'TST'),
+                            StufObjectMapping.get_for_entity_type("La01", 'TST'))
 
         with self.assertRaises(Exception):
-            StufObjectMapping.get_for_entity_type('NONEXISTENT')
+            StufObjectMapping.get_for_entity_type('NONEXISTENT', 'SAME')
 
 
 class TestNPSMapping(TestCase):

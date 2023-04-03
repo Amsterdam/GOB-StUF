@@ -2,12 +2,14 @@ from unittest import TestCase
 from unittest.mock import patch, MagicMock, call
 from datetime import date
 
+import xml.etree.ElementTree as ET
 from flask import app
 
 from gobstuf.stuf.brp.base_response import StufResponse, StufMappedResponse, NoStufAnswerException, Mapping, \
     MappedObjectWrapper, RelatedDetailResponseFilter, RelatedListResponseFilter, WildcardSearchResponseFilter, \
     VerblijfplaatsHistorieFilter
 from gobstuf.stuf.brp.response_mapping import RelatedMapping
+from gobstuf.stuf.exception import NoStufAnswerFilterException
 
 
 @patch("gobstuf.stuf.brp.base_response.StufMessage")
@@ -24,6 +26,7 @@ class StufResponseTest(TestCase):
 
 
 class StufMappedResponseImpl(StufMappedResponse):
+    answer_type = 'ANS'
     answer_section = 'ANSWER SECTION'
     object_elm = 'OBJECT'
 
@@ -70,6 +73,7 @@ class MockWildcardSearchResponseFilter(MagicMock):
 
 
 class StufMappedResponseRelatedImpl(StufMappedResponse):
+    answer_type = 'ANS'
     answer_section = 'ANSWER SECTION'
     object_elm = 'OBJECT'
 
@@ -216,6 +220,7 @@ class StufMappedResponseTest(TestCase):
     def test_sort_embedded_objects(self):
         class MockedMapping(Mapping):
             entity_type = 'ENT'
+            answer_type = 'ANS'
             mapping = {}
             related = {}
 
@@ -314,7 +319,7 @@ class StufMappedResponseTest(TestCase):
         resp.get_object_elm = MagicMock()
         resp.create_object_from_element = MagicMock(return_value=None)
 
-        with self.assertRaises(NoStufAnswerException):
+        with self.assertRaises(NoStufAnswerFilterException):
             result = resp.get_answer_object()
 
     def test_get_answer_object_related(self):
@@ -423,6 +428,7 @@ class StufMappedResponseTest(TestCase):
     def test_get_mapping(self, mock_get_for_entity_type):
 
         class Impl(StufMappedResponse):
+            answer_type = 'ANS'
             answer_section = 'ANSWER SECTION'
             object_elm = 'OBJECT'
 
@@ -433,10 +439,7 @@ class StufMappedResponseTest(TestCase):
         }})
 
         self.assertEqual(mock_get_for_entity_type.return_value, resp._get_mapping(element))
-        mock_get_for_entity_type.assert_called_with('TST')
-
-
-import xml.etree.ElementTree as ET
+        mock_get_for_entity_type.assert_called_with('ANS', 'TST')
 
 
 class TestMappedObject(TestCase):
@@ -444,8 +447,13 @@ class TestMappedObject(TestCase):
     def test_mapped_object(self):
         class MappedResponse(StufMappedResponse):
             @property
+            def answer_type(self):
+                pass
+
+            @property
             def answer_section(self):
                 pass
+
             @property
             def object_elm(self):
                 pass

@@ -10,7 +10,8 @@ from gobstuf.stuf.brp.response.filters import (
 
 
 class IngeschrevenpersonenStufResponse(StufMappedResponse):
-    answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa01 BG:antwoord'
+    answer_type = "La01"
+    answer_section = f'soapenv:Envelope soapenv:Body BG:nps{answer_type} BG:antwoord'
     object_elm = 'BG:object'
 
     # These properties are passed to the filter method of the mapped object
@@ -41,18 +42,14 @@ class IngeschrevenpersonenStufKinderenListResponse(IngeschrevenpersonenStufRespo
     response_filters = [KinderenListResponseFilter]
 
 
-class IngeschrevenpersonenStufHistorieResponse(IngeschrevenpersonenStufResponse):
-    answer_section = 'soapenv:Envelope soapenv:Body BG:npsLa07 BG:antwoord'
+class IngeschrevenpersonenStufHistorieResponse(StufMappedResponse):
+    answer_type = "La07"
+    answer_section = f"soapenv:Envelope soapenv:Body BG:nps{answer_type} BG:antwoord"
+    object_elm = "BG:object"
 
     response_filters = [VerblijfplaatsHistorieFilter]
 
-    def get_all_answer_objects(self) -> list[dict]:
-        """
-        Returns verblijfsplaatshistorie objects as a list of dictionaries.
-
-        Because we are actually mapping 1 NPS and returning multiple Verblijfplaats,
-        we need to fetch the first object here.
-        Otherwise the return value will be list[list[dict, ...]]
-        """
-        answer_objects = super().get_all_answer_objects()
-        return answer_objects[0] if answer_objects else answer_objects
+    def get_answer_object(self):
+        """Return a list of verblijfplaatsen from single response object."""
+        answer = super().get_answer_object()
+        return [vbl for vbl in [answer.get("verblijfplaats"), *answer.get("historieMaterieel", [])] if vbl]

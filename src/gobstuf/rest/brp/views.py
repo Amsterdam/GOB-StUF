@@ -1,4 +1,4 @@
-from gobstuf.rest.brp.base_view import StufRestView, StufRestFilterView
+from gobstuf.rest.brp.base_view import StufRestView, StufRestFilterView, StufRestViewAsList
 from gobstuf.stuf.brp.request.ingeschrevenpersonen import (
     IngeschrevenpersonenBsnStufRequest,
     IngeschrevenpersonenBsnPartnerStufRequest,
@@ -114,25 +114,13 @@ class IngeschrevenpersonenBsnKinderenDetailView(IngeschrevenpersonenBsnView):
         return f"Ingeschreven kind voor persoon niet gevonden met burgerservicenummer {kwargs['bsn']}."
 
 
-class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView):
-    def get_not_found_message(self, **kwargs):
-        return f"Verblijfsplaatshistorie niet gevonden voor burgerservicenummer {kwargs['bsn']}."
+class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestViewAsList):
+    """List view for verblijfplaatshistorie response."""
 
     request_template = IngeschrevenpersonenBsnHistorieStufRequest
     response_template = IngeschrevenpersonenStufHistorieResponse
 
     name = 'verblijfplaatshistorie'
 
-    # For this Class parameters are not required, but if they are used, only certain combinations are valid
-    # Herefore the empty tuple is provided at index 2 of query_parameter_combinations
-    query_parameter_combinations = [
-        ('datumVan', 'datumTotEnMet'),
-        ('peildatum',),
-        ()
-     ]
-
-    optional_query_parameters = []
-
-    def _request_template_parameters(self, **kwargs):
-        self._get_query_parameters()  # validate peildatum or datumVan/datumTotEnMet combinations
-        return {"bsn": kwargs["bsn"]}  # pass on "bsn" to request template
+    def get_not_found_message(self, **kwargs):
+        return f"Verblijfsplaatshistorie niet gevonden voor burgerservicenummer {kwargs['bsn']}."

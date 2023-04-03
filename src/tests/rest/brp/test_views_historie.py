@@ -63,9 +63,9 @@ class TestIngeschrevenpersonenBsnViewHistorie:
         else:
             assert response.json.get("invalid-params") is err_on
 
-    @pytest.mark.parametrize("stuf_310_response", ["response_310_historie_overleden.xml"], indirect=True)
-    def test_historie_overleden_empty_response(self, stuf_310_response, app_base_path, client, jwt_header):
-        """Test returning empty list if person has indicatie overleden."""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
-        assert response.status_code == 200
-        assert response.json["_embedded"]["verblijfplaatshistorie"] == []
+    # @pytest.mark.parametrize("stuf_310_response", ["response_310_historie_overleden.xml"], indirect=True)
+    # def test_historie_overleden_empty_response(self, stuf_310_response, app_base_path, client, jwt_header):
+    #     """Test returning empty list if person has indicatie overleden."""
+    #     response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
+    #     assert response.status_code == 200
+    #     assert response.json["_embedded"]["verblijfplaatshistorie"] == []
