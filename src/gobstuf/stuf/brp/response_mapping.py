@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 from typing import Type, Optional, Union
 from abc import ABC, abstractmethod
@@ -22,6 +23,11 @@ class Mapping(ABC):
     @property
     @abstractmethod
     def mapping(self) -> dict:  # pragma: no cover
+        pass
+
+    @property
+    @abstractmethod
+    def answer_code(self) -> str:  # pragma: no cover
         pass
 
     @property
@@ -67,28 +73,27 @@ class Mapping(ABC):
 
 
 class StufObjectMapping:
-    """Class holding all Mapping objects. Call register() with each Mapping to make the mapping available.
-
-    """
-    mappings = {}
+    """Class holding all Mapping objects. Call register() with each Mapping to make the mapping available."""
+    mappings = defaultdict(dict)
 
     @classmethod
-    def get_for_entity_type(cls, entity_type: str):
-        mapping = cls.mappings.get(entity_type)
-
-        if not mapping:
-            raise Exception(f"Can't find mapping for entity type {entity_type}")
-        return mapping()
+    def get_for_entity_type(cls, answer_code: str, entity_type: str) -> Mapping:
+        try:
+            return cls.mappings[answer_code][entity_type]()
+        except KeyError:
+            raise Exception(f"Can't find mapping for answer/entity type combination: {answer_code} / {entity_type}")
 
     @classmethod
     def register(cls, mapping: Type[Mapping]):
-        cls.mappings[mapping().entity_type] = mapping
+        map_obj = mapping()
+        cls.mappings[map_obj.answer_code] |= {map_obj.entity_type: mapping}
 
 
 class NPSMapping(Mapping):
-    """NPS mapping, for Natuurlijke Personen
-
-    """
+    """NPS mapping, for Natuurlijke Personen."""
+    @property
+    def answer_code(self):
+        return "npsLa01"
 
     @property
     def entity_type(self):
@@ -634,6 +639,10 @@ class RelatedMapping(Mapping):
 class NPSNPSHUWMapping(RelatedMapping):
 
     @property
+    def answer_code(self) -> str:
+        return "npsLa01"
+
+    @property
     def entity_type(self):  # pragma: no cover
         return 'NPSNPSHUW'
 
@@ -784,6 +793,10 @@ class NPSFamilieRelatedMapping(RelatedMapping):
 class NPSNPSOUDMapping(NPSFamilieRelatedMapping):
 
     @property
+    def answer_code(self) -> str:
+        return "npsLa01"
+
+    @property
     def entity_type(self):  # pragma: no cover
         return 'NPSNPSOUD'
 
@@ -808,6 +821,10 @@ StufObjectMapping.register(NPSNPSOUDMapping)
 class NPSNPSKNDMapping(NPSFamilieRelatedMapping):
 
     @property
+    def answer_code(self) -> str:
+        return "npsLa01"
+
+    @property
     def entity_type(self):  # pragma: no cover
         return 'NPSNPSKND'
 
@@ -820,3 +837,17 @@ class NPSNPSKNDMapping(NPSFamilieRelatedMapping):
 
 
 StufObjectMapping.register(NPSNPSKNDMapping)
+
+
+class VerblijfplaatsHistorieMapping(NPSMapping):
+
+    @property
+    def answer_code(self):
+        return "npsLa07"
+
+    @property
+    def related(self):
+        return {}
+
+
+StufObjectMapping.register(VerblijfplaatsHistorieMapping)

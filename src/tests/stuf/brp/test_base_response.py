@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call
 from datetime import date
+import xml.etree.ElementTree as ET
 
 from flask import app
 
@@ -24,10 +25,12 @@ class StufResponseTest(TestCase):
 
 
 class StufMappedResponseImpl(StufMappedResponse):
+    answer_code = "ANSWER CODE"
     answer_section = 'ANSWER SECTION'
     object_elm = 'OBJECT'
 
     class MockMapping(Mapping):
+        answer_code = "ANS"
         entity_type = 'TST'
         mapping = {
             'attr1': 'XML PATH A',
@@ -70,6 +73,7 @@ class MockWildcardSearchResponseFilter(MagicMock):
 
 
 class StufMappedResponseRelatedImpl(StufMappedResponse):
+    answer_code = "ANSWER CODE"
     answer_section = 'ANSWER SECTION'
     object_elm = 'OBJECT'
 
@@ -79,6 +83,7 @@ class StufMappedResponseRelatedImpl(StufMappedResponse):
 class MappedObjectWrapperTest(TestCase):
     class MockMapping(Mapping):
         entity_type = 'TST'
+        answer_code = "ANS"
         mapping = {
             'A': 'some mapping to A',
             'B': 'some mapping to B',
@@ -215,6 +220,7 @@ class StufMappedResponseTest(TestCase):
 
     def test_sort_embedded_objects(self):
         class MockedMapping(Mapping):
+            answer_code = "ANS"
             entity_type = 'ENT'
             mapping = {}
             related = {}
@@ -235,6 +241,7 @@ class StufMappedResponseTest(TestCase):
     def test_add_embedded_objects(self):
         class MockedMapping(Mapping):
             entity_type = 'ENT'
+            answer_code = "ANS"
             mapping = {}
             related = {
                 'partners': 'SOME PATH TO PARTNERS',
@@ -379,6 +386,7 @@ class StufMappedResponseTest(TestCase):
 
     def test_get_mapped_related_object(self):
         class RelatedMappingImpl(RelatedMapping):
+            answer_code = "ANS"
             entity_type = 'REL'
             mapping = {}
             override_related_filters = {'override': 'this one is overridden'}
@@ -402,6 +410,7 @@ class StufMappedResponseTest(TestCase):
 
     def test_get_mapped_object_related(self):
         class RelatedMappingImpl(RelatedMapping):
+            answer_code = "ANS"
             entity_type = 'REL'
             mapping = {'extra attr': 'attrB'}
 
@@ -423,6 +432,7 @@ class StufMappedResponseTest(TestCase):
     def test_get_mapping(self, mock_get_for_entity_type):
 
         class Impl(StufMappedResponse):
+            answer_code = "ANSWER_CODE"
             answer_section = 'ANSWER SECTION'
             object_elm = 'OBJECT'
 
@@ -433,16 +443,16 @@ class StufMappedResponseTest(TestCase):
         }})
 
         self.assertEqual(mock_get_for_entity_type.return_value, resp._get_mapping(element))
-        mock_get_for_entity_type.assert_called_with('TST')
-
-
-import xml.etree.ElementTree as ET
+        mock_get_for_entity_type.assert_called_with("ANSWER_CODE", 'TST')
 
 
 class TestMappedObject(TestCase):
 
     def test_mapped_object(self):
         class MappedResponse(StufMappedResponse):
+            @property
+            def answer_code(self):
+                pass
             @property
             def answer_section(self):
                 pass
