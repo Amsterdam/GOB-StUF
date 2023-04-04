@@ -100,51 +100,8 @@ class NPSMapping(Mapping):
         return 'NPS'
 
     @property
-    def mapping(self):
-
-        communicatie_parameters = {
-            'persoon': {
-                'geslachtsaanduiding': (MKSConverter.as_geslachtsaanduiding,
-                                        'BG:geslachtsaanduiding',
-                                        'BG:geslachtsaanduiding@StUF:noValue'),
-                'naam': {
-                    'aanduidingNaamgebruik': (MKSConverter.as_aanduiding_naamgebruik, 'BG:aanduidingNaamgebruik'),
-                    'voorletters': 'BG:voorletters',
-                    'geslachtsnaam': 'BG:geslachtsnaam',
-                    'voorvoegsel': 'BG:voorvoegselGeslachtsnaam',
-                }
-            },
-            'partners': ['BG:inp.heeftAlsEchtgenootPartner', {
-                'naam': {
-                    'geslachtsnaam': 'BG:gerelateerde BG:geslachtsnaam',
-                    'voorvoegsel': 'BG:gerelateerde BG:voorvoegselGeslachtsnaam',
-                },
-                'aangaanHuwelijkPartnerschap': {
-                    'datum': (MKSConverter.as_datum_broken_down, 'BG:datumSluiting')
-                },
-                'ontbindingHuwelijkPartnerschap': {
-                    'datum': (MKSConverter.as_datum_broken_down, 'BG:datumOntbinding')
-                }
-            }]
-        }
-
-        nationaliteit_parameters = {
-            'aanduidingBijzonderNederlanderschap': (MKSConverter.as_aanduiding_bijzonder_nederlanderschap,
-                                                    'BG:inp.aanduidingBijzonderNederlanderschap'),
-            'nationaliteiten': ['BG:inp.heeftAlsNationaliteit', {
-                'datumIngangGeldigheid': (MKSConverter.as_datum_broken_down,
-                                          'BG:inp.datumVerkrijging',
-                                          'BG:inp.datumVerkrijging@StUF:indOnvolledigeDatum'),
-                'datumVerlies': 'BG:inp.datumVerlies',
-                'nationaliteit': {
-                    'code': (MKSConverter.as_code(4), 'BG:gerelateerde BG:code'),
-                    'omschrijving': 'BG:gerelateerde BG:omschrijving',
-                },
-                'inOnderzoek': 'BG:inOnderzoek'
-            }]
-        }
-# verblijfplaats is reordered in `NPSMapping.filter`
-        verblijfplaats = {
+    def mapping_verblijfplaats(self):
+        return {
             'adresseerbaarObjectIdentificatie': 'BG:inp.verblijftIn BG:gerelateerde BG:identificatie',
             'woonadres': {
                 'naamOpenbareRuimte': 'BG:verblijfsadres BG:gor.openbareRuimteNaam',
@@ -210,6 +167,50 @@ class NPSMapping(Mapping):
             "inOnderzoek": (NPSMapping.in_onderzoek, ["BG:inOnderzoek", ".!.[@groepsnaam='Verblijfsplaats']"]),
         }
 
+    @property
+    def mapping(self):
+        communicatie_parameters = {
+            'persoon': {
+                'geslachtsaanduiding': (MKSConverter.as_geslachtsaanduiding,
+                                        'BG:geslachtsaanduiding',
+                                        'BG:geslachtsaanduiding@StUF:noValue'),
+                'naam': {
+                    'aanduidingNaamgebruik': (MKSConverter.as_aanduiding_naamgebruik, 'BG:aanduidingNaamgebruik'),
+                    'voorletters': 'BG:voorletters',
+                    'geslachtsnaam': 'BG:geslachtsnaam',
+                    'voorvoegsel': 'BG:voorvoegselGeslachtsnaam',
+                }
+            },
+            'partners': ['BG:inp.heeftAlsEchtgenootPartner', {
+                'naam': {
+                    'geslachtsnaam': 'BG:gerelateerde BG:geslachtsnaam',
+                    'voorvoegsel': 'BG:gerelateerde BG:voorvoegselGeslachtsnaam',
+                },
+                'aangaanHuwelijkPartnerschap': {
+                    'datum': (MKSConverter.as_datum_broken_down, 'BG:datumSluiting')
+                },
+                'ontbindingHuwelijkPartnerschap': {
+                    'datum': (MKSConverter.as_datum_broken_down, 'BG:datumOntbinding')
+                }
+            }]
+        }
+
+        nationaliteit_parameters = {
+            'aanduidingBijzonderNederlanderschap': (MKSConverter.as_aanduiding_bijzonder_nederlanderschap,
+                                                    'BG:inp.aanduidingBijzonderNederlanderschap'),
+            'nationaliteiten': ['BG:inp.heeftAlsNationaliteit', {
+                'datumIngangGeldigheid': (MKSConverter.as_datum_broken_down,
+                                          'BG:inp.datumVerkrijging',
+                                          'BG:inp.datumVerkrijging@StUF:indOnvolledigeDatum'),
+                'datumVerlies': 'BG:inp.datumVerlies',
+                'nationaliteit': {
+                    'code': (MKSConverter.as_code(4), 'BG:gerelateerde BG:code'),
+                    'omschrijving': 'BG:gerelateerde BG:omschrijving',
+                },
+                'inOnderzoek': 'BG:inOnderzoek'
+            }]
+        }
+
         return {
             'burgerservicenummer': 'BG:inp.bsn',
             'aNummer': 'BG:inp.a-nummer',
@@ -266,8 +267,7 @@ class NPSMapping(Mapping):
                     'omschrijving': (MKSConverter.get_gemeente_omschrijving, 'BG:inp.overlijdenplaats')
                 }
                 },
-            # verblijfplaats is reordered in `NPSMapping.filter`
-            'verblijfplaats': verblijfplaats,
+            'verblijfplaats': self.mapping_verblijfplaats,  # verblijfplaats is reordered in `NPSMapping.filter`
             'verblijfstitel': (
                     NPSMapping.verblijfstitel,
                     "BG:vbt.aanduidingVerblijfstitel",
@@ -275,12 +275,11 @@ class NPSMapping(Mapping):
                     "BG:ing.datumVerliesVerblijfstitel",
                     ["BG:inOnderzoek", ".!.[@elementnaam='aanduidingVerblijfstitel']"],
                     ["StUF:extraElementen", ".!.//StUF:extraElement[@naam='omschrijvingVerblijfstitel']"],
-                ),
-            'historieMaterieel': (NPSMapping.historie, ["BG:historieMaterieel", verblijfplaats])
+                )
         }
 
     @staticmethod
-    def _order_verblijfplaats(verblijfplaats):
+    def _filter_verblijfplaats(verblijfplaats: dict) -> dict:
         adres = {}
         functie = None
 
@@ -295,19 +294,10 @@ class NPSMapping(Mapping):
             'adresseerbaarObjectIdentificatie': verblijfplaats.pop('adresseerbaarObjectIdentificatie', None),
             'nummeraanduidingIdentificatie': adres.pop('nummeraanduidingIdentificatie', None),
             'functieAdres': functie,
-            'indicatieVestigingVanuitBuitenland':
-                verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
+            'indicatieVestigingVanuitBuitenland': verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
             'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
         }
         return {**adres, **reordered, **verblijfplaats}
-
-    @classmethod
-    def historie(cls, historie):
-        """
-        Orders content of historic residences
-        """
-        if historie:
-            return [cls._order_verblijfplaats(verblijfplaats) for verblijfplaats in historie]
 
     @property
     def related(self):  # pragma: no cover
@@ -490,14 +480,13 @@ class NPSMapping(Mapping):
         :param mapped_object: The mapped response object
         :return:
         """
+        if (
+            mapped_object.get('overlijden', {}).get('indicatieOverleden')
+            and not kwargs.get('inclusiefoverledenpersonen', False)
+        ):
+            return
 
-        mapped_object['verblijfplaats'] = self._order_verblijfplaats(mapped_object['verblijfplaats'])
-
-        # Use overlijdensdatum for filtering
-        is_overleden = mapped_object['overlijden']['indicatieOverleden']
-        if is_overleden and not kwargs.get('inclusiefoverledenpersonen', False):
-            # Skip overleden personen, unless explicitly included
-            mapped_object = None
+        mapped_object['verblijfplaats'] = self._filter_verblijfplaats(mapped_object['verblijfplaats'])
         return super().filter(mapped_object)
 
     def _add_related_object_links(self, mapped_object: dict, links: dict, embedded_type: str, route: str):
@@ -842,12 +831,33 @@ StufObjectMapping.register(NPSNPSKNDMapping)
 class VerblijfplaatsHistorieMapping(NPSMapping):
 
     @property
-    def answer_code(self):
+    def answer_code(self) -> str:
         return "npsLa07"
 
     @property
-    def related(self):
+    def related(self) -> dict:
         return {}
+
+    @property
+    def mapping(self) -> dict:
+        return {
+            # necessary for filter overleden persoon, remove after filter
+            "overlijden": {"indicatieOverleden": (MKSConverter.true_if_exists, "BG:overlijdensdatum")},
+            "verblijfplaats": self.mapping_verblijfplaats,
+            "historieMaterieel": ["BG:historieMaterieel", self.mapping_verblijfplaats]
+        }
+
+    def filter(self, mapped_object: dict, **kwargs) -> dict:
+        if historic := mapped_object.get("historieMaterieel"):
+            mapped_object["historieMaterieel"] = [self._filter_verblijfplaats(vbo) for vbo in historic]
+
+        # verblijfplaats is filtered in super().filter
+        result = super().filter(mapped_object, **kwargs)
+
+        if result is not None:
+            result.pop("overlijden", None)
+
+        return result
 
 
 StufObjectMapping.register(VerblijfplaatsHistorieMapping)
