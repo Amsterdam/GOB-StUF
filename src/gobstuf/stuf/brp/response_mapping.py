@@ -842,6 +842,7 @@ class VerblijfplaatsHistorieMapping(NPSMapping):
     def mapping(self) -> dict:
         return {
             # necessary for filter overleden persoon, remove after filter
+            # NB: user needs authentication for this field
             "overlijden": {"indicatieOverleden": (MKSConverter.true_if_exists, "BG:overlijdensdatum")},
             "verblijfplaats": self.mapping_verblijfplaats,
             "historieMaterieel": ["BG:historieMaterieel", self.mapping_verblijfplaats]
