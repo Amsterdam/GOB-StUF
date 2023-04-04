@@ -1,4 +1,4 @@
-from gobstuf.rest.brp.base_view import StufRestView, StufRestFilterView
+from gobstuf.rest.brp.base_view import StufRestView, StufRestFilterView, StufRestViewAsList
 from gobstuf.stuf.brp.request.ingeschrevenpersonen import (
     IngeschrevenpersonenBsnStufRequest,
     IngeschrevenpersonenBsnPartnerStufRequest,
@@ -114,7 +114,7 @@ class IngeschrevenpersonenBsnKinderenDetailView(IngeschrevenpersonenBsnView):
         return f"Ingeschreven kind voor persoon niet gevonden met burgerservicenummer {kwargs['bsn']}."
 
 
-class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestFilterView):
+class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestViewAsList):
 
     request_template = IngeschrevenpersonenBsnHistorieStufRequest
     response_template = IngeschrevenpersonenStufHistorieResponse

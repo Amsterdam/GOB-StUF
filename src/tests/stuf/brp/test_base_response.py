@@ -314,7 +314,7 @@ class StufMappedResponseTest(TestCase):
         self._mock_stuf_message(resp)
 
         result = resp.get_answer_object()
-        print(result)
+
         self.assertEqual(result, self._get_expected_mapped_result(resp))
 
     def test_get_answer_object_no_answer(self):
@@ -764,55 +764,63 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
     def test_filter_response_peildatum(self):
         # peildatum within a range
         with self.app.test_request_context("path?peildatum=2000-01-01"):
-            expected = [{
-                'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
-                'datumTot': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}
-            }]
+            expected = {
+                "historieMaterieel": [{
+                    'datumIngangGeldigheid': {'datum': '1999-09-21', 'jaar': 1999, 'maand': 9, 'dag': 21},
+                    'datumTot': {'datum': '2007-09-21', 'jaar': 2007, 'maand': 9, 'dag': 21}
+                }]
+            }
             assert self.resp_obj.filter_response(self.mapped_object) == expected
 
         # peildatum on a datumIngangGeldigheid
         with self.app.test_request_context("path?peildatum=2020-09-21"):
-            expected = [{'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}]
+            expected = {
+                "historieMaterieel": [
+                    {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}
+                ]
+            }
             assert self.resp_obj.filter_response(self.mapped_object) == expected
 
         # peildatum before date ranges
         with self.app.test_request_context("path?peildatum=1950-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == []
+            assert self.resp_obj.filter_response(self.mapped_object) == {}
 
         # peildatum in the future and correct datumvan
         with self.app.test_request_context("path?peildatum=2200-09-21&datumVan=2003-01-01"):
-            assert self.resp_obj.filter_response(self.mapped_object) == []
+            assert self.resp_obj.filter_response(self.mapped_object) == {}
 
     def test_filter_response_datumvan(self):
         # datumVan in the past
         with self.app.test_request_context("path?datumVan=1900-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object["historieMaterieel"]
+            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object
 
         # datumVan in the future
         with self.app.test_request_context("path?datumVan=2200-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == []
+            assert self.resp_obj.filter_response(self.mapped_object) == {}
 
     def test_filter_response_datumtotenmet(self):
         # datumTotenMet in the past
         with self.app.test_request_context("path?datumTotEnMet=1900-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == []
+            assert self.resp_obj.filter_response(self.mapped_object) == {}
 
         # datumTotenMet in the future
         with self.app.test_request_context("path?datumTotEnMet=2200-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object["historieMaterieel"]
+            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object
 
         # datumTotEnMet on datumInganggeldigheid
         with self.app.test_request_context("path?datumTotEnMet=2020-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object["historieMaterieel"]
+            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object
 
     def test_filter_response_datumvan_datumtotenmet(self):
         # datumVan smaller than smalles datumIngangGeldigheid and datumTotEnMet bigger than biggest datumTot
         with self.app.test_request_context("path?datumVan=1980-09-21&datumTotEnMet=2021-09-21"):
-            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object["historieMaterieel"]
+            assert self.resp_obj.filter_response(self.mapped_object) == self.mapped_object
 
         # datumVan on datumIngangGeldigheid
         with self.app.test_request_context("path?datumVan=2020-09-21&datumTotEnMet=2222-09-21"):
-            expected = [{'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}]
+            expected = {"historieMaterieel": [
+                {'datumIngangGeldigheid': {'datum': '2020-09-21', 'jaar': 2020, 'maand': 9, 'dag': 21}}
+            ]}
             assert self.resp_obj.filter_response(self.mapped_object) == expected
 
     def test_filter_response_missing_datumInangGeldigheid(self):
@@ -827,7 +835,7 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
                 },
             ]
         }
-        expected = [{"datumTot": {"datum": "2007-09-21", "jaar": 2007, "maand": 9, "dag": 21}}]
+        expected = {"historieMaterieel": [{"datumTot": {"datum": "2007-09-21", "jaar": 2007, "maand": 9, "dag": 21}}]}
 
         with self.app.test_request_context("path?peildatum=2000-01-01"):
             assert self.resp_obj.filter_response(mapped_object) == expected
