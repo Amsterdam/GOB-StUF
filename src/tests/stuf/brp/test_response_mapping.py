@@ -3,7 +3,8 @@ import freezegun
 from unittest import TestCase
 from unittest.mock import patch
 from gobstuf.stuf.brp.response_mapping import (
-    Mapping, NPSMapping, StufObjectMapping, RelatedMapping, NPSNPSHUWMapping, NPSNPSOUDMapping, NPSNPSKNDMapping, NPSFamilieRelatedMapping
+    Mapping, NPSMapping, StufObjectMapping, RelatedMapping, NPSNPSHUWMapping, NPSNPSOUDMapping, NPSNPSKNDMapping,
+    NPSFamilieRelatedMapping, VerblijfplaatsHistorieMapping
 )
 
 
@@ -787,3 +788,39 @@ class TestNPSNPSKNDMapping(TestCase):
             'geheimhoudingPersoonsgegevens',
             'leeftijd',
         ], mapping.include_related)
+
+
+class TestVerblijfplaatsHistorieMapping(TestCase):
+
+    def setUp(self) -> None:
+        self.mapping = VerblijfplaatsHistorieMapping()
+
+    def test_entity_type(self):
+        assert "NPS" == self.mapping.entity_type
+
+    def test_related(self):
+        assert {} == self.mapping.related
+
+    def test_get_links(self):
+        assert self.mapping.get_links({}) is None
+
+    def test_mapping(self):
+        assert ["overlijden", "verblijfplaats", "historieMaterieel"] == list(self.mapping.mapping)
+
+    def test_filter(self):
+        obj = {
+            "verblijfplaats": {
+                "nummeraanduidingIdentificatie": "03630123456",
+                "adresseerbaarObjectIdentificatie": "03631234"  # not valid
+            },
+            "historieMaterieel": [
+                {"adresseerbaarObjectIdentificatie": "036303"}
+            ],
+            "overlijden": {"indicatieOverleden": None}
+        }
+        result = self.mapping.filter(obj)
+
+        assert "overlijden" not in result
+        assert "adresseerbaarObject" not in result["verblijfplaats"]["_links"]
+        assert result["verblijfplaats"]["_links"]["adres"]["href"] == "https://api.data.amsterdam.nl/v1/bag/nummeraanduidingen/03630123456"
+        assert result["historieMaterieel"][0]["_links"]["adresseerbaarObject"]["href"] == "https://api.data.amsterdam.nl/v1/bag/standplaatsen/036303"
