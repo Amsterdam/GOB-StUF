@@ -485,7 +485,7 @@ class TestStufRestViewAsList(TestCase):
 
         view = MyListView()
         response_obj = MagicMock(spec=StufMappedResponse)
-        response_obj.get_answer_object.return_value = [{'object': 'A'}, {'object': 'B'}]
+        response_obj.get_all_answer_objects.return_value = [{'object': 'A'}, {'object': 'B'}]
 
         assert mock_rest_response.ok.return_value == view._build_response(response_obj)
         mock_rest_response.ok.assert_called_with(
@@ -493,11 +493,11 @@ class TestStufRestViewAsList(TestCase):
             links={}
         )
 
-        response_obj.get_answer_object.side_effect = NoStufAnswerException
+        response_obj.get_all_answer_objects.side_effect = NoStufAnswerException
         view._build_response(response_obj)
         mock_rest_response.not_found.assert_called_with(detail="not found!")
 
-        response_obj.get_answer_object.side_effect = NoStufAnswerFilterException
+        response_obj.get_all_answer_objects.side_effect = NoStufAnswerFilterException
         view._build_response(response_obj)
         mock_rest_response.ok.assert_called_with(
             data={"_embedded": {"my_list_view": []}},
