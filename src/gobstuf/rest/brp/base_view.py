@@ -465,7 +465,7 @@ class StufRestViewAsList(StufRestView):
 
     def _build_response(self, response_obj: StufMappedResponse, **kwargs) -> Response:
         try:
-            data = response_obj.get_answer_object()
+            data = response_obj.get_all_answer_objects()
         except NoStufAnswerException:
             return RESTResponse.not_found(detail=self.get_not_found_message(**kwargs))
         except NoStufAnswerFilterException:

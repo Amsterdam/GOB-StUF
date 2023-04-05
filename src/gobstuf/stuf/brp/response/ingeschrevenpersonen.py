@@ -49,7 +49,7 @@ class IngeschrevenpersonenStufHistorieResponse(StufMappedResponse):
 
     response_filters = [VerblijfplaatsHistorieFilter]
 
-    def get_answer_object(self) -> list[dict]:
+    def get_all_answer_objects(self) -> list[dict]:
         """Return a list of verblijfplaatsen from a single response object."""
         answer = super().get_answer_object()
         return [vbl for vbl in [answer.get("verblijfplaats"), *answer.get("historieMaterieel", [])] if vbl]
