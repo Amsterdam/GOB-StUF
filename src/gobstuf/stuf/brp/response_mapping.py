@@ -300,6 +300,12 @@ class NPSMapping(Mapping):
             'indicatieVestigingVanuitBuitenland': verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
             'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
         }
+
+        # dont return datumAanvangAdreshouding when address is foreign, see #66932
+        # ie gemeenteVanInschrijving == {"code": "1999","omschrijving": "Registratie Niet Ingezetenen (RNI)"}
+        if verblijfplaats["gemeenteVanInschrijving"]["code"] == "1999":
+            verblijfplaats.pop("datumAanvangAdreshouding")
+
         return {**adres, **reordered, **verblijfplaats}
 
     @property
