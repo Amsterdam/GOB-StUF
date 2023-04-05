@@ -10,11 +10,13 @@ from gobstuf.stuf.brp.response_mapping import (
 class MappingImpl(Mapping):
     mapping = {}
     entity_type = 'TST'
+    answer_code = "code1"
 
 
 class MappingImpl2(Mapping):
     mapping = {}
     entity_type = 'TST2'
+    answer_code = "code2"
 
 
 class TestMapping(TestCase):
@@ -69,15 +71,15 @@ class TestStufObjectMapping(TestCase):
         StufObjectMapping.register(MappingImpl)
         StufObjectMapping.register(MappingImpl2)
 
-        self.assertIsInstance(StufObjectMapping.get_for_entity_type('TST'), MappingImpl)
-        self.assertIsInstance(StufObjectMapping.get_for_entity_type('TST2'), MappingImpl2)
+        self.assertIsInstance(StufObjectMapping.get_for_entity_type("code1", 'TST'), MappingImpl)
+        self.assertIsInstance(StufObjectMapping.get_for_entity_type("code2", 'TST2'), MappingImpl2)
 
         # Should return different instances
-        self.assertNotEqual(StufObjectMapping.get_for_entity_type('TST'),
-                            StufObjectMapping.get_for_entity_type('TST'))
+        self.assertNotEqual(StufObjectMapping.get_for_entity_type("code1", 'TST'),
+                            StufObjectMapping.get_for_entity_type("code1", 'TST'))
 
         with self.assertRaises(Exception):
-            StufObjectMapping.get_for_entity_type('NONEXISTENT')
+            StufObjectMapping.get_for_entity_type('NONEXISTENT', "NONEXISTENT")
 
 
 class TestNPSMapping(TestCase):
@@ -599,6 +601,7 @@ class TestRelatedMapping(TestCase):
 
     def test_filter(self):
         class RelatedMappingImpl(RelatedMapping):
+            answer_code = "ANSCODE"
             entity_type = 'RELMAP'
             mapping = {'D': 'not important'}
             include_related = ['A', 'B']
@@ -665,6 +668,10 @@ class TestNPSNPSHUWMapping(TestCase):
 class TestNPSFamilieRelatedMapping(TestCase):
 
     class NPSFamilieRelatedMappingImpl(NPSFamilieRelatedMapping):
+
+        @property
+        def answer_code(self) -> str:
+            return "fam answer code"
 
         @property
         def entity_type(self):

@@ -9,7 +9,7 @@ from xml.etree.ElementTree import Element
 from gobstuf.lib.utils import get_value
 from gobstuf.rest.brp.argument_checks import WILDCARD_CHARS
 from gobstuf.stuf.message import StufMessage
-from gobstuf.stuf.exception import NoStufAnswerException
+from gobstuf.stuf.exception import NoStufAnswerException, NoStufAnswerFilterException
 from gobstuf.stuf.brp.response_mapping import StufObjectMapping, Mapping, RelatedMapping
 
 
@@ -206,11 +206,12 @@ class StufMappedResponse(StufResponse):
         answer_object = self.create_object_from_element(object)
 
         # Filter the response if a response type is defined
-        for filter in self.response_filters_instances:
-            answer_object = filter.filter_response(answer_object)
+        if answer_object is not None:
+            for filter in self.response_filters_instances:
+                answer_object = filter.filter_response(answer_object)
 
         if not answer_object:
-            raise NoStufAnswerException()
+            raise NoStufAnswerFilterException()
 
         return answer_object
 
@@ -266,7 +267,7 @@ class StufMappedResponse(StufResponse):
         :return:
         """
         stuf_entity_type = element.attrib.get('{%s}entiteittype' % self.namespaces['StUF'])
-        return StufObjectMapping.get_for_entity_type(stuf_entity_type)
+        return StufObjectMapping.get_for_entity_type(self.answer_code, stuf_entity_type)
 
     def _get_mapped_related_object(self, mapping: RelatedMapping, wrapper_element: Element):
         """Returns the mapping for the inner entity of RelatedMapping
@@ -358,6 +359,12 @@ class StufMappedResponse(StufResponse):
         else:
             # Plain element value
             return self.stuf_message.get_elm_value(mapping, obj)
+
+    @property
+    @abstractmethod
+    def answer_code(self):
+        """The type of response in the StUF message."""
+        pass  # pragma: no cover
 
     @property
     @abstractmethod
@@ -561,7 +568,7 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         jaar, maand, dag = datum.split('-')
         return date(int(jaar), int(maand), int(dag))
 
-    def get_date_range_request_args(self, **kwargs) -> tuple[date]:
+    def get_date_range_request_args(self, **kwargs) -> tuple[date, date]:
         """
         Returns the request args as date range
         """
@@ -577,7 +584,7 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         datumtotenmet = self.convert_to_date_request_arg(datumtm) if datumtm else date.max
         return datumvan, datumtotenmet
 
-    def get_date_range_vb(self, verblijfplaats) -> tuple[date]:
+    def get_date_range_vb(self, verblijfplaats) -> tuple[date, date]:
         """
         Converts verblijfplaats dates to date range
         """
@@ -617,37 +624,25 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         ):
             return verblijfplaats
 
-    def create_verblijfplaatsen_list(self, response_object) -> list[dict]:
-        """
-        Adds the current verblijfplaats to the list of historic verblijfplaatsen
-        """
-
-        verblijfplaatsen = response_object.get('historieMaterieel', [])
-        verblijfplaats = response_object.get('verblijfplaats')
-        if verblijfplaats:
-            verblijfplaatsen.insert(0, verblijfplaats)
-
-        return verblijfplaatsen
-
-    def filter_response(self, response_object: dict) -> list[dict]:
-        """
-        Filters the response object and gives back a list with the
-        actual and the historic verblijfplaatsen.
-        """
-        # Convert query paramters to date range
+    def filter_response(self, response_object: dict) -> dict:
+        """Filters the response object based on query parameters."""
         qp_datumvan, qp_datumtotenmet = self.get_date_range_request_args(**request.args)
 
-        # Return empty list if query param datumTotEnMet is smaller than query param datumVan
         if qp_datumtotenmet < qp_datumvan:
-            return []
+            return {}
 
-        # Create a list of verblijfplaatsen
-        verblijfplaatsen = self.create_verblijfplaatsen_list(response_object)
+        result = response_object.copy()
 
-        # Filter the verblijfplaatsenlist with query params
-        verblijfplaatsen_filtered = []
-        for verblijfplaats in verblijfplaatsen:
-            if self.filter_on_request_args(verblijfplaats, qp_datumvan, qp_datumtotenmet):
-                verblijfplaatsen_filtered.append(verblijfplaats)
+        actual = result.get("verblijfplaats")
+        if actual and self.filter_on_request_args(actual, qp_datumvan, qp_datumtotenmet) is None:
+            result.pop("verblijfplaats")
 
-        return verblijfplaatsen_filtered
+        result["historieMaterieel"] = [
+            obj for obj in result.get("historieMaterieel", [])
+            if self.filter_on_request_args(obj, qp_datumvan, qp_datumtotenmet) is not None
+        ]
+
+        if not result["historieMaterieel"]:
+            result.pop("historieMaterieel")
+
+        return result
