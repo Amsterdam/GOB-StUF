@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from collections import defaultdict
 
@@ -5,6 +7,7 @@ from typing import Type, Optional, Union
 from abc import ABC, abstractmethod
 
 from gobstuf.auth.routes import get_auth_url
+from gobstuf.config import BAG_NAG_ENDPOINT, BAG_VBO_ENDPOINT, BAG_LPS_ENDPOINT, BAG_SPS_ENDPOINT
 from gobstuf.indications import Geslachtsaanduiding
 from gobstuf.mks_utils import MKSConverter
 from gobstuf.lib.utils import get_value
@@ -469,7 +472,7 @@ class NPSMapping(Mapping):
         # See comments in sort_ouders for more info on sorted with key
         return sorted(kinderen, key=kinderen_sorter)
 
-    def filter(self, mapped_object: dict, **kwargs):
+    def filter(self, mapped_object: dict, **kwargs) -> dict | None:
         """
         Filter the mapped object on overlijdensdatum
         Overleden personen are returned based on the inclusiefoverledenpersonen kwarg
@@ -525,32 +528,19 @@ class NPSMapping(Mapping):
                     }
                 }
 
-    def get_links(self, mapped_object: dict):
+    def get_links(self, mapped_object: dict) -> dict:
         """
         Return the HAL links that correspond with the mapped and filtered object (data)
 
-        :param data: the mapped and filtered object
+        :param mapped_object: the mapped and filtered object
         :return:
         """
         links = super().get_links(mapped_object)
-
-        if mapped_object.get('verblijfplaats', {}).get('woonadres', {}).get('nummeraanduidingIdentificatie'):
-            nummeraanduiding = mapped_object['verblijfplaats']['woonadres']['nummeraanduidingIdentificatie']
-            links['verblijfplaatsNummeraanduiding'] = {
-                'href': f"https://api.data.amsterdam.nl/gob/bag/nummeraanduidingen/{nummeraanduiding}/"
-            }
 
         if mapped_object.get('burgerservicenummer'):
             links['self'] = {
                 'href': get_auth_url('brp_ingeschrevenpersonen_bsn', bsn=mapped_object['burgerservicenummer'])
             }
-
-        self._add_related_object_links(
-            mapped_object,
-            links,
-            'partners',
-            'brp_ingeschrevenpersonen_bsn_partners_detail'
-        )
 
         self._add_related_object_links(
             mapped_object,
@@ -565,6 +555,20 @@ class NPSMapping(Mapping):
             'kinderen',
             'brp_ingeschrevenpersonen_bsn_kinderen_detail'
         )
+        self._add_related_object_links(
+            mapped_object,
+            links,
+            'partners',
+            'brp_ingeschrevenpersonen_bsn_partners_detail'
+        )
+
+        if self_url := links.get('self'):
+            links["verblijfplaatshistorie"] = {"href": f"{self_url['href']}/verblijfplaatshistorie"}
+
+        # 'verblijfplaatsNummeraanduiding' is deprecated, the HC api uses 'adres' now
+        if mapped_object.get("verblijfplaats", {}).get("woonadres", {}).get("nummeraanduidingIdentificatie"):
+            nummeraanduiding = mapped_object["verblijfplaats"]["woonadres"]["nummeraanduidingIdentificatie"]
+            links["verblijfplaatsNummeraanduiding"] = {"href": f"{BAG_NAG_ENDPOINT}/{nummeraanduiding}"}
 
         return links
 
@@ -838,6 +842,9 @@ class VerblijfplaatsHistorieMapping(NPSMapping):
     def related(self) -> dict:
         return {}
 
+    def get_links(self, mapped_object: dict) -> dict:
+        return {}
+
     @property
     def mapping(self) -> dict:
         return {
@@ -848,17 +855,39 @@ class VerblijfplaatsHistorieMapping(NPSMapping):
             "historieMaterieel": ["BG:historieMaterieel", self.mapping_verblijfplaats]
         }
 
-    def filter(self, mapped_object: dict, **kwargs) -> dict:
+    def filter(self, mapped_object: dict, **kwargs) -> dict | None:
         if historic := mapped_object.get("historieMaterieel"):
             mapped_object["historieMaterieel"] = [self._filter_verblijfplaats(vbo) for vbo in historic]
 
         # verblijfplaats is filtered in super().filter
-        result = super().filter(mapped_object, **kwargs)
-
-        if result is not None:
+        if result := super().filter(mapped_object, **kwargs):
             result.pop("overlijden", None)
 
+            # add links to adres/adresobjectid after filtering woon/brief adres
+            for obj in result["verblijfplaats"], *result["historieMaterieel"]:
+                self._add_links(obj)
+
         return result
+
+    @staticmethod
+    def _get_href_from_objectid(object_id: str) -> str:
+        try:
+            return {"01": BAG_VBO_ENDPOINT, "02": BAG_LPS_ENDPOINT, "03": BAG_SPS_ENDPOINT}[object_id[4:6]]
+        except (KeyError, IndexError):
+            pass
+
+    def _add_links(self, verblijfplaats: dict):
+        links = {}
+
+        if nr_id := verblijfplaats.get("nummeraanduidingIdentificatie"):
+            links["adres"] = {"href": f"{BAG_NAG_ENDPOINT}/{nr_id}"}
+
+        if adrsobj_id := verblijfplaats.get("adresseerbaarObjectIdentificatie"):
+            if href := self._get_href_from_objectid(adrsobj_id):
+                links["adresseerbaarObject"] = {"href": f"{href}/{adrsobj_id}"}
+
+        if links:
+            verblijfplaats["_links"] = links
 
 
 StufObjectMapping.register(VerblijfplaatsHistorieMapping)

@@ -52,3 +52,9 @@ UNIQUE_ID_HEADER = 'X-Unique-ID'
 
 KEYCLOAK_AUTH_URL = _getenv('KEYCLOAK_AUTH_URL')
 KEYCLOAK_CLIENT_ID = _getenv('KEYCLOAK_CLIENT_ID')
+
+BAG_API_URL = "https://api.data.amsterdam.nl/v1/bag"
+BAG_NAG_ENDPOINT = f"{BAG_API_URL}/nummeraanduidingen"
+BAG_LPS_ENDPOINT = f"{BAG_API_URL}/ligplaatsen"
+BAG_SPS_ENDPOINT = f"{BAG_API_URL}/standplaatsen"
+BAG_VBO_ENDPOINT = f"{BAG_API_URL}/verblijfsobjecten"
