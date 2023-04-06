@@ -528,11 +528,11 @@ class NPSMapping(Mapping):
                     }
                 }
 
-    def get_links(self, mapped_object: dict):
+    def get_links(self, mapped_object: dict) -> dict:
         """
         Return the HAL links that correspond with the mapped and filtered object (data)
 
-        :param data: the mapped and filtered object
+        :param mapped_object: the mapped and filtered object
         :return:
         """
         links = super().get_links(mapped_object)
@@ -842,8 +842,8 @@ class VerblijfplaatsHistorieMapping(NPSMapping):
     def related(self) -> dict:
         return {}
 
-    def get_links(self, mapped_object: dict):
-        pass
+    def get_links(self, mapped_object: dict) -> dict:
+        return {}
 
     @property
     def mapping(self) -> dict:

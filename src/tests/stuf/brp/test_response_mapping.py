@@ -802,7 +802,7 @@ class TestVerblijfplaatsHistorieMapping(TestCase):
         assert {} == self.mapping.related
 
     def test_get_links(self):
-        assert self.mapping.get_links({}) is None
+        assert {} == self.mapping.get_links({})
 
     def test_mapping(self):
         assert ["overlijden", "verblijfplaats", "historieMaterieel"] == list(self.mapping.mapping)
