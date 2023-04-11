@@ -7,25 +7,25 @@ class TestIngeschrevenpersonenBsnViewHistorie:
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     def test_historie_connection(self, stuf_310_response, app_base_path, client, jwt_header):
         """Make sure a connection can be made"""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie", headers=jwt_header)
         assert response.status_code == 200
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     def test_historie_connection_too_long_bsn(self, stuf_310_response, app_base_path, client, jwt_header):
         """Make sure a connection can't be made when the bsn is too long"""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/1234566789/verblijfsplaatshistorie", headers=jwt_header)
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/1234566789/verblijfplaatshistorie", headers=jwt_header)
         assert response.status_code == 400
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     def test_historie_connection_too_short(self, stuf_310_response, app_base_path, client, jwt_header):
         """Make sure a connection can't be made with a too short bsn"""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/12345667/verblijfsplaatshistorie", headers=jwt_header)
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/12345667/verblijfplaatshistorie", headers=jwt_header)
         assert response.status_code == 400
 
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
     def test_response_list_of_dict(self, stuf_310_response, app_base_path, client, jwt_header):
         """Test the return types."""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie", headers=jwt_header)
         objs = response.json["_embedded"]["verblijfplaatshistorie"]
         assert response.status_code == 200
         assert isinstance(objs, list) and all(isinstance(obj, dict) for obj in objs)
@@ -50,7 +50,7 @@ class TestIngeschrevenpersonenBsnViewHistorie:
             self, stuf_310_response, app_base_path, client, jwt_header, query_param, result_code, err_on
     ):
         """Test query parameters on the test client."""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie?{urlencode(query_param)}", headers=jwt_header)
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie?{urlencode(query_param)}", headers=jwt_header)
         assert response.status_code == result_code
 
         if invalid := response.json.get("invalid-params"):
@@ -63,6 +63,6 @@ class TestIngeschrevenpersonenBsnViewHistorie:
     @pytest.mark.parametrize("stuf_310_response", ["response_310_historie_overleden.xml"], indirect=True)
     def test_historie_overleden_empty_response(self, stuf_310_response, app_base_path, client, jwt_header):
         """Test returning empty list if person has indicatie overleden."""
-        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfsplaatshistorie", headers=jwt_header)
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie", headers=jwt_header)
         assert response.status_code == 200
         assert response.json["_embedded"]["verblijfplaatshistorie"] == []
