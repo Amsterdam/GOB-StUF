@@ -834,6 +834,10 @@ class TestVerblijfplaatsHistorieMapping(TestCase):
     def test_mapping(self):
         assert ["overlijden", "verblijfplaats", "historieMaterieel"] == list(self.mapping.mapping)
 
+    def test_mapping_verblijfplaats(self):
+        assert self.mapping.mapping_verblijfplaats["datumIngangGeldigheid"] != NPSMapping.DUMMY
+        assert self.mapping.mapping_verblijfplaats["datumTot"] != NPSMapping.DUMMY
+
     def test_filter(self):
         obj = {
             "verblijfplaats": {
