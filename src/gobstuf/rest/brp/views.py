@@ -114,7 +114,7 @@ class IngeschrevenpersonenBsnKinderenDetailView(IngeschrevenpersonenBsnView):
         return f"Ingeschreven kind voor persoon niet gevonden met burgerservicenummer {kwargs['bsn']}."
 
 
-class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestViewAsList):
+class IngeschrevenpersonenBsnVerblijfplaatshistorieListView(StufRestViewAsList):
 
     request_template = IngeschrevenpersonenBsnHistorieStufRequest
     response_template = IngeschrevenpersonenStufHistorieResponse
@@ -122,4 +122,4 @@ class IngeschrevenpersonenBsnVerblijfsplaatshistorieListView(StufRestViewAsList)
     name = 'verblijfplaatshistorie'
 
     def get_not_found_message(self, **kwargs):
-        return f"Verblijfsplaatshistorie niet gevonden voor burgerservicenummer {kwargs['bsn']}."
+        return f"Verblijfplaatshistorie niet gevonden voor burgerservicenummer {kwargs['bsn']}."

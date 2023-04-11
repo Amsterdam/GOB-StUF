@@ -7,7 +7,7 @@ from gobstuf.rest.brp.views import (
     IngeschrevenpersonenBsnPartnerListView,
     IngeschrevenpersonenBsnPartnerDetailView,
     IngeschrevenpersonenFilterView,
-    IngeschrevenpersonenBsnVerblijfsplaatshistorieListView,
+    IngeschrevenpersonenBsnVerblijfplaatshistorieListView,
     IngeschrevenpersonenStufResponse,
     IngeschrevenpersonenStufPartnersListResponse,
     IngeschrevenpersonenStufPartnersDetailResponse,
@@ -120,8 +120,9 @@ class TestIngeschrevenpersonenBsnKinderenDetailView(TestCase):
         self.assertEqual('Ingeschreven kind voor persoon niet gevonden met burgerservicenummer BEE ES EN.',
                          IngeschrevenpersonenBsnKinderenDetailView().get_not_found_message(**kwargs))
 
-class TestIngeschrevenpersonenBsnVerblijfsplaatshistorieListView(TestCase):
+
+class TestIngeschrevenpersonenBsnVerblijfplaatshistorieListView(TestCase):
     def test_get_not_found_message(self):
         kwargs = {'bsn': 'BEE ES EN'}
-        self.assertEqual('Verblijfsplaatshistorie niet gevonden voor burgerservicenummer BEE ES EN.',
-                         IngeschrevenpersonenBsnVerblijfsplaatshistorieListView().get_not_found_message(**kwargs))
+        self.assertEqual('Verblijfplaatshistorie niet gevonden voor burgerservicenummer BEE ES EN.',
+                         IngeschrevenpersonenBsnVerblijfplaatshistorieListView().get_not_found_message(**kwargs))
