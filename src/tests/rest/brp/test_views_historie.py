@@ -66,3 +66,19 @@ class TestIngeschrevenpersonenBsnViewHistorie:
         response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie", headers=jwt_header)
         assert response.status_code == 200
         assert response.json["_embedded"]["verblijfplaatshistorie"] == []
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_empty.xml"], indirect=True)
+    def test_historie_empty_404(self, stuf_310_response, app_base_path, client, jwt_header):
+        """Test status 404 on empty response."""
+        response = client.get(f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie", headers=jwt_header)
+        assert response.status_code == 404
+        assert "Verblijfplaatshistorie niet gevonden voor burgerservicenummer 123456789." == response.json["detail"]
+
+    @pytest.mark.parametrize("stuf_310_response", ["response_310_historie.xml"], indirect=True)
+    def test_historie_filter_empty(self, stuf_310_response, app_base_path, client, jwt_header):
+        """Test status 200 on empty response after filtering."""
+        url =  f"{app_base_path}/brp/ingeschrevenpersonen/123456789/verblijfplaatshistorie?peildatum=1500-03-03"
+        response = client.get(url, headers=jwt_header)
+
+        assert response.status_code == 200
+        assert response.json["_embedded"]["verblijfplaatshistorie"] == []
