@@ -466,6 +466,33 @@ class TestNPSMapping(TestCase):
         result = mapping.filter(obj)
         self.assertEqual(result, {'verblijfplaats': {'any brief key': 'any brief value', 'functieAdres': 'briefadres'}})
 
+    def test_filter_datum_aanvang_adreshouding_buitenland(self):
+        mapping = NPSMapping()
+
+        obj = self.empty_mapping(mapping.mapping) | {
+            "verblijfplaats": {
+                "gemeenteVanInschrijving": {"code": "1999", "omschrijving": "RNI"},
+                "datumAanvangAdreshouding": "2020-01-01"
+            }
+        }
+        assert "datumAanvangAdreshouding" not in mapping.filter(obj)["verblijfplaats"]
+
+        obj = self.empty_mapping(mapping.mapping) | {
+            "verblijfplaats": {
+                "gemeenteVanInschrijving": {"code": None, "omschrijving": None},
+                "datumAanvangAdreshouding": "2020-01-01"
+            }
+        }
+        assert "datumAanvangAdreshouding" in mapping.filter(obj)["verblijfplaats"]
+
+        obj = self.empty_mapping(mapping.mapping) | {
+            "verblijfplaats": {
+                "gemeenteVanInschrijving": {"code": "1", "omschrijving": "other"},
+                "datumAanvangAdreshouding": "2020-01-01"
+            }
+        }
+        assert "datumAanvangAdreshouding" in mapping.filter(obj)["verblijfplaats"]
+
     @patch("gobstuf.stuf.brp.response_mapping.get_auth_url",
            lambda name, **kwargs: f"https://theurl/{name}/{kwargs['bsn']}/type/{kwargs.get('thetype_id', kwargs.get('theothertype_id'))}")
     def test_add_related_object_links(self):
@@ -807,14 +834,24 @@ class TestVerblijfplaatsHistorieMapping(TestCase):
     def test_mapping(self):
         assert ["overlijden", "verblijfplaats", "historieMaterieel"] == list(self.mapping.mapping)
 
+    def test_mapping_verblijfplaats(self):
+        assert self.mapping.mapping_verblijfplaats["datumIngangGeldigheid"] != NPSMapping.DUMMY
+        assert self.mapping.mapping_verblijfplaats["datumTot"] != NPSMapping.DUMMY
+
     def test_filter(self):
         obj = {
             "verblijfplaats": {
                 "nummeraanduidingIdentificatie": "03630123456",
-                "adresseerbaarObjectIdentificatie": "03631234"  # not valid
+                "adresseerbaarObjectIdentificatie": "03631234",  # not valid
+                "gemeenteVanInschrijving": {"code": None},
+                "datumAanvangAdreshouding": "2020-01-01",
             },
             "historieMaterieel": [
-                {"adresseerbaarObjectIdentificatie": "036303"}
+                {
+                    "adresseerbaarObjectIdentificatie": "036303",
+                    "gemeenteVanInschrijving": {"code": "1999"},
+                    "datumAanvangAdreshouding": "2020-01-01",  # filtered by gemeenteVanInschrijving
+                }
             ],
             "overlijden": {"indicatieOverleden": None}
         }
@@ -824,3 +861,6 @@ class TestVerblijfplaatsHistorieMapping(TestCase):
         assert "adresseerbaarObject" not in result["verblijfplaats"]["_links"]
         assert result["verblijfplaats"]["_links"]["adres"]["href"] == "https://api.data.amsterdam.nl/v1/bag/nummeraanduidingen/03630123456"
         assert result["historieMaterieel"][0]["_links"]["adresseerbaarObject"]["href"] == "https://api.data.amsterdam.nl/v1/bag/standplaatsen/036303"
+
+        assert "datumAanvangAdreshouding" in result["verblijfplaats"]
+        assert "datumAanvangAdreshouding" not in result["historieMaterieel"][0]

@@ -94,6 +94,9 @@ class StufObjectMapping:
 
 class NPSMapping(Mapping):
     """NPS mapping, for Natuurlijke Personen."""
+
+    DUMMY = (lambda dummy: None, "BG:dummy")
+
     @property
     def answer_code(self):
         return "npsLa01"
@@ -137,9 +140,10 @@ class NPSMapping(Mapping):
                  'BG:verblijfsadres BG:begindatumVerblijf',
                  'BG:inp.verblijftIn StUF:tijdvakRelatie StUF:beginRelatie'
                  ),
-            # only available for verblijfplaatshistorie, not actual
-            'datumIngangGeldigheid': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:beginGeldigheid'),
-            'datumTot': (MKSConverter.as_datum_broken_down, 'StUF:tijdvakGeldigheid StUF:eindGeldigheid'),
+            # only available for verblijfplaatshistorie, dummy to maintain ordering
+            'datumIngangGeldigheid': self.DUMMY,
+            'datumTot': self.DUMMY,
+
             'datumInschrijvingInGemeente': (MKSConverter.as_datum_broken_down, 'BG:inp.datumInschrijving'),
             'datumVestigingInNederland':
                 (MKSConverter.as_datum_broken_down, 'BG:inp.datumVestigingInNederland',
@@ -300,6 +304,12 @@ class NPSMapping(Mapping):
             'indicatieVestigingVanuitBuitenland': verblijfplaats.pop('indicatieVestigingVanuitBuitenland', None),
             'locatiebeschrijving': adres.pop('locatiebeschrijving', None),
         }
+
+        # dont return datumAanvangAdreshouding when address is foreign, see #66932
+        # ie gemeenteVanInschrijving == {"code": "1999","omschrijving": "Registratie Niet Ingezetenen (RNI)"}
+        if verblijfplaats["gemeenteVanInschrijving"]["code"] == "1999":
+            verblijfplaats.pop("datumAanvangAdreshouding")
+
         return {**adres, **reordered, **verblijfplaats}
 
     @property
@@ -844,6 +854,19 @@ class VerblijfplaatsHistorieMapping(NPSMapping):
 
     def get_links(self, mapped_object: dict) -> dict:
         return {}
+
+    @property
+    def mapping_verblijfplaats(self) -> dict:
+        return super().mapping_verblijfplaats | {
+            "datumIngangGeldigheid": (
+                MKSConverter.get_first_date_from_various,
+                "StUF:tijdvakGeldigheid StUF:beginGeldigheid",  # first location
+                "BG:verblijfsadres BG:begindatumVerblijf",  # fallback datumAanvangAdreshouding only actual
+                "BG:inp.verblijftIn StUF:tijdvakRelatie StUF:beginRelatie",
+                "BG:inp.datumInschrijving"
+            ),
+            "datumTot": (MKSConverter.as_datum_broken_down, "StUF:tijdvakGeldigheid StUF:eindGeldigheid")
+        }
 
     @property
     def mapping(self) -> dict:
