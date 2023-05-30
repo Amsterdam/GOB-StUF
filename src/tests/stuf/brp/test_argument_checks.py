@@ -1,8 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from gobstuf.rest.brp.argument_checks import ArgumentCheck
 from gobstuf.reference_data.code_resolver import DataItemNotFoundException
+from gobstuf.stuf.brp.request.argument_checks import ArgumentCheck
 
 
 class TestArgumentCheck(TestCase):
@@ -77,7 +77,7 @@ class TestArgumentCheck(TestCase):
         for v in ['aa*aa', 'aa?aa']:
             self.assertTrue(ArgumentCheck.validate(check, v))
 
-    @patch('gobstuf.rest.brp.argument_checks.CodeResolver')
+    @patch('gobstuf.stuf.brp.request.argument_checks.CodeResolver')
     def test_validate_gemeentecode(self, mock_code_resolver):
         mock_code_resolver.get_gemeente.side_effect = ['any code', DataItemNotFoundException()]
 

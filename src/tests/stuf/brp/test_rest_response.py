@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 
 import json
 
-from gobstuf.rest.brp.rest_response import RESTResponse
+from gobstuf.stuf.brp.rest_response import RESTResponse
 
 mock_response = MagicMock()
 any_data = {"any": "data"}
@@ -12,7 +12,7 @@ mock_request = MagicMock()
 mock_request.url = "any url"
 
 
-@patch("gobstuf.rest.brp.rest_response.Response", mock_response)
+@patch("gobstuf.stuf.brp.rest_response.Response", mock_response)
 class TestRESTResponse(TestCase):
 
     def setUp(self) -> None:
@@ -20,7 +20,7 @@ class TestRESTResponse(TestCase):
         mock_response.side_effect = lambda **kwargs: kwargs
 
     def test_json_response(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             # Return the data as a JSON string response
             result = RESTResponse._json_response(any_data)
             self.assertEqual(result['response'], json.dumps(any_data))
@@ -30,7 +30,7 @@ class TestRESTResponse(TestCase):
             self.assertEqual(result['aap'], "noot")
 
     def test_client_error_response(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             result = RESTResponse._client_error_response(data=any_data, status=400)
             response = json.loads(result['response'])
             # Check if all required attributes are present in the response
@@ -49,12 +49,12 @@ class TestRESTResponse(TestCase):
             self.assertEqual(response['any'], 'other')
 
     def test_hal(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             hal = RESTResponse._hal(any_data)
             self.assertEqual(hal, {'_links': {'self': {'href': 'any url'}}, 'any': 'data'})
 
     def test_ok(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             result = RESTResponse.ok(any_data)
             response = json.loads(result['response'])
             self.assertEqual(result['content_type'], 'application/hal+json')
@@ -62,7 +62,7 @@ class TestRESTResponse(TestCase):
             self.assertEqual(response, RESTResponse._hal(any_data))
 
     def test_errors(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             for method in ['bad_request', 'forbidden', 'not_found']:
                 result = getattr(RESTResponse, method)(**any_data)
                 self.assertEqual(result['content_type'], 'application/problem+json')
@@ -71,21 +71,21 @@ class TestRESTResponse(TestCase):
                     self.assertEqual(response[k], v)
 
     def test_bad_request(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             result = RESTResponse.bad_request()
             self.assertEqual(result['status'], 400)
 
     def test_forbidden(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             result = RESTResponse.forbidden()
             self.assertEqual(result['status'], 403)
 
     def test_not_found(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             result = RESTResponse.not_found()
             self.assertEqual(result['status'], 404)
 
     def test_internal_server_error(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+        with patch("gobstuf.stuf.brp.rest_response.request", mock_request):
             result = RESTResponse.internal_server_error()
             self.assertEqual(result['status'], 500)

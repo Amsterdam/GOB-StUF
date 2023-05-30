@@ -1,5 +1,5 @@
-from gobstuf.rest.brp.rest_response import RESTResponse
 from gobstuf.stuf.brp.base_response import StufResponse
+from gobstuf.stuf.brp.rest_response import RESTResponse
 
 
 class UnknownErrorCode(Exception):

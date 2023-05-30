@@ -1,9 +1,8 @@
-"""
-Request argument checks are defined here
+"""Request argument checks."""
 
-"""
-import re
+
 import datetime
+import re
 
 from gobstuf.reference_data.code_resolver import CodeResolver, DataItemNotFoundException
 from gobstuf.stuf.message import WILDCARD_CHARS
@@ -21,7 +20,7 @@ def validate_date(value: str):
 
 
 def validate_gemeentecode(value: str):
-    # Try to lookup a valid gemeente for the supplied value
+    """Try to lookup a valid gemeente for the supplied value."""
     try:
         CodeResolver.get_gemeente(value)
     except DataItemNotFoundException:
@@ -30,7 +29,7 @@ def validate_gemeentecode(value: str):
 
 
 def validate_wildcard_length(value: str):
-    # Test if the value is a valid wildcard search when a wildcard is used, meaning it has at least 2 characters
+    """Test if the value is a valid wildcard search when a wildcard is used, meaning it has at least 2 characters."""
     if any(wildcard in value for wildcard in WILDCARD_CHARS):
         wildcard_regex = ''.join(WILDCARD_CHARS)
         return len(re.sub(rf'[{wildcard_regex}]', '', value)) >= MIN_WILDCARD_LENGTH
@@ -38,7 +37,7 @@ def validate_wildcard_length(value: str):
 
 
 def validate_wildcard_position(value: str):
-    # Test if wildcards are at the beginning or end of the search string
+    """Test if wildcards are at the beginning or end of the search string."""
     if any(wildcard in value for wildcard in WILDCARD_CHARS):
         wildcard_regex = ''.join(WILDCARD_CHARS)
         return re.match(rf'^[{wildcard_regex}]*[^{wildcard_regex}]+[{wildcard_regex}]*$', value)

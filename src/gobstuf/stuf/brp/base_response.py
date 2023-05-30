@@ -1,14 +1,13 @@
 import re
-
 from abc import ABC, abstractmethod
 from datetime import date
-from flask import request
-from typing import List, Optional
+from typing import Optional
 from xml.etree.ElementTree import Element
 
+from flask import request
+
 from gobstuf.lib.utils import get_value
-from gobstuf.rest.brp.argument_checks import WILDCARD_CHARS
-from gobstuf.stuf.message import StufMessage
+from gobstuf.stuf.message import WILDCARD_CHARS, StufMessage
 from gobstuf.stuf.exception import NoStufAnswerException, NoStufAnswerFilterException
 from gobstuf.stuf.brp.response_mapping import StufObjectMapping, Mapping, RelatedMapping
 
@@ -227,7 +226,7 @@ class StufMappedResponse(StufResponse):
         self._add_embedded_objects(mapped_object)
         return mapped_object.get_filtered_object(**self._get_filter_kwargs())
 
-    def create_objects_from_elements(self, object_elements: list) -> List[dict]:
+    def create_objects_from_elements(self, object_elements: list) -> list[dict]:
         """Create a list of objects from a list of XMLtree elements
 
         :param object_elements:
@@ -599,9 +598,9 @@ class VerblijfplaatsHistorieFilter(ResponseFilter):
         return vp_datuminganggeldigheid, vp_datumtot
 
     def filter_on_request_args(self, verblijfplaats, qp_datumvan, qp_datumtotenmet) -> Optional[dict]:
-        """
-        Converts the query parameters dates and verblijfplaats dates to date range dicts
-        Filters the data on the request args and retruns the new filtered data
+        """Convert the query parameters dates and verblijfplaats dates to date range dicts.
+
+        Filter the data on the request args and returns the new filtered data
         """
         # Convert verblijfplaats dates to date range
         vp_datuminganggeldigheid, vp_datumtot = self.get_date_range_vb(verblijfplaats)
