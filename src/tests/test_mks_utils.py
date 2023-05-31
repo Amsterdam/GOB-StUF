@@ -1,10 +1,9 @@
+import datetime
 from unittest import TestCase
 from unittest.mock import patch
 
-import datetime
-
-from gobstuf.mks_utils import MKSConverter, _today, DataItemNotFoundException
 from gobstuf.indications import Indication
+from gobstuf.mks_utils import DataItemNotFoundException, MKSConverter, _today
 
 
 class TestMKSConverter(TestCase):
@@ -52,6 +51,10 @@ class TestMKSConverter(TestCase):
     def test_as_dag(self):
         self.assertEqual(MKSConverter.as_dag("20200422"), 22)
         self.assertEqual(MKSConverter.as_dag("202004221"), None)
+
+    def test_to_date(self):
+        self.assertEqual(MKSConverter.to_date("20200422"), datetime.date(2020, 4, 22))
+        self.assertEqual(MKSConverter.to_date("202004221"), None)
 
     def test_as_code(self):
         for length in range(1, 5):
@@ -332,6 +335,15 @@ class TestMKSConverter(TestCase):
         self.assertEqual(len(nationaliteit), 1)
         self.assertEqual(nationaliteit[0]['nationaliteit']['omschrijving'], 'Nederlandse')
         self.assertTrue(nationaliteit[0]['inOnderzoek']['nationaliteit'])
+
+        # no code
+        no_code_nationaliteit_parameters = {
+            'nationaliteiten': [{'nationaliteit': {'code': None}}]
+        }
+        no_code_nationaliteit = MKSConverter.get_nationaliteit(no_code_nationaliteit_parameters)
+
+        # Expect no nationaliteit
+        self.assertIsNone(no_code_nationaliteit)
 
     def test_get_verblijf_buitenland(self):
         parameters = {

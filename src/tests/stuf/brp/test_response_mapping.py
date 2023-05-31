@@ -1,7 +1,8 @@
-import freezegun
-
 from unittest import TestCase
 from unittest.mock import patch
+
+import freezegun
+
 from gobstuf.stuf.brp.response_mapping import (
     Mapping, NPSMapping, StufObjectMapping, RelatedMapping, NPSNPSHUWMapping, NPSNPSOUDMapping, NPSNPSKNDMapping,
     NPSFamilieRelatedMapping, VerblijfplaatsHistorieMapping
@@ -84,12 +85,63 @@ class TestStufObjectMapping(TestCase):
 
 
 class TestNPSMapping(TestCase):
+    """NPSMapping tests."""
+
+    def setUp(self) -> None:
+        self.mapping = NPSMapping()
+
+    def test_in_onderzoek(self):
+        self.assertIsNone(self.mapping.in_onderzoek(["N"]))
+
+        result = {
+            "aanduidingBijHuisnummer": True,
+            "adresseerbaarObjectIdentificatie": True,
+            "datumAanvangAdreshouding": True,
+            "datumIngangGeldigheid": True,
+            "datumInschrijvingInGemeente": True,
+            "datumVestigingInNederland": True,
+            "functieAdres": True,
+            "gemeenteVanInschrijving": True,
+            "huisletter": True,
+            "huisnummer": True,
+            "huisnummertoevoeging": True,
+            "korteNaam": True,
+            "landVanwaarIngeschreven": True,
+            "locatiebeschrijving": True,
+            "nummeraanduidingIdentificatie": True,
+            "postcode": True,
+            "straat": True,
+            "verblijfBuitenland": True,
+            "woonplaats": True,
+        }
+        self.assertEqual(self.mapping.in_onderzoek(["J"]), result)
+
+    def test_verblijfstitel(self):
+        self.assertIsNone(self.mapping.verblijfstitel(None, "20221203", "22000127", ["N"], "x"))
+
+        self.assertIsNone(self.mapping.verblijfstitel(1, "20221203", "20230127", ["N"], "x"))
+
+        self.assertIsNone(self.mapping.verblijfstitel(2, None, "22000127", ["J"], "x"))
+
+        result = {
+            "aanduiding": {"code": "25", "omschrijving": "R"},
+            "datumIngang": {"datum": "2022-12-03", "jaar": 2022, "maand": 12, "dag": 3},
+            "datumEinde": {"datum": "2200-01-27", "jaar": 2200, "maand": 1, "dag": 27},
+            "inOnderzoek": {"aanduiding": True, "datumIngang": True, "datumEinde": True}
+        }
+        self.assertEqual(self.mapping.verblijfstitel(
+            25, "20221203", "22000127", ["J"], "R"), result)
+
+        result = {
+            "aanduiding": {"code": "98", "omschrijving": "G"},
+            "datumIngang": {"datum": "2022-02-07", "jaar": 2022, "maand": 2, "dag": 7},
+            "datumEinde": {"datum": "2023-08-06", "jaar": 2023, "maand": 8, "dag": 6},
+        }
+        self.assertEqual(self.mapping.verblijfstitel(98, "20220207", "20230806", ["N"], "G"), result)
 
     def test_sort_ouders(self):
-        mapping = NPSMapping()
-
         def ensure_ordering(objects: list):
-            ordered = mapping.sort_ouders(objects)
+            ordered = self.mapping.sort_ouders(objects)
             order = [obj['order'] for obj in ordered]
             self.assertTrue(order == sorted(order))
 
@@ -267,10 +319,9 @@ class TestNPSMapping(TestCase):
         ensure_ordering(ouders)
 
     def test_sort_kinderen(self):
-        mapping = NPSMapping()
 
         def ensure_ordering(objects: list):
-            ordered = mapping.sort_kinderen(objects)
+            ordered = self.mapping.sort_kinderen(objects)
             order = [obj['order'] for obj in ordered]
 
             self.assertTrue(order == sorted(order))
@@ -421,84 +472,77 @@ class TestNPSMapping(TestCase):
         return result
 
     def test_filter_overleden(self):
-        mapping = NPSMapping()
-
-        obj = self.empty_mapping(mapping.mapping)
-        result = mapping.filter(obj)
+        obj = self.empty_mapping(self.mapping.mapping)
+        result = self.mapping.filter(obj)
         self.assertEqual(result, {})
 
-        obj = self.empty_mapping(mapping.mapping)
+        obj = self.empty_mapping(self.mapping.mapping)
         obj['any key'] = 'any value'
-        result = mapping.filter(obj)
+        result = self.mapping.filter(obj)
         self.assertEqual(result, {'any key': 'any value'})
 
-        obj = self.empty_mapping(mapping.mapping)
+        obj = self.empty_mapping(self.mapping.mapping)
         obj['any key'] = 'any value'
         obj['overlijden']['indicatieOverleden'] = True
         kwargs = {'inclusiefoverledenpersonen': False}
-        result = mapping.filter(obj, **kwargs)
+        result = self.mapping.filter(obj, **kwargs)
         self.assertEqual(result, None)
 
-        obj = self.empty_mapping(mapping.mapping)
+        obj = self.empty_mapping(self.mapping.mapping)
         obj['any key'] = 'any value'
         obj['overlijden']['indicatieOverleden'] = True
         kwargs = {'inclusiefoverledenpersonen': True}
-        result = mapping.filter(obj, **kwargs)
+        result = self.mapping.filter(obj, **kwargs)
         self.assertEqual(result, {'any key': 'any value', 'overlijden': {'indicatieOverleden': True}})
 
     def test_filter_adres(self):
-        mapping = NPSMapping()
-
-        obj = self.empty_mapping(mapping.mapping)
+        obj = self.empty_mapping(self.mapping.mapping)
         obj['verblijfplaats']['woonadres'] = {'any key': 'any value'}
-        result = mapping.filter(obj)
+        result = self.mapping.filter(obj)
         self.assertEqual(result, {'verblijfplaats': {'any key': 'any value', 'functieAdres': 'woonadres'}})
 
-        obj = self.empty_mapping(mapping.mapping)
+        obj = self.empty_mapping(self.mapping.mapping)
         obj['verblijfplaats']['briefadres'] = {'any key': 'any value'}
-        result = mapping.filter(obj)
+        result = self.mapping.filter(obj)
         self.assertEqual(result, {'verblijfplaats': {'any key': 'any value', 'functieAdres': 'briefadres'}})
 
         # test both brief- and woonadres, should result in briefadres
-        obj = self.empty_mapping(mapping.mapping)
+        obj = self.empty_mapping(self.mapping.mapping)
         obj['verblijfplaats']['woonadres'] = {'any woon key': 'any woon value'}
         obj['verblijfplaats']['briefadres'] = {'any brief key': 'any brief value'}
-        result = mapping.filter(obj)
+        result = self.mapping.filter(obj)
         self.assertEqual(result, {'verblijfplaats': {'any brief key': 'any brief value', 'functieAdres': 'briefadres'}})
 
     def test_filter_datum_aanvang_adreshouding_buitenland(self):
-        mapping = NPSMapping()
-
-        obj = self.empty_mapping(mapping.mapping) | {
+        obj = self.empty_mapping(self.mapping.mapping) | {
             "verblijfplaats": {
                 "gemeenteVanInschrijving": {"code": "1999", "omschrijving": "RNI"},
                 "datumAanvangAdreshouding": "2020-01-01"
             }
         }
-        assert "datumAanvangAdreshouding" not in mapping.filter(obj)["verblijfplaats"]
+        assert "datumAanvangAdreshouding" not in self.mapping.filter(obj)["verblijfplaats"]
 
-        obj = self.empty_mapping(mapping.mapping) | {
+        obj = self.empty_mapping(self.mapping.mapping) | {
             "verblijfplaats": {
                 "gemeenteVanInschrijving": {"code": None, "omschrijving": None},
                 "datumAanvangAdreshouding": "2020-01-01"
             }
         }
-        assert "datumAanvangAdreshouding" in mapping.filter(obj)["verblijfplaats"]
+        assert "datumAanvangAdreshouding" in self.mapping.filter(obj)["verblijfplaats"]
 
-        obj = self.empty_mapping(mapping.mapping) | {
+        obj = self.empty_mapping(self.mapping.mapping) | {
             "verblijfplaats": {
                 "gemeenteVanInschrijving": {"code": "1", "omschrijving": "other"},
                 "datumAanvangAdreshouding": "2020-01-01"
             }
         }
-        assert "datumAanvangAdreshouding" in mapping.filter(obj)["verblijfplaats"]
+        assert "datumAanvangAdreshouding" in self.mapping.filter(obj)["verblijfplaats"]
 
     @patch("gobstuf.stuf.brp.response_mapping.get_auth_url",
            lambda name, **kwargs: f"https://theurl/{name}/{kwargs['bsn']}/type/{kwargs.get('thetype_id', kwargs.get('theothertype_id'))}")
     def test_add_related_object_links(self):
         # _add_related_object_links is also indirectly tested by the test_get_links method below.
         # This method tests the method in isolation
-        mapping = NPSMapping()
         mapped_object = {
             'burgerservicenummer': 'digitdigitdigit',
             '_embedded': {
@@ -520,7 +564,7 @@ class TestNPSMapping(TestCase):
         }
         links = {}
 
-        mapping._add_related_object_links(mapped_object, links, 'thetype', 'theroute')
+        self.mapping._add_related_object_links(mapped_object, links, 'thetype', 'theroute')
 
         self.assertEqual({
             'thetype': [
@@ -564,7 +608,7 @@ class TestNPSMapping(TestCase):
         }, mapped_object)
 
         # Should add 'theothertype' links as well, without having matching embedded objects
-        mapping._add_related_object_links(mapped_object, links, 'theothertype', 'theroute')
+        self.mapping._add_related_object_links(mapped_object, links, 'theothertype', 'theroute')
 
         self.assertEqual({
             'thetype': [
@@ -581,8 +625,6 @@ class TestNPSMapping(TestCase):
     @patch("gobstuf.stuf.brp.response_mapping.get_auth_url",
            lambda name, **kwargs: f'http(s)://thishost/{name}/{kwargs["bsn"]}')
     def test_get_links(self):
-
-        mapping = NPSMapping()
         mapped_object = {
             'verblijfplaats': {
                 'woonadres': {
@@ -618,14 +660,14 @@ class TestNPSMapping(TestCase):
                 {'href': 'http(s)://thishost/brp_ingeschrevenpersonen_bsn_partners_detail/digitdigitdigit'},
                 {'href': 'http(s)://thishost/brp_ingeschrevenpersonen_bsn_partners_detail/digitdigitdigit'}
             ]
-        }, mapping.get_links(mapped_object))
+        }, self.mapping.get_links(mapped_object))
 
         for c, partner in enumerate(mapped_object['_embedded']['partners']):
             self.assertEqual(partner['_links']['self']['href'],
                              'http(s)://thishost/brp_ingeschrevenpersonen_bsn_partners_detail/digitdigitdigit')
 
         mapped_object = {}
-        self.assertEqual({}, mapping.get_links(mapped_object))
+        self.assertEqual({}, self.mapping.get_links(mapped_object))
 
 
 class TestRelatedMapping(TestCase):

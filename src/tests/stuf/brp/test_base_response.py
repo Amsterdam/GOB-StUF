@@ -63,13 +63,13 @@ class StufMappedResponseImpl(StufMappedResponse):
 
 class MockRelatedResponseFilter(MagicMock):
     wildcards = {}
-    
+
     filter_response = MagicMock()
 
 
 class MockWildcardSearchResponseFilter(MagicMock):
     related_type = 'relation'
-    
+
     filter_response = MagicMock()
 
 
@@ -372,7 +372,7 @@ class StufMappedResponseTest(TestCase):
         resp = StufMappedResponseImpl('msg')
         resp.get_all_object_elms = MagicMock()
         resp.create_objects_from_elements = MagicMock()
-        
+
         mock_filter = MockWildcardSearchResponseFilter(resp)
         mock_filter.filter_response.side_effect = ['obj1', None]
         resp.response_filters_instances = [mock_filter]
@@ -473,9 +473,9 @@ class TestMappedObject(TestCase):
   </elm3>
   <elm4 attr="4" />
   <elm8>
-    <elm8sub x="11">1</elm8sub> 
-    <elm8sub x="12">2</elm8sub> 
-    <elm8sub x="13">3</elm8sub> 
+    <elm8sub x="11">1</elm8sub>
+    <elm8sub x="12">2</elm8sub>
+    <elm8sub x="13">3</elm8sub>
   </elm8>
 </root>
 '''
@@ -694,7 +694,7 @@ class TestWildcardSearchResponseFilter(TestCase):
             res = filter.filter_response(obj)
             results += [res['naam']['geslachtsnaam']] if res is not None else []
         self.assertEqual(['Jansen', 'van Jansen'], results)
-        
+
         # Test naam? wildcard
         wildcards = {'naam__geslachtsnaam': 'Jans??'}
         results = []
@@ -703,7 +703,7 @@ class TestWildcardSearchResponseFilter(TestCase):
             res = filter.filter_response(obj)
             results += [res['naam']['geslachtsnaam']] if res is not None else []
         self.assertEqual(['Jansen'], results)
-        
+
         # Test ?naam wildcard
         wildcards = {'naam__geslachtsnaam': '?ans'}
         results = []
@@ -712,7 +712,7 @@ class TestWildcardSearchResponseFilter(TestCase):
             res = filter.filter_response(obj)
             results += [res['naam']['geslachtsnaam']] if res is not None else []
         self.assertEqual(['Jans'], results)
-        
+
         # Test *naam? wildcard
         wildcards = {'naam__geslachtsnaam': '*Jans??'}
         results = []
@@ -823,7 +823,11 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
             ]}
             assert self.resp_obj.filter_response(self.mapped_object) == expected
 
-    def test_filter_response_missing_datumInangGeldigheid(self):
+        # datumTotEnMet < datumVan
+        with self.app.test_request_context("path?datumTotEnMet=2004-02-26&datumVan=2004-03-01"):
+            self.assertEqual(self.resp_obj.filter_response(self.mapped_object), {})
+
+    def test_filter_response_missing_datumIngangGeldigheid(self):
         mapped_object = {
             "historieMaterieel": [
                 {
@@ -839,6 +843,23 @@ class TestVerblijfplaatsHistorieFilter(TestCase):
 
         with self.app.test_request_context("path?peildatum=2000-01-01"):
             assert self.resp_obj.filter_response(mapped_object) == expected
+
+    def test_filter_response_verblijfplaats(self):
+        """Test VerblijfplaatsHistorieFilter.filter_response with verblijfplaats."""
+        mapped_object = {"verblijfplaats": {"datumTot": {"datum": "2009-03-05", "jaar": 2009, "maand": 3, "dag": 5}}}
+        with self.app.test_request_context("path?peildatum=2006-05-10"):
+            expected = {"verblijfplaats": {"datumTot": {"datum": "2009-03-05", "jaar": 2009, "maand": 3, "dag": 5}}}
+            self.assertEqual(self.resp_obj.filter_response(mapped_object), expected)
+
+        # verblijfplaats: datumTot < datumVan
+        mapped_object = {
+            "verblijfplaats": {
+                "datumTot": {"datum": "2009-03-05", "jaar": 2009, "maand": 3, "dag": 5},
+                "datumVan": {"datum": "2012-06-13", "jaar": 2012, "maand": 6, "dag": 13}
+            }
+        }
+        with self.app.test_request_context("path?peildatum=2018-01-01"):
+            self.assertEqual(self.resp_obj.filter_response(mapped_object), {})
 
     def test_get_date_type(self):
         tests = [
