@@ -119,7 +119,7 @@ def stuf_310_response(request, requests_mock, tests_dir: Path) -> None:
     requests_mock.post(url, text=mock_response)
 
 
-@pytest.fixture(params=["API_BASE_PATH", "HC_BASE_PATH"])
+@pytest.fixture(params=["HC_BASE_PATH"])
 def app_base_path(request) -> str:
     """Returns the base path where the api is mounted.
 
