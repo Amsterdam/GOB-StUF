@@ -9,7 +9,6 @@ from gobstuf.auth.routes import secure_route
 from gobstuf.certrequest import cert_get, cert_post
 from gobstuf.config import API_BASE_PATH, ROUTE_PATH_310, ROUTE_PATH_204, ROUTE_SCHEME, ROUTE_NETLOC, GOB_STUF_PORT
 from gobstuf.logger import get_default_logger
-from gobstuf.rest.routes import REST_ROUTES
 
 logger = get_default_logger()
 
@@ -146,15 +145,6 @@ XML_ROUTES = [
     (ROUTE_PATH_310, _stuf, ['GET', 'POST'], "stuf_310"),
     (ROUTE_PATH_204, _stuf, ['GET', 'POST'], "stuf_204")
 ]
-
-
-for rule, view_func, methods in REST_ROUTES:
-    secure_bp.add_url_rule(
-        rule=rule,
-        methods=methods,
-        view_func=secure_route(rule, view_func)
-    )
-    logger.info(secure_bp.url_prefix + rule)
 
 
 for rule, view_func, methods, endpoint in XML_ROUTES:
