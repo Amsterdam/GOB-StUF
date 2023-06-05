@@ -41,8 +41,8 @@ def _get_keycloak_token(user: str):
 class EnvVarDecoder(json.JSONDecoder):
 
     substitutes = [
-        ('$PORT', BRP_REGRESSION_TEST_LOCAL_PORT),
-        ('$API_BASE_PATH', HC_BASE_PATH.strip('/'))
+        ("$PORT", BRP_REGRESSION_TEST_LOCAL_PORT),
+        ("/$API_BASE_PATH/", f"/{HC_BASE_PATH.strip('/')}/" if HC_BASE_PATH else "/"),
     ]
 
     def decode(self, s: str, _w: Callable[..., Any] = ...) -> Any:
@@ -247,7 +247,7 @@ class BrpRegression:
         token = self._get_token(testcase.username)
         headers = {'Authorization': token}
 
-        r = requests.get(self.API_BASE + testcase.endpoint, headers=headers)
+        r = requests.get(self.API_BASE.rstrip("/") + testcase.endpoint, headers=headers)
 
         try:
             with open(testcase.expected_result_file, 'r') as f:
