@@ -12,8 +12,10 @@ from gobconfig.datastore.config import get_datastore_config
 from gobcore.datastore.factory import DatastoreFactory
 from gobcore.datastore.objectstore import get_full_container_list, get_object, delete_object, put_object
 from gobcore.exceptions import GOBException
-from gobstuf.config import GOB_OBJECTSTORE, CONTAINER_BASE, API_BASE_PATH, BRP_REGRESSION_TEST_LOCAL_PORT, \
-    KEYCLOAK_AUTH_URL, KEYCLOAK_CLIENT_ID
+from gobstuf.config import (
+    GOB_OBJECTSTORE, CONTAINER_BASE, BRP_REGRESSION_TEST_LOCAL_PORT,
+    KEYCLOAK_AUTH_URL, KEYCLOAK_CLIENT_ID, HC_BASE_PATH
+)
 
 
 def _get_keycloak_token(user: str):
@@ -40,7 +42,7 @@ class EnvVarDecoder(json.JSONDecoder):
 
     substitutes = [
         ('$PORT', BRP_REGRESSION_TEST_LOCAL_PORT),
-        ('$API_BASE_PATH', API_BASE_PATH.strip('/'))
+        ('$API_BASE_PATH', HC_BASE_PATH.strip('/'))
     ]
 
     def decode(self, s: str, _w: Callable[..., Any] = ...) -> Any:
@@ -155,7 +157,7 @@ class BrpRegression:
     TESTS_FILE = 'testcases.csv'
     EXPECTED_DIR = 'expected'
     DESTINATION_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'downloaded', 'brp_regression_tests')
-    API_BASE = f'http://localhost:{BRP_REGRESSION_TEST_LOCAL_PORT}{API_BASE_PATH}'
+    API_BASE = f'http://localhost:{BRP_REGRESSION_TEST_LOCAL_PORT}{HC_BASE_PATH}'
 
     def __init__(self, logger):
         self.logger = logger
