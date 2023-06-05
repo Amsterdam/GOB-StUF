@@ -12,12 +12,21 @@ from gobstuf.regression_tests.brp import BrpRegression, Objectstore, Objectstore
 class TestDecoder(TestCase):
 
     def test_json_substituting(self):
-        data = '{"_links": {"self": {"href": "http://localhost:$BRP_REGRESSION_TEST_LOCAL_PORT/"}}}'
-        expected = '{"_links": {"self": {"href": "http://localhost:8000/"}}}'
-        substitutes = [('$BRP_REGRESSION_TEST_LOCAL_PORT', 8000)]
+        # HC_BASE_PATH="", see pytest.ini
+        data = '{"_links": {"self": {"href": "http://localhost:$PORT/$API_BASE_PATH/brp"}}}'
+        expected = '{"_links": {"self": {"href": "http://localhost:8000/brp"}}}'
+        assert json.loads(data, cls=EnvVarDecoder) == json.loads(expected)
 
+        # patch substitutes, mirror logic
+        base_path = "/gob_stuf"
+        substitutes = [
+            ("$PORT", 8001),
+            ("/$API_BASE_PATH/", f"/{base_path.strip('/')}/" if base_path else "/"),
+        ]
         with patch.object(EnvVarDecoder, 'substitutes', substitutes):
-            self.assertDictEqual(json.loads(data, cls=EnvVarDecoder), json.loads(expected))
+            data = '{"_links": {"self": {"href": "http://localhost:$PORT/$API_BASE_PATH/brp"}}}'
+            expected = '{"_links": {"self": {"href": "http://localhost:8001/gob_stuf/brp"}}}'
+            assert json.loads(data, cls=EnvVarDecoder) == json.loads(expected)
 
 
 class TestModuleFunctions(TestCase):
