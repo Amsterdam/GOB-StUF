@@ -1,5 +1,5 @@
 git+https://github.com/Amsterdam/GOB-Config.git@v0.14.2
-git+https://github.com/Amsterdam/GOB-Core.git@v2.22.0
+git+https://github.com/Amsterdam/GOB-Core.git@v2.23.0
 -e git+https://github.com/Amsterdam/flask-audit-log.git@v0.1.0a-rc1#egg=datapunt-flask-audit-log
 Flask-Cors==4.0.0
 Flask==2.3.3
