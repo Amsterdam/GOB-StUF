@@ -46,13 +46,14 @@ class TestApp(TestCase):
         # Also call _exit when the message driven service has failed
         mock_os._exit.assert_called_once()
 
-    @patch("gobstuf.app.Thread")
-    @patch("gobstuf.app.get_flask_app")
-    def test_get_app(self, mock_flask_app, mock_thread):
-        self.assertEqual(mock_flask_app(), get_app())
-
-        mock_thread.assert_called_with(target=run_message_thread)
-        mock_thread().start.assert_called_once()
+    # DISABLED for now, see app.py
+    # @patch("gobstuf.app.Thread")
+    # @patch("gobstuf.app.get_flask_app")
+    # def test_get_app(self, mock_flask_app, mock_thread):
+    #     self.assertEqual(mock_flask_app(), get_app())
+    #
+    #     mock_thread.assert_called_with(target=run_message_thread)
+    #     mock_thread().start.assert_called_once()
 
     @patch("gobstuf.app.GOB_STUF_PORT", 1234)
     @patch("gobstuf.app.get_app")

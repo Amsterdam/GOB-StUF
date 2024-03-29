@@ -2,7 +2,6 @@ import os
 import datetime
 
 from gobstuf.api import get_flask_app
-from threading import Thread
 
 from gobcore.logging.logger import logger
 from gobcore.message_broker.config import WORKFLOW_EXCHANGE, BRP_REGRESSION_TEST_QUEUE, BRP_REGRESSION_TEST_RESULT_KEY
@@ -58,8 +57,10 @@ def run_message_thread():
 
 def get_app():
     # Start messagedriven_service in separate thread
-    t = Thread(target=run_message_thread)
-    t.start()
+
+    # DISABLED FOR NOW. Won't be supported in the old environment anymore.
+    # t = Thread(target=run_message_thread)
+    # t.start()
 
     return get_flask_app()
 
