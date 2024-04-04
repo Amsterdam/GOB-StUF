@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock, ANY
 
 import json
 
-from gobstuf.audit_log import GOBAuditLogHandler, get_log_handler, get_user_from_request, get_nested_item, on_audit_log_exception
+from gobstuf.audit_log import GOBAuditLogHandler, get_log_handler, get_user_from_request, get_nested_item, on_audit_log_exception, log_request, log_response
 
 class TestAuditLog(unittest.TestCase):
 
@@ -12,9 +12,10 @@ class TestAuditLog(unittest.TestCase):
         self.assertIsNotNone(log_handler)
 
     @patch('gobstuf.audit_log.uuid.uuid4', lambda: 'any uuid')
-    @patch('gobstuf.audit_log.AuditLogger')
+    @patch('gobstuf.audit_log.log_request')
+    @patch('gobstuf.audit_log.log_response')
     @patch('gobstuf.audit_log.on_audit_log_exception')
-    def test_emit(self, mock_on_audit_log_exception, mock_audit_logger):
+    def test_emit(self, mock_on_audit_log_exception, mock_log_response, mock_log_request):
         mock_request = MagicMock()
 
         with patch('gobstuf.audit_log.request', mock_request):
@@ -45,9 +46,7 @@ class TestAuditLog(unittest.TestCase):
                 }
             }
             log_handler.emit(record)
-            mock_audit_logger.get_instance.assert_called_with()
-            audit_logger = mock_audit_logger.get_instance.return_value
-            audit_logger.log_request.assert_called_with(
+            mock_log_request.assert_called_with(
                 source="any url",
                 destination="any ip",
                 extra_data={
@@ -57,7 +56,7 @@ class TestAuditLog(unittest.TestCase):
                 },
                 request_uuid="any uuid"
             )
-            audit_logger.log_response.assert_called_with(
+            mock_log_response.assert_called_with(
                 source="any url",
                 destination="any ip",
                 extra_data={
@@ -72,9 +71,7 @@ class TestAuditLog(unittest.TestCase):
                 'X-Unique-ID': 'some unique id'
             }
             log_handler.emit(record)
-            mock_audit_logger.get_instance.assert_called_with()
-            audit_logger = mock_audit_logger.get_instance.return_value
-            audit_logger.log_request.assert_called_with(
+            mock_log_request.assert_called_with(
                 source="any url",
                 destination="any ip",
                 extra_data={
@@ -84,7 +81,7 @@ class TestAuditLog(unittest.TestCase):
                 },
                 request_uuid="some correlation id"
             )
-            audit_logger.log_response.assert_called_with(
+            mock_log_response.assert_called_with(
                 source="any url",
                 destination="any ip",
                 extra_data={
@@ -92,12 +89,6 @@ class TestAuditLog(unittest.TestCase):
                 },
                 request_uuid="some correlation id"
             )
-
-
-            mock_on_audit_log_exception.reset_mock()
-            audit_logger.log_request.side_effect = Exception("any exception")
-            log_handler.emit(record)
-            mock_on_audit_log_exception.assert_called_with(audit_logger.log_request.side_effect, record)
 
     @patch('gobstuf.audit_log.get_client_ip')
     def test_get_user_from_request(self, mock_get_client_ip):
