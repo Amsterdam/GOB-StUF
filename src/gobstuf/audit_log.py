@@ -7,7 +7,6 @@ from flask import request
 
 from flask_audit_log.util import get_client_ip
 
-from gobcore.logging.audit_logger import AuditLogger
 from gobstuf.config import CORRELATION_ID_HEADER, UNIQUE_ID_HEADER
 from gobstuf.logger import get_default_logger
 
@@ -57,22 +56,25 @@ class GOBAuditLogHandler(logging.StreamHandler):
             UNIQUE_ID_HEADER: request.headers.get(UNIQUE_ID_HEADER),
         })
 
-        audit_logger = AuditLogger.get_instance()
+        log_request(
+            source=source,
+            destination=destination,
+            extra_data=request_data,
+            request_uuid=request_uuid)
 
-        try:
-            audit_logger.log_request(
-                source=source,
-                destination=destination,
-                extra_data=request_data,
-                request_uuid=request_uuid)
+        log_response(
+            source=source,
+            destination=destination,
+            extra_data=response_data,
+            request_uuid=request_uuid)
 
-            audit_logger.log_response(
-                source=source,
-                destination=destination,
-                extra_data=response_data,
-                request_uuid=request_uuid)
-        except Exception as exception:
-            on_audit_log_exception(exception, msg)
+
+def log_request(**kwargs):
+    logger.info(f"request: {json.dumps(kwargs)}", kwargs)
+
+
+def log_response(**kwargs):
+    logger.info(f"response: {json.dumps(kwargs)}", kwargs)
 
 
 def on_audit_log_exception(exception, msg):
