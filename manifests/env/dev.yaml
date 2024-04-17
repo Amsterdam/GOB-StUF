@@ -1,0 +1,19 @@
+# Default keyvault for getting secrets
+keyVaultName: ssr-o-gp4jqffo3heda
+
+# Managed identity (clientId) for workload identity with
+workloadIdentity: 0a33527e-6a51-421c-b00a-b8213b59bb6e
+
+image:
+  repository: brpproxy/gobstuf
+
+# We must select the nodepool to run the pods on
+nodepool: cccbenkont01
+
+# Default host for the ingress resources
+host: benk-o.azure.amsterdam.nl
+
+# Specify the keyvault that has the certificate
+secrets:
+  certificate:
+    keyVaultName: shared-o-wf5pflasngroi

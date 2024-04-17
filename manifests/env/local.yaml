@@ -1,0 +1,31 @@
+image:
+  registry: localhost:5001
+  repository: brpproxy/gobstuf
+  tag: latest
+
+# Default host for the ingress resources
+host: localhost
+
+network:
+  allow-ingress:
+    enabled: false
+
+ingress:
+  backend-external:
+    enabled: false
+  backend-internal:
+    className: nginx
+    tls: null
+
+secrets:
+  certificate:
+    enabled: false
+
+  vault:
+    type: opaque
+    secrets:
+      secret-key: dev
+      oidc-base-url: dev
+      oidc-rp-client-id: dev
+      oidc-rp-client-secret: dev
+      applicationinsights-connection-string: ""

@@ -1,0 +1,95 @@
+fullnameOverride: brpproxy
+tenantId: 72fca1b1-2c2e-4376-a445-294d80196804
+
+image:
+  registry: saks01weuacrpgpgo5qvmwo.azurecr.io
+  repository: brpproxy/gobstuf
+  tag: latest
+
+labels:
+  app: brpproxy
+
+network:
+  allow-ingress:
+    annotations:
+      helm.sh/hook-weight: "-5"
+    selector: app == 'brpproxy'
+    ingress:
+      - action: Allow
+    egress:
+      - action: Allow
+
+secrets:
+  certificate:
+    type: keyvault
+    tls: brpproxy
+
+  vault:
+    type: keyvault
+    annotations:
+      helm.sh/hook-weight: "-5"
+    secrets:
+      - keycloak-auth-url
+      - keycloak-client-id
+      - mks-certificate
+      - mks-certificate-password
+
+deployments:
+  api:
+    selectorLabels:
+      component: api
+    env:
+      KEYCLOAK_AUTH_URL: todo
+      KEYCLOAK_CLIENT_ID: todo
+      MKS_CERTIFICATE: todo
+      MKS_CERTIFICATE_PASSWORD: todo
+    autoscale:
+      cpu: 90
+      memory: 70
+      max: 10
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+    containers:
+      - name: main
+        secrets:
+          - vault
+        tempDirs:
+          - /tmp
+        ports:
+          - port: 8000
+            name: http
+services:
+  api:
+    selector:
+      component: api
+    ports:
+      - port: 8000
+        targetPort: http
+
+ingress:
+  backend-external:
+    className: nginx-external
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    paths:
+      - path: /brp(/|$)(.*)
+        pathType: ImplementationSpecific
+        service: api
+        port: 8000
+    tls: certificate
+
+  backend-internal:
+    className: nginx-internal
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    paths:
+      - path: /brp(/|$)(.*)
+        pathType: ImplementationSpecific
+        service: api
+        port: 8000
+    tls: certificate
