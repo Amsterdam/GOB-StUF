@@ -21,9 +21,9 @@ extends:
       devopsEnvironment: brpproxy-dev
       namespace: ns-ccc-benk-ont-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-ont-01-brpproxy-aks
-      steps:
-        - script: make deploy
-          displayName: make deploy
+#      steps:
+#        - script: make deploy
+#          displayName: make deploy
 #    test:
 #      pool: Selfhosted Azure Devops Agents
 #      devopsEnvironment: demo-test
