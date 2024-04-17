@@ -6,6 +6,7 @@ services:
     build:
       context: src
       target: development
+    image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-brpproxy/gobstuf}:${VERSION:-latest}
     ports:
       # No OAuth2 Proxy
       - "8165:8001"
