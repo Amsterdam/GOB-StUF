@@ -1,4 +1,4 @@
-.PHONY: build deploy manifests
+.PHONY: build deploy manifests push test
 
 dc = docker compose
 
@@ -27,3 +27,6 @@ deploy: manifests
 
 manifests:
 	helm template $(HELM_RELEASE) $(HELM_ARGS)
+
+test:
+	echo "Not implemented yet, but please continue"
