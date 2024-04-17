@@ -20,7 +20,7 @@ extends:
       pool: Selfhosted Azure Devops Agents
       devopsEnvironment: brpproxy-dev
       namespace: ns-ccc-benk-ont-01-brpproxy-aks
-      kubernetesServiceConnection: SCN-K8S-ns-ccc-ssr-ont-01-sensorenregister
+      kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-ont-01-brpproxy-aks
       steps:
         - script: make deploy
           displayName: make deploy
