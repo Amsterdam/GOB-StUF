@@ -9,9 +9,6 @@ resources:
       endpoint: Amsterdam
       name: Amsterdam/common-azure-pipelines
       ref: main
-    - repository: source
-      type: git
-      name: Datateam%20Basis%20en%20Kernregistraties/GOB-StUF
 
 extends:
   template: pipelines/aks/template.yaml@templates
@@ -19,11 +16,6 @@ extends:
     name: brpproxy-api
     variables:
       repository: brpproxy/gobstuf
-    build:
-      # producedImages:
-      #   - sensorenregister/api
-      #   - sensorenregister/api-dev
-      sourceRepository: source
     dev:
       pool: Selfhosted Azure Devops Agents
       devopsEnvironment: brpproxy-dev
