@@ -31,7 +31,7 @@ secrets:
     secrets:
       - oauth2-proxy-client-id
       - oauth2-proxy-client-secret
-      - oauth2-proxy-cookie-secre
+      - oauth2-proxy-cookie-secret
       - oauth2-proxy-oidc-issuer-url
       - oauth2-proxy-redirect-url
 
