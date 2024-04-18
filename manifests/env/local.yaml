@@ -1,5 +1,5 @@
 image:
-  registry: localhost:5001
+  registry: localhost:5000
   repository: brpproxy/gobstuf
   tag: latest
 
