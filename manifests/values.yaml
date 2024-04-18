@@ -86,7 +86,7 @@ services:
 
 ingress:
   backend-external:
-    className: nginx-external
+    className: nginx-internal
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     paths:

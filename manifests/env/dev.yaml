@@ -11,7 +11,7 @@ image:
 nodepool: cccbenkont01
 
 # Default host for the ingress resources
-host: benk-o.azure.amsterdam.nl
+host: brpproxy.benk-o.azure.amsterdam.nl
 
 # Specify the keyvault that has the certificate
 secrets:
