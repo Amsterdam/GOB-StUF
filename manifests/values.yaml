@@ -29,20 +29,33 @@ secrets:
     annotations:
       helm.sh/hook-weight: "-5"
     secrets:
-      - keycloak-auth-url
-      - keycloak-client-id
       - mks-certificate
       - mks-certificate-password
+      - oauth2-proxy-client-id
+      - oauth2-proxy-client-secret
+      - oauth2-proxy-cookie-secre
+      - oauth2-proxy-oidc-issuer-url
 
 deployments:
   api:
     selectorLabels:
       component: api
     env:
-      KEYCLOAK_AUTH_URL: todo
-      KEYCLOAK_CLIENT_ID: todo
+      ROUTE_PATH_310: /CGS/StUF/0301/BG/0310/services/BeantwoordVraag
+      ROUTE_PATH_204: /CGS/StUF/services/BGSynchroon
       MKS_CERTIFICATE: todo
       MKS_CERTIFICATE_PASSWORD: todo
+      UWSGI_HTTP: ":8001"
+      UWSGI_MODULE: "gobstuf.wsgi"
+      UWSGI_CALLABLE: "app"
+      UWSGI_HARAKIRI: "3600"
+      UWSGI_PROCESSES: "4"
+      UWSGI_ENABLE_THREADS: ""
+      UWSGI_MAX_WORKER_LIFETIME: "1800"
+      UWSGI_HTTP_TIMEOUT: "4000"
+      UWSGI_BUFFER_SIZE: "8192"
+      UWSGI_DIE_ON_TERM: "1"
+      UWSGI_NEED_APP: "1"
     autoscale:
       cpu: 90
       memory: 70

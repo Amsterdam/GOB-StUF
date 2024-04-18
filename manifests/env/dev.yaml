@@ -1,5 +1,5 @@
 # Default keyvault for getting secrets
-keyVaultName: ssr-o-gp4jqffo3heda
+keyVaultName: brpproxy-o-lnqqy7depr3ry
 
 # Managed identity (clientId) for workload identity with
 workloadIdentity: 0a33527e-6a51-421c-b00a-b8213b59bb6e
@@ -17,3 +17,10 @@ host: benk-o.azure.amsterdam.nl
 secrets:
   certificate:
     keyVaultName: shared-o-wf5pflasngroi
+
+deployments:
+  api:
+    env:
+      KEYCLOAK_AUTH_URL: https://iam.amsterdam.nl/auth/realms/datapunt-ad-acc/protocol/openid-connect/token
+      KEYCLOAK_CLIENT_ID: test-gob-stuf
+      ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
