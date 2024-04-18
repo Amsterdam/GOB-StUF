@@ -2,7 +2,7 @@
 keyVaultName: brpproxy-o-lnqqy7depr3ry
 
 # Managed identity (clientId) for workload identity with
-workloadIdentity: 0a33527e-6a51-421c-b00a-b8213b59bb6e
+workloadIdentity: 4011c161-8b44-4f48-b68d-276a9cc467b1
 
 image:
   repository: brpproxy/gobstuf
