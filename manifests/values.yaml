@@ -60,8 +60,6 @@ deployments:
     env:
       ROUTE_PATH_310: /CGS/StUF/0301/BG/0310/services/BeantwoordVraag
       ROUTE_PATH_204: /CGS/StUF/services/BGSynchroon
-      MKS_CERTIFICATE: todo
-      MKS_CERTIFICATE_PASSWORD: todo
       UWSGI_HTTP: ":8000"
       UWSGI_MODULE: "gobstuf.wsgi"
       UWSGI_CALLABLE: "app"
