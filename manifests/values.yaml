@@ -35,6 +35,22 @@ secrets:
       - oauth2-proxy-oidc-issuer-url
       - oauth2-proxy-redirect-url
 
+jobs:
+
+  certificate-init:
+    annotations:
+      helm.sh/hook: post-install,post-upgrade
+    labels:
+      component: certificate
+    secrets:
+      - certificate
+    containers:
+      - name: main
+        command:
+          - sleep
+        args:
+          - "1"
+
 deployments:
   api:
     selectorLabels:
@@ -85,13 +101,22 @@ services:
         targetPort: http
 
 ingress:
+  backend-external:
+    className: nginx-external
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    paths:
+      - path: /brp(/|$)(.*)
+        service: api
+        port: 8000
+    tls: certificate
+
   backend-internal:
     className: nginx-internal
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /$2
     paths:
       - path: /brp(/|$)(.*)
-        pathType: ImplementationSpecific
         service: api
         port: 8000
     tls: certificate
