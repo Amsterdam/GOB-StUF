@@ -85,7 +85,7 @@ services:
         targetPort: http
 
 ingress:
-  backend-external:
+  backend-internal:
     className: nginx-internal
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /$2
