@@ -24,6 +24,10 @@ secrets:
     type: keyvault
     tls: brpproxy
 
+  mks-certificate:
+    type: keyvault
+    tls: mks-certificate
+
   vault:
     type: keyvault
     annotations:
@@ -34,8 +38,6 @@ secrets:
       - oauth2-proxy-cookie-secret
       - oauth2-proxy-oidc-issuer-url
       - oauth2-proxy-redirect-url
-    certificates:
-      - mks-certificate
 
 jobs:
 
@@ -87,6 +89,7 @@ deployments:
       - name: main
         secrets:
           - vault
+          - mks-certificate
         tempDirs:
           - /tmp
         ports:
