@@ -21,28 +21,16 @@ extends:
       devopsEnvironment: brpproxy-dev
       namespace: ns-ccc-benk-ont-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-ont-01-brpproxy-aks
-#      steps:
-#        - script: make deploy
-#          displayName: make deploy
 #    test:
 #      pool: Selfhosted Azure Devops Agents
 #      devopsEnvironment: demo-test
 #      namespace: ns-ccc-ssr-tst-01-sensorenregister
 #      kubernetesServiceConnection: SCN-K8S-ns-ccc-ssr-tst-01-sensorenregister
-#      steps:
-#        - script: make deploy/sensorenregister-backend
-#          displayName: make deploy/sensorenregister-backend
 #    acc:
 #      pool: Selfhosted Azure Devops Agents
 #      namespace: ns-ccc-ssr-acc-01-sensorenregister
 #      kubernetesServiceConnection: SCN-K8S-ns-ccc-ssr-acc-01-sensorenregister
-#      steps:
-#        - script: make deploy/sensorenregister-backend
-#          displayName: make deploy/sensorenregister-backend
 #    prod:
 #      pool: Selfhosted Azure Devops Agents
 #      namespace: ns-ccc-ssr-prd-01-sensorenregister
 #      kubernetesServiceConnection: SCN-K8S-ns-ccc-ssr-prd-01-sensorenregister
-#      steps:
-#        - script: make deploy/sensorenregister-backend
-#          displayName: make deploy/sensorenregister-backend
