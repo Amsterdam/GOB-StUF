@@ -1,0 +1,27 @@
+# Default keyvault for getting secrets
+keyVaultName: brpproxy-a-qmwocolamutd2
+
+# Managed identity (clientId) for workload identity with
+workloadIdentity: c5510b7e-6bec-4c07-a2af-6788d274fb52
+
+image:
+  repository: brpproxy/gobstuf
+
+# We must select the nodepool to run the pods on
+# TODO: does not exist yet
+nodepool: cccbenkacc01
+
+# Default host for the ingress resources
+host: brpproxy.benk-a.azure.amsterdam.nl
+
+# Specify the keyvault that has the certificate
+secrets:
+  certificate:
+    keyVaultName: shared-a-iaecdpzoozlqc
+
+deployments:
+  api:
+    env:
+      KEYCLOAK_AUTH_URL: https://iam.amsterdam.nl/auth/realms/datapunt-ad-acc/protocol/openid-connect/token
+      KEYCLOAK_CLIENT_ID: test-gob-stuf
+      ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
