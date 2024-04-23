@@ -1,0 +1,22 @@
+trigger: none
+
+jobs:
+  - job: deploy
+    displayName: Deploy
+
+    pool: Selfhosted Azure Devops Agents
+
+    steps:
+      - task: Kubernetes@1
+        displayName: "login"
+        inputs:
+          connectionType: "Kubernetes Service Connection"
+          kubernetesServiceEndpoint: SCN-K8S-ns-ccc-benk-acc-01-brpproxy-aks
+          namespace: ns-ccc-benk-acc-01-brpproxy-aks
+          command: "login"
+
+      - script: |
+          kubectl config set-context deploy --namespace="ns-ccc-benk-acc-01-brpproxy-aks"
+          kubectl config use-context deploy
+          kubectl get secret -A
+        displayName: Delete deployment kubectl
