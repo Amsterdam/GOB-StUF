@@ -8,7 +8,6 @@ image:
   repository: brpproxy/gobstuf
 
 # We must select the nodepool to run the pods on
-# TODO: does not exist yet
 nodepool: cccbenkacc01
 
 # Default host for the ingress resources
@@ -25,3 +24,8 @@ deployments:
       KEYCLOAK_AUTH_URL: https://iam.amsterdam.nl/auth/realms/datapunt-ad-acc/protocol/openid-connect/token
       KEYCLOAK_CLIENT_ID: test-gob-stuf
       ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
+
+# override host for external ingress
+ingress:
+  backend-external:
+    host: acc.bp.data.amsterdam.nl
