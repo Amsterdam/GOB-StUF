@@ -107,7 +107,7 @@ ingress:
   backend-external:
     className: nginx-external
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/rewrite-target: /brp/$2
     paths:
       - path: /brp(/|$)(.*)
         service: api
@@ -117,7 +117,7 @@ ingress:
   backend-internal:
     className: nginx-internal
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/rewrite-target: /brp/$2
     paths:
       - path: /brp(/|$)(.*)
         service: api
