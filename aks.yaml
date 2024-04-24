@@ -31,6 +31,7 @@ extends:
 
     acc:
       pool: Selfhosted Azure Devops Agents
+      devopsEnvironment: brpproxy-acc
       namespace: ns-ccc-benk-acc-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-acc-01-brpproxy-aks
 
