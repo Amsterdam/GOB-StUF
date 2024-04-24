@@ -185,9 +185,12 @@ class StufRestView(MethodView):
         try:
             response.raise_for_status()
         except HTTPError:
-            # Received error status code from MKS (always 500)
-            response_obj = StufErrorResponse(response.text)
-            return self._error_response(response_obj)
+            try:
+                # Received error status code from MKS (always 500)
+                response_obj = StufErrorResponse(response.text)
+                return self._error_response(response_obj)
+            except:
+                logging.error(f"Error parsing exception:\n\n{response.text}")
 
         # Map MKS response back to REST response. Include the path parameters to the response
         response_obj = self.response_template(response.text,
