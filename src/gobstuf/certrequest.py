@@ -15,7 +15,7 @@ def cert_get(url, **kwargs):
     :return: request response
     """
     logger.info(f"GET {url}")
-    response = requests.get(url, cert=(CLIENT_CERT_CRT, CLIENT_CERT_KEY))
+    response = requests.get(url, cert=(CLIENT_CERT_CRT, CLIENT_CERT_KEY), **kwargs)
     logger.info(f"RESPONSE {response.status_code}, {response.reason}")
     return response
 
@@ -30,6 +30,6 @@ def cert_post(url, **kwargs):
     :return: request response
     """
     logger.info(f"POST {url}")
-    response = requests.post(url, cert=(CLIENT_CERT_CRT, CLIENT_CERT_KEY))
+    response = requests.post(url, cert=(CLIENT_CERT_CRT, CLIENT_CERT_KEY), **kwargs)
     logger.info(f"RESPONSE {response.status_code}, {response.reason}")
     return response
