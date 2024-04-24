@@ -6,4 +6,3 @@ Flask==2.3.3
 freezegun~=1.2.2
 pytest-env~=1.0.1
 requests-mock~=1.11.0
-requests-pkcs12~=1.18

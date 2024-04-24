@@ -26,8 +26,8 @@ GOB_STUF_PORT = _getenv("GOB_STUF_PORT", default_value=8165)
 ROUTE_SCHEME = _getenv("ROUTE_SCHEME", default_value="https")
 
 # Optional parameters
-PKCS12_FILENAME = _getenv("PKCS12_FILENAME", is_optional=True)
-PKCS12_PASSWORD = _getenv("PKCS12_PASSWORD", is_optional=True)
+CLIENT_CERT_CRT = _getenv("CLIENT_CERT_CRT", is_optional=True)
+CLIENT_CERT_KEY = _getenv("CLIENT_CERT_KEY", is_optional=True)
 
 API_BASE_PATH = _getenv("API_BASE_PATH", default_value="", is_optional=True)
 HC_BASE_PATH = _getenv("HC_BASE_PATH", default_value="", is_optional=True)
