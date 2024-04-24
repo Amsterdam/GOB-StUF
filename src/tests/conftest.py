@@ -6,7 +6,6 @@ import jwt
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
-from gobcore.message_broker.initialise_queues import initialize_message_broker
 
 from gobcore.secure.request import ACCESS_TOKEN_HEADER, USER_NAME_HEADER
 from gobstuf.api import get_flask_app
@@ -24,7 +23,6 @@ def app() -> Generator[Flask, None, None]:
     with app.test_client() as client:
         client.get(...)
     """
-    initialize_message_broker()
     app = get_flask_app()
     with app.app_context():
         yield app

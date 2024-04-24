@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   test:
     build:
@@ -7,11 +5,5 @@ services:
       target: test
     environment:
       GOB_SHARED_DIR: /app/shared
-      MESSAGE_BROKER_ADDRESS: stuf_test_rabbitmq
     command: >
       bash -c "./test.sh"
-    depends_on:
-      - rabbitmq
-  rabbitmq:
-    image: "rabbitmq:3.9-management"
-    container_name: stuf_test_rabbitmq
