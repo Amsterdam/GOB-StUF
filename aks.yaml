@@ -35,7 +35,8 @@ extends:
       namespace: ns-ccc-benk-acc-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-acc-01-brpproxy-aks
 
-#    prod:
-#      pool: Selfhosted Azure Devops Agents
-#      namespace: ns-ccc-ssr-prd-01-sensorenregister
-#      kubernetesServiceConnection: SCN-K8S-ns-ccc-ssr-prd-01-sensorenregister
+    prod:
+      pool: Selfhosted Azure Devops Agents
+      devopsEnvironment: brpproxy-prd
+      namespace:  ns-ccc-benk-prd-01-brpproxy-aks
+      kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-prd-01-brpproxy-aks
