@@ -1,8 +1,10 @@
+import socket
+
 from flask import Flask
 from flask_audit_log.middleware import AuditLogMiddleware
 from flask_cors import CORS
 
-from gobstuf.config import AUDIT_LOG_CONFIG
+from gobstuf.config import AUDIT_LOG_CONFIG, ROUTE_NETLOC
 from gobstuf.logger import get_default_logger
 
 logger = get_default_logger()
@@ -10,6 +12,13 @@ logger = get_default_logger()
 
 def _health() -> str:
     """Message telling the StUF API is OK."""
+    host, port = ROUTE_NETLOC.split(":")
+
+    try:
+        socket.create_connection((host, int(port)), timeout=5.0)
+    except:
+        return "Backend not available"
+
     return 'Connectivity OK'
 
 
