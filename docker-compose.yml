@@ -1,7 +1,5 @@
-version: "3.7"
 
 services:
-
   gobstuf:
     build:
       context: src
@@ -16,9 +14,6 @@ services:
       # - "8165:8000"
     container_name: gobstuf
     environment:
-      KEYCLOAK_AUTH_URL: "https://keycloak/auth/url"
-      KEYCLOAK_CLIENT_ID: "fakefake"
-      MESSAGE_BROKER_ADDRESS: rabbitmq
       UWSGI_HTTP: ":8001"
       UWSGI_MODULE: "gobstuf.wsgi"
       UWSGI_CALLABLE: "app"
@@ -32,15 +27,15 @@ services:
       UWSGI_NEED_APP: "1"
 #      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy --config oauth2-proxy.cfg,freq=3,control=true,stopsignal=15"
 
-      PKCS12_FILENAME: ${PKCS12_FILENAME}
-      PKCS12_PASSWORD: ${PKCS12_PASSWORD}
+      KEYCLOAK_AUTH_URL: "https://keycloak/auth/url"
+      KEYCLOAK_CLIENT_ID: "fakefake"
       BRP_REGRESSION_TEST_LOCAL_PORT: 8000  # Points to Gatekeeper. Overrides port 8165 defined in the .env file
 
-      OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
-      OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
-      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
-      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
-      OAUTH2_PROXY_REDIRECT_URL: ${OAUTH2_PROXY_REDIRECT_URL}
+#      OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+#      OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+#      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+#      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
+#      OAUTH2_PROXY_REDIRECT_URL: ${OAUTH2_PROXY_REDIRECT_URL}
     volumes:
       - gob-volume:/app/shared
       - ./src/gobstuf:/app/gobstuf
