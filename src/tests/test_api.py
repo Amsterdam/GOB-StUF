@@ -21,9 +21,16 @@ class MockResponse:
 @mock.patch('gobstuf.api.logger', mock.MagicMock())
 class TestAPI(unittest.TestCase):
 
-    def test_health(self):
+    @mock.patch("gobstuf.api.socket")
+    def test_health(self, mock_socket):
         result = _health()
         self.assertEqual(result, "Connectivity OK")
+        mock_socket.create_connection.assert_called_with(("gob-stuf-tests", 1234), timeout=5.0)
+        mock_socket.create_connection.return_value.close.assert_called()
+
+        mock_socket.create_connection.side_effect = TimeoutError
+        result = _health()
+        self.assertEqual(result, "Backend not available")
 
     def test_routed_url(self):
         result = _routed_url("proto://domain/path?args")

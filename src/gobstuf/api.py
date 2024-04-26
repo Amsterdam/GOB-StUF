@@ -15,8 +15,9 @@ def _health() -> str:
     host, port = ROUTE_NETLOC.split(":")
 
     try:
-        socket.create_connection((host, int(port)), timeout=5.0)
-    except:
+        s = socket.create_connection((host, int(port)), timeout=5.0)
+        s.close()
+    except Exception:
         return "Backend not available"
 
     return 'Connectivity OK'
