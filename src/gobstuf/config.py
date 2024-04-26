@@ -35,7 +35,7 @@ HC_BASE_PATH = _getenv("HC_BASE_PATH", default_value="", is_optional=True)
 BASE_PATHS = [API_BASE_PATH, HC_BASE_PATH]
 
 AUDIT_LOG_CONFIG = {
-    'EXEMPT_URLS': [],
+    'EXEMPT_URLS': ["/brp/status/health"],
     'LOG_HANDLER_CALLABLE_PATH': 'gobstuf.audit_log.get_log_handler',
     'USER_FROM_REQUEST_CALLABLE_PATH': 'gobstuf.audit_log.get_user_from_request'
 }
