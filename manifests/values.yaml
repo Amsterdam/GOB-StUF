@@ -72,6 +72,7 @@ deployments:
       UWSGI_HARAKIRI: "3600"
       UWSGI_HTTP: ":8001"
       UWSGI_HTTP_TIMEOUT: "4000"
+      UWSGI_LOG_DRAIN: ".*\\/brp\\/status\\/health\\/.*"
       UWSGI_MAX_REQUESTS: 100  # Restart workers after this many requests
       UWSGI_MODULE: "gobstuf.wsgi"
       UWSGI_NEED_APP: "1"
