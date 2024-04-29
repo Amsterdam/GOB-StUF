@@ -129,6 +129,7 @@ ingress:
     className: nginx-internal
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /brp/$2
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
     paths:
       - path: /brp(/|$)(.*)
         service: api
