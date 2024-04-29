@@ -25,3 +25,10 @@ deployments:
       KEYCLOAK_AUTH_URL: https://iam.amsterdam.nl/auth/realms/datapunt-ad-acc/protocol/openid-connect/token
       KEYCLOAK_CLIENT_ID: test-gob-stuf
       ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
+
+# override host for external and internal ingress
+ingress:
+  backend-external:
+    host: test.bp.data.amsterdam.nl
+  backend-internal:
+    host: test.bp.data.amsterdam.nl
