@@ -16,6 +16,9 @@ extends:
     name: brpproxy-api
     variables:
       repository: brpproxy/gobstuf
+    build:
+      pool:
+        name: Selfhosted Azure Devops Agents
 
     dev:
       pool: Selfhosted Azure Devops Agents
