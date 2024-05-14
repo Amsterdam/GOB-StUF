@@ -7,10 +7,10 @@ set -e # stop on any error
 export COVERAGE_FILE=/tmp/.coverage
 
 echo "Running tests"
-coverage run --source=./gobstuf -m pytest tests/
+coverage run --source=gobstuf -m pytest tests/
 
 echo "Coverage report"
 coverage report --show-missing --fail-under=100
 
 echo "Running style checks"
-flake8
+flake8 gobstuf

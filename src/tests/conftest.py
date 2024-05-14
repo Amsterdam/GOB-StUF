@@ -7,7 +7,7 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
-from gobcore.secure.request import ACCESS_TOKEN_HEADER, USER_NAME_HEADER
+from gobstuf.auth.request import ACCESS_TOKEN_HEADER, USER_NAME_HEADER
 from gobstuf.api import get_flask_app
 
 

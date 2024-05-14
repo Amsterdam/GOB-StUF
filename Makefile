@@ -16,11 +16,14 @@ REGISTRY ?= localhost:5001
 REPOSITORY ?= brpproxy/gobstuf
 VERSION ?= latest
 
+SERVICE_APP ?= gobstuf-app
+SERVICE_TEST ?= gobstuf-test
+
 build:
-	$(dc) build
+	$(dc) build $(SERVICE_APP)
 
 push: build
-	$(dc) push
+	$(dc) push $(SERVICE_APP)
 
 deploy: manifests
 	helm upgrade --install $(HELM_RELEASE) $(HELM_ARGS)
@@ -29,4 +32,4 @@ manifests:
 	helm template $(HELM_RELEASE) $(HELM_ARGS)
 
 test:
-	echo "Not implemented yet, but please continue"
+	$(dc) run $(SERVICE_TEST)
