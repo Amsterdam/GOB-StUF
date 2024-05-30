@@ -4,12 +4,7 @@ trigger:
     include:
       - master
 
-pr:
-  autoCancel: 'true'
-  drafts: 'true'
-  branches:
-    include:
-      - master
+pr: none
 
 
 resources:
