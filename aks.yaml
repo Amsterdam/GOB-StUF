@@ -1,5 +1,15 @@
-trigger: none
-pr: none
+trigger:
+  batch: 'true'
+  branches:
+    include:
+      - master
+
+pr:
+  autoCancel: 'true'
+  drafts: 'true'
+  branches:
+    include:
+      - master
 
 
 resources:
