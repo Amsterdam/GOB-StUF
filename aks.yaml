@@ -1,11 +1,11 @@
 trigger:
-  batch: 'true'
+  batch: true
   branches:
     include:
-      - master
-
-pr: none
-
+      - main
+  tags:
+    include:
+      - "*.*.*"
 
 resources:
   repositories:
@@ -26,7 +26,6 @@ extends:
         name: ContainerBuilder
 #        DISABLE SADA -> fw currently blocks debian apt-get (470)
 #        name: Selfhosted Azure Devops Agents
-
 
     dev:
       pool: Selfhosted Azure Devops Agents
