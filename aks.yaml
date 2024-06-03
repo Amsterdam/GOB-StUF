@@ -23,9 +23,7 @@ extends:
       repository: brpproxy/gobstuf
     build:
       pool:
-        name: ContainerBuilder
-#        DISABLE SADA -> fw currently blocks debian apt-get (470)
-#        name: Selfhosted Azure Devops Agents
+        name: Selfhosted Azure Devops Agents
 
     dev:
       pool: Selfhosted Azure Devops Agents

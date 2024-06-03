@@ -20,7 +20,7 @@ SERVICE_APP ?= gobstuf-app
 SERVICE_TEST ?= gobstuf-test
 
 build:
-	$(dc) build $(SERVICE_APP)
+	$(dc) build --no-cache --pull $(SERVICE_APP)
 
 push: build
 	$(dc) push $(SERVICE_APP)
@@ -32,4 +32,4 @@ manifests:
 	helm template $(HELM_RELEASE) $(HELM_ARGS)
 
 test:
-	$(dc) run $(SERVICE_TEST)
+	$(dc) run --rm --remove-orphans $(SERVICE_TEST)
