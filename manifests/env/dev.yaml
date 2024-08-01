@@ -25,9 +25,13 @@ deployments:
       KEYCLOAK_CLIENT_ID: test-gob-stuf
       ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
 
-# override host for external and internal ingress
+# override host for external ingress
 ingress:
   backend-external:
     host: ont.bp.data.amsterdam.nl
+
   backend-internal:
-    host: ont.bp.data.amsterdam.nl
+    paths:
+      - path: /brp(/|$)(.*)
+        service: api
+        port: 8000

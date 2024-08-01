@@ -29,5 +29,19 @@ deployments:
 ingress:
   backend-external:
     host: acc.bp.data.amsterdam.nl
+
+  # Listener in use by WONEN
   backend-internal:
     host: acc.bp.data.amsterdam.nl
+
+  backend-internal-benk-a:
+    host: brpproxy.benk-a.azure.amsterdam.nl
+    className: nginx-internal
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /brp/$2
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    paths:
+      - path: /brp(/|$)(.*)
+        service: api
+        port: 8000
+    tls: certificate
