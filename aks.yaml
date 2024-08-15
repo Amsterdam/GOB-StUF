@@ -13,7 +13,7 @@ resources:
       type: github
       endpoint: Amsterdam
       name: Amsterdam/common-azure-pipelines
-      ref: main
+      ref: a74d71a6fe669194a91542356c2d89b87f94a416  # v1.18.0
 
 extends:
   template: pipelines/aks/template.yaml@templates
@@ -27,18 +27,18 @@ extends:
 
     dev:
       pool: Selfhosted Azure Devops Agents
-      devopsEnvironment: brpproxy-dev
+      devopsEnvironment: brpproxy-api-dev
       namespace: ns-ccc-benk-ont-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-ont-01-brpproxy-aks
 
     acc:
       pool: Selfhosted Azure Devops Agents
-      devopsEnvironment: brpproxy-acc
+      devopsEnvironment: brpproxy-api-acc
       namespace: ns-ccc-benk-acc-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-acc-01-brpproxy-aks
 
     prod:
       pool: Selfhosted Azure Devops Agents
-      devopsEnvironment: brpproxy-prd
+      devopsEnvironment: brpproxy-api-prod
       namespace:  ns-ccc-benk-prd-01-brpproxy-aks
       kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-prd-01-brpproxy-aks
