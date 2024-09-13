@@ -1,7 +1,7 @@
-Flask-Cors==4.0.0
+Flask-Cors==5.0.0
 Flask==2.3.3
 git+https://github.com/Amsterdam/flask-audit-log.git@v0.1.0a-rc1#egg=datapunt-flask-audit-log
-PyJWT==2.8.0
-pytz==2024.1
-requests==2.31.0
-uWSGI==2.0.25.1
+PyJWT==2.9.0
+pytz==2024.2
+requests==2.32.3
+uWSGI==2.0.26
