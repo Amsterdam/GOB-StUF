@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm as builder
+FROM python:3.11-slim-bookworm AS builder
 
 ENV PIP_NO_CACHE_DIR=1 DEBIAN_FRONTEND=noninteractive
 
@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git gcc libpcre
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-FROM python:3.11-slim-bookworm as test
+FROM python:3.11-slim-bookworm AS test
 
 RUN useradd --user-group --system --no-create-home benktest
 
@@ -26,7 +26,7 @@ COPY .flake8 test.sh ./
 USER benktest
 CMD ["bash", "-c", "./test.sh"]
 
-FROM python:3.11-slim-bookworm as application
+FROM python:3.11-slim-bookworm AS application
 
 WORKDIR /app
 
