@@ -1,15 +1,39 @@
-from unittest import TestCase
-from unittest.mock import patch, MagicMock
-
 import json
+from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from gobstuf.rest.brp.rest_response import RESTResponse
 
 mock_response = MagicMock()
+
 any_data = {"any": "data"}
 
 mock_request = MagicMock()
 mock_request.url = "any url"
+
+
+class TestResponse(TestCase):
+    """Test REST responses."""
+
+    def test_rest_ok(self):
+        """Test ok response."""
+        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
+            response = RESTResponse.ok(any_data)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status, "200 OK")
+            self.assertEqual(response.content_type, "application/hal+json")
+
+            self.assertEqual(response.json["any"], "data")
+            self.assertEqual(response.json, RESTResponse._hal(any_data))
+
+            # Check Security Headers
+            self.assertEqual(response.headers.get("Content-Type"), "application/hal+json")
+            self.assertEqual(response.headers.get("Content-Security-Policy"), "default-src 'self'")
+            self.assertEqual(
+                response.headers.get("Strict-Transport-Security"), "max-age=63072000; includeSubDomains; preload"
+            )
+            self.assertEqual(response.headers.get("X-Frame-Options"), "DENY")
+            self.assertEqual(response.headers.get("X-Content-Type-Options"), "nosniff")
 
 
 @patch("gobstuf.rest.brp.rest_response.Response", mock_response)
