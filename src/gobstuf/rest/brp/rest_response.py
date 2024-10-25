@@ -28,6 +28,7 @@ class RESTResponse:
         :param kwargs:
         :return:
         """
+        kwargs = {"mimetype": "application/json", "headers": SECURITY_HEADERS} | kwargs
         return Response(response=json.dumps(data), **kwargs)
 
     @classmethod
@@ -95,7 +96,7 @@ class RESTResponse:
         """
         hal_data = cls._hal(data, links)
         return cls._json_response(
-            data=hal_data, content_type="application/hal+json", headers=SECURITY_HEADERS, status=HTTP_200_OK
+            data=hal_data, content_type="application/hal+json", status=HTTP_200_OK
         )
 
     @classmethod

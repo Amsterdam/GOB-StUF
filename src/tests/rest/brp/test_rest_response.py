@@ -2,7 +2,7 @@ import json
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from gobstuf.rest.brp.rest_response import SECURITY_HEADERS, RESTResponse
+from gobstuf.rest.brp.rest_response import RESTResponse
 
 mock_request = MagicMock()
 mock_request.url = "https://flask.palletsprojects.com/"
@@ -20,16 +20,15 @@ class TestRESTResponse(TestCase):
 
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.status, "200 OK")
-            # Wrong mime type.
-            self.assertEqual(response.content_type, "text/html; charset=utf-8")
-            self.assertEqual(response.headers.get("Content-Type"), "text/html; charset=utf-8")
+            self.assertEqual(response.content_type, "application/json")
+            self.assertEqual(response.headers.get("Content-Type"), "application/json")
+            self.assertEqual(response.headers.get("X-Content-Type-Options"), "nosniff")
             self.assertEqual(json.loads(response.data), test_data)
 
-            # Include headers in the Response.
-            response = RESTResponse._json_response(test_data, headers=SECURITY_HEADERS, mimetype="application/json")
+            # Change mimetype in Response.
+            response = RESTResponse._json_response(test_data, mimetype="application/hal+json")
+            self.assertEqual(response.content_type, "application/hal+json")
             self.assertEqual(response.headers.get("Content-Security-Policy"), "default-src 'self'")
-            # Fixed JSON mime type.
-            self.assertEqual(response.content_type, "application/json")
 
     def test_hal(self):
         """Test HAL data."""
@@ -62,7 +61,7 @@ class TestRESTResponse(TestCase):
             self.assertEqual(response.content_type, "application/problem+json")
 
             # Check valid overrides of default fields
-            response = RESTResponse._client_error_response(data=test_data, status=403, headers=SECURITY_HEADERS)
+            response = RESTResponse._client_error_response(data=test_data, status=403)
             response_data = json.loads(response.data)
 
             self.assertEqual(response.status_code, 403)
@@ -104,6 +103,9 @@ class TestRESTResponse(TestCase):
                 "The request could not be understood by the server due to malformed syntax."
                 " The client SHOULD NOT repeat the request without modification.",
             )
+            self.assertEqual(
+                response.headers.get("Strict-Transport-Security"), "max-age=63072000; includeSubDomains; preload"
+            )
 
     def test_forbidden(self):
         """Test forbidden (403) response."""
@@ -113,6 +115,7 @@ class TestRESTResponse(TestCase):
             self.assertEqual(response.status_code, 403)
             self.assertEqual(response.status, "403 FORBIDDEN")
             self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.headers.get("X-Content-Type-Options"), "nosniff")
 
     def test_not_found(self):
         """Test not_found (404) response."""
@@ -122,6 +125,7 @@ class TestRESTResponse(TestCase):
             self.assertEqual(response.status_code, 404)
             self.assertEqual(response.status, "404 NOT FOUND")
             self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.headers.get("Content-Security-Policy"), "default-src 'self'")
 
     def test_internal_server_error(self):
         """Test internal_server_error (500) response."""
@@ -131,3 +135,4 @@ class TestRESTResponse(TestCase):
             self.assertEqual(response.status_code, 500)
             self.assertEqual(response.status, "500 INTERNAL SERVER ERROR")
             self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.headers.get("X-Frame-Options"), "DENY")
