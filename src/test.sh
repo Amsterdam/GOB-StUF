@@ -3,14 +3,18 @@
 set -u # crash on missing env
 set -e # stop on any error
 
-# Coverage 6: coverage run --data-file=/tmp/.coveragerc …
-export COVERAGE_FILE=/tmp/.coverage
+echo() {
+  builtin echo -e "$@"
+}
 
-echo "Running tests"
-coverage run --source=gobstuf -m pytest tests/
 
-echo "Coverage report"
-coverage report --show-missing --fail-under=100
+echo "Running unit tests"
+coverage run --source=gobstuf --data-file=/tmp/.coveragerc -m pytest tests/
 
-echo "Running style checks"
+echo "\nCoverage report"
+coverage report --data-file=/tmp/.coveragerc --show-missing --fail-under=100
+
+echo "\nRunning style checks"
 flake8 gobstuf
+
+echo "\nChecks complete"

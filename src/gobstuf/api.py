@@ -20,7 +20,7 @@ def _health() -> str:
     except Exception:
         return "Backend not available"
 
-    return 'Connectivity OK'
+    return "Connectivity OK"
 
 
 def get_flask_app():
@@ -30,17 +30,18 @@ def get_flask_app():
     :return: Flask App
     """
     app = Flask(__name__)
-    CORS(app)
+    # Fake origins for testing. Cross-origin resource sharing not allowed for now.
+    CORS(app, resources={r"/brp/*": {"origins": ["https://bp.data.amsterdam.nl"]}})
 
     # Add the AuditLogMiddleware
-    app.config['AUDIT_LOG'] = AUDIT_LOG_CONFIG
+    app.config["AUDIT_LOG"] = AUDIT_LOG_CONFIG
     AuditLogMiddleware(app)
 
     logger.info("Available endpoints:")
 
     # Health check route for HC endpoint (/brp prefix is required)
     # see oauth2-proxy.cfg for bypass
-    app.route(rule='/brp/status/health/')(_health)
+    app.route(rule="/brp/status/health/")(_health)
 
     # import blueprints, prints endpoints
     from gobstuf.blueprints import hc_bp, secure_bp
