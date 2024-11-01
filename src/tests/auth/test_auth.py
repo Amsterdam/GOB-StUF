@@ -2,6 +2,8 @@ from typing import Optional
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
+import jwt
+
 from gobstuf.auth.routes import secure_route, get_auth_url
 
 
@@ -51,6 +53,20 @@ class TestSecureRoute:
             assert result("1", "2", kwarg="3") == ("Forbidden", 403)
             assert mock_g.MKS_GEBRUIKER is None
             assert mock_g.MKS_APPLICATIE is None
+
+    def test_secure_route_test_burger(self, app):
+        with patch("gobstuf.auth.routes.request", MockRequest()) as mock_request, \
+                patch("gobstuf.auth.routes.g", MockG()) as mock_g:
+            mock_request.headers = {
+                "X-Forwarded-Access-Token":
+                    jwt.encode({"roles": ["fp_burger", "brp_r"]}, key='', headers={}, algorithm="HS256"),
+            }
+            result = secure_route("rule", view_func)
+
+            assert result.__name__ == view_func.__name__
+            assert result("1", "2", kwarg="3") == "access_granted_1,2_{'kwarg': '3'}"
+            assert mock_g.MKS_GEBRUIKER == "test_burger"
+            assert mock_g.MKS_APPLICATIE == "fp_burger"
 
 
 class TestAuth(TestCase):

@@ -46,7 +46,14 @@ def _allows_access(rule, *args, **kwargs) -> bool:
     if REQUIRED_ROLE in roles and fp_role:
         # Store the MKS USER and APPLICATION in the global object and allow access
         setattr(g, MKS_APPLICATION_KEY, fp_role)
-        setattr(g, MKS_USER_KEY, request.headers.get(USER_NAME_HEADER, ""))
+
+        if fp_role == "fp_burger":
+            # allow users which have fp_burger role to make requests
+            user_name = "test_burger"
+        else:
+            user_name = request.headers.get(USER_NAME_HEADER, "")
+
+        setattr(g, MKS_USER_KEY, user_name)
         return True
 
     return False

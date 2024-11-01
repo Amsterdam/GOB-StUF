@@ -1,0 +1,68 @@
+# https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config
+
+injectRequestHeaders:
+#  - name: X-Forwarded-Groups
+#    values:
+#      - claim: groups
+#  - name: X-Forwarded-User
+#    values:
+#      - claim: user
+#  - name: X-Forwarded-Email
+#    values:
+#      - claim: email
+  - name: X-Forwarded-Preferred-Username
+    values:
+      - claim: preferred_username
+  - name: X-Forwarded-Access-Token
+    values:
+      - claim: access_token
+  - name: X-Forwarded-Id-Token
+    values:
+      - claim: id_token
+
+# Enable for debugging
+injectResponseHeaders:
+  - name: X-Forwarded-Access-Token
+    values:
+      - claim: access_token
+  - name: X-Forwarded-Id-Token
+    values:
+      - claim: id_token
+
+providers:
+  - id: azureEntraId
+    clientID: ${OAUTH2_PROXY_CLIENT_ID}
+    clientSecret: ${OAUTH2_PROXY_CLIENT_SECRET}
+    code_challenge_method: S256
+    provider: oidc
+    scope: openid profile ${OAUTH2_PROXY_CLIENT_ID}/user_impersonation
+
+    loginURLParameters:
+      - name: prompt
+        default: [ "select_account" ]
+      - name: response_mode
+        default: [ "form_post" ]
+
+    oidcConfig:
+      issuerURL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
+      insecureSkipNonce: false
+      audienceClaims: [ "aud" ]
+      emailClaim: email
+      userIDClaim: oid
+
+      # temporary enabled
+      # different issuers for v1 and v2 token versions
+      insecureSkipIssuerVerification: true
+
+server:
+  BindAddress: 0.0.0.0:8000
+
+upstreamConfig:
+  upstreams:
+    - id: gobstuf-backend
+      flushInterval: 1s
+      passHostHeader: true
+      path: /
+      proxyWebSockets: false
+      timeout: 30s
+      uri: http://127.0.0.1:8001/
