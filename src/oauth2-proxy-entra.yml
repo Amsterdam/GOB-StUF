@@ -1,0 +1,77 @@
+# https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config
+
+injectRequestHeaders:
+  # claim / header map, value for claim in the token is send to upstream as request header (not response)
+
+  #  - name: X-Forwarded-Groups
+  #    values:
+  #      - claim: groups
+  #  - name: X-Forwarded-User
+  #    values:
+  #      - claim: user
+  #  - name: X-Forwarded-Email
+  #    values:
+  #      - claim: email
+
+  # NOTE: preferred_username is not used by entra
+  - name: X-Forwarded-Preferred-Username
+    values:
+      - claim: preferred_username
+  - name: X-Forwarded-Access-Token
+    values:
+      - claim: access_token
+  - name: X-Forwarded-Id-Token
+    values:
+      - claim: id_token
+
+# Enable for debugging, token in response header
+#injectResponseHeaders:
+#  - name: X-Forwarded-Access-Token
+#    values:
+#      - claim: access_token
+#  - name: X-Forwarded-Id-Token
+#    values:
+#      - claim: id_token
+
+providers:
+  - id: azureEntraId
+    clientID: ${OAUTH2_PROXY_ENTRA_CLIENT_ID}  # env var, use appId of client
+    clientSecret: ${OAUTH2_PROXY_ENTRA_CLIENT_SECRET}  # env var, use secret of appId
+    code_challenge_method: S256
+    provider: oidc
+
+    # user_impersonation scope required for user sign in
+    # roles not present in access_token otherwise
+    scope: openid profile ${OAUTH2_PROXY_ENTRA_CLIENT_ID}/user_impersonation
+
+    loginURLParameters:
+      # https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
+      - name: prompt
+        default: [ "select_account" ]  # interrupts single sign-on providing account selection experience
+      - name: response_mode
+        default: [ "form_post" ]  # POST (form) data back to redirect url instead of query
+
+    oidcConfig:
+      issuerURL: ${OAUTH2_PROXY_ENTRA_OIDC_ISSUER_URL}
+      insecureSkipNonce: false
+      audienceClaims: [ "aud" ]  # required, default not set
+      emailClaim: email
+      userIDClaim: oid  # use objectId GUID of principal as identifier
+
+      # temporary enabled
+      # different issuers for v1 and v2 token versions
+      # --extra-jwt-issuers does not work for entra, maybe verify in application
+      insecureSkipIssuerVerification: true
+
+server:
+  BindAddress: 0.0.0.0:8000
+
+upstreamConfig:
+  upstreams:
+    - id: gobstuf-backend
+      flushInterval: 1s
+      passHostHeader: true
+      path: /
+      proxyWebSockets: false
+      timeout: 30s
+      uri: http://127.0.0.1:8001/
