@@ -38,8 +38,8 @@ RUN useradd --user-group --system --no-create-home benk && \
 COPY --from=builder /usr/local/bin/uwsgi /usr/local/bin/uwsgi
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
-COPY --chmod=755 oauth2-proxy oauth2-proxy
-COPY oauth2-proxy.cfg ca-bundle.crt ./
+COPY --chmod=755 oauth2-proxy oauth2-proxy.sh ./
+COPY oauth2-proxy.cfg ca-bundle.crt oauth2-proxy-entra.cfg oauth2-proxy-entra.yml ./
 COPY gobstuf gobstuf
 
 RUN mkdir -p /var/log/oauth2-proxy && chown benk /var/log/oauth2-proxy
