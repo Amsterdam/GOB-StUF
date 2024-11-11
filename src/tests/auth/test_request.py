@@ -10,12 +10,15 @@ class TestRequest(TestCase):
     def test_extract_roles(self, mock_jwt):
 
         mock_jwt.decode.return_value = {
-            'roles': ['any roles']
+            'realm_access': {
+                'roles': ['any roles']
+            }
         }
 
-        headers = {ACCESS_TOKEN_HEADER: "the token"}
+        headers = {
+            ACCESS_TOKEN_HEADER: "the token"
+        }
         roles = extract_roles(headers)
-
         self.assertEqual(roles, ["any roles"])
         mock_jwt.decode.assert_called_with(
             'the token',

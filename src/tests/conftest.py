@@ -60,7 +60,7 @@ def jwt_header(request) -> dict[str, bytes]:
     :return: A header dict containing a JWT token and preferred username.
     """
     header = {"type": "JWT", "alg": "HS256"}
-    payload = {"roles": request.param["roles"]}
+    payload = {"realm_access": {"roles": request.param["roles"]}}
     return {
         ACCESS_TOKEN_HEADER: jwt.encode(payload, key='', headers=header, algorithm="HS256"),
         USER_NAME_HEADER: request.param[USER_NAME_HEADER],
@@ -92,7 +92,7 @@ def jwt_header_forbidden(request) -> dict[str, bytes]:
     header = {'_param': request.param}
 
     if "roles" in request.param:
-        payload = {"roles": request.param}
+        payload = {"realm_access": {"roles": request.param}}
         token_header = {"type": "JWT", "alg": "HS256"}
         header[ACCESS_TOKEN_HEADER] = jwt.encode(payload, key='', headers=token_header, algorithm="HS256")
 
