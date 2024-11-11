@@ -55,13 +55,8 @@ providers:
       issuerURL: ${OAUTH2_PROXY_ENTRA_OIDC_ISSUER_URL}
       insecureSkipNonce: false
       audienceClaims: [ "aud" ]  # required, default not set
-      emailClaim: email
+      emailClaim: preferred_username
       userIDClaim: oid  # use objectId GUID of principal as identifier
-
-      # temporary enabled
-      # different issuers for v1 and v2 token versions
-      # --extra-jwt-issuers does not work for entra, maybe verify in application
-      insecureSkipIssuerVerification: true
 
 server:
   BindAddress: 0.0.0.0:7999
