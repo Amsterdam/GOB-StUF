@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from gobstuf.auth.request import ACCESS_TOKEN_HEADER, extract_roles, is_secured_request
+from gobstuf.auth.request import ACCESS_TOKEN_HEADER, extract_roles, is_secured_request, decode_token
 
 
 class TestRequest(TestCase):
@@ -28,6 +28,9 @@ class TestRequest(TestCase):
 
         roles = extract_roles({})
         self.assertEqual(roles, [])
+
+    def test_decode_token(self):
+        self.assertEqual({}, decode_token({ACCESS_TOKEN_HEADER: "token"}))
 
     def test_is_secured_request(self):
         self.assertTrue(is_secured_request({ACCESS_TOKEN_HEADER: 'access token'}))

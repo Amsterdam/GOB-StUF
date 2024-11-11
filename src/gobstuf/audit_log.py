@@ -1,12 +1,12 @@
-from functools import reduce
 import json
 import logging
 import uuid
+from functools import reduce
 
 from flask import request
-
 from flask_audit_log.util import get_client_ip
 
+from gobstuf.auth.request import extract_roles, is_secured_request, USER_NAME_HEADER
 from gobstuf.config import CORRELATION_ID_HEADER, UNIQUE_ID_HEADER
 from gobstuf.logger import get_default_logger
 
@@ -96,16 +96,12 @@ def get_user_from_request() -> dict:
     Gets the user information from the request header set by keycloak
     and returns a dict with the user information for the Datapunt Audit Logger
     """
-    # Update the user info when Keycloak is going to be used
-    user = {
-        'authenticated': False,
-        'provider': '',
-        'realm': '',
-        'email': '',
-        'roles': [],
-        'ip': get_client_ip(request)
+    return {
+        "authenticated": is_secured_request(request.headers),
+        "username": request.headers.get(USER_NAME_HEADER),
+        "roles": extract_roles(request.headers),
+        "ip": get_client_ip(request)
     }
-    return user
 
 
 def get_nested_item(data, *keys):
