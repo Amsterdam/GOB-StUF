@@ -59,7 +59,7 @@ providers:
       userIDClaim: oid  # use objectId GUID of principal as identifier
 
 server:
-  BindAddress: 0.0.0.0:7999
+  BindAddress: 0.0.0.0:8000
 
 upstreamConfig:
   upstreams:
