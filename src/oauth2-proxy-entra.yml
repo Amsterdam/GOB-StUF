@@ -64,7 +64,7 @@ providers:
       insecureSkipIssuerVerification: true
 
 server:
-  BindAddress: 0.0.0.0:8000
+  BindAddress: 0.0.0.0:7999
 
 upstreamConfig:
   upstreams:

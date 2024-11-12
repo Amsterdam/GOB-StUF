@@ -10,8 +10,8 @@ services:
       # With oauth2-proxy
       #   Set cookie_secure in oauth2-proxy.cfg to false
       #   Uncomment UWSGI_ATTACH_DAEMON2
-      # - "8165:7999" # Keycloak
-      # - "8165:8000" # Entra ID
+      # - "8165:8000" # Keycloak
+      # - "8165:7999" # Entra ID
     container_name: gobstuf
     environment:
       #UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy.sh,freq=3,control=true,stopsignal=15"

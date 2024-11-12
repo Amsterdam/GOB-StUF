@@ -40,7 +40,6 @@ secrets:
       - oauth2-proxy-oidc-issuer-url
 
       # Dev only: entra (used in oauth2-proxy-entra.yml)
-      # entra (used in oauth2-proxy-entra.yml) dev only
       #- oauth2-proxy-entra-client-id
       #- oauth2-proxy-entra-client-secret
       #- oauth2-proxy-entra-oidc-issuer-url
