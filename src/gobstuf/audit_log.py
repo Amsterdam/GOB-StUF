@@ -98,7 +98,7 @@ def get_user_from_request() -> dict:
     """
     return {
         "authenticated": is_secured_request(request.headers),
-        "username": request.headers.get(USER_NAME_HEADER),
+        "email": request.headers.get(USER_NAME_HEADER),
         "roles": extract_roles(request.headers),
         "ip": get_client_ip(request)
     }

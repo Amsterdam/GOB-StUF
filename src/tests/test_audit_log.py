@@ -100,7 +100,7 @@ class TestAuditLog(unittest.TestCase):
             user = get_user_from_request()
             self.assertEqual(user, {
                 'authenticated': False,
-                "username": "my_user",
+                "email": "my_user",
                 'roles': [],
                 'ip': mock_get_client_ip.return_value
             })
