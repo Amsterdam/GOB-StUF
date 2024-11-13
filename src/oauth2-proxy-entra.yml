@@ -2,18 +2,9 @@
 
 injectRequestHeaders:
   # claim / header map, value for claim in the token is send to upstream as request header (not response)
-
-  #  - name: X-Forwarded-Groups
-  #    values:
-  #      - claim: groups
-  #  - name: X-Forwarded-User
-  #    values:
-  #      - claim: user
-  #  - name: X-Forwarded-Email
-  #    values:
-  #      - claim: email
-
-  # NOTE: preferred_username is not used by entra
+  - name: X-Forwarded-User
+    values:
+      - claim: user
   - name: X-Forwarded-Preferred-Username
     values:
       - claim: preferred_username
@@ -32,6 +23,12 @@ injectResponseHeaders:
   - name: X-Forwarded-Id-Token
     values:
       - claim: id_token
+  - name: X-Forwarded-User
+    values:
+      - claim: user
+  - name: X-Forwarded-Preferred-Username
+    values:
+      - claim: preferred_username
 
 providers:
   - id: azureEntraId

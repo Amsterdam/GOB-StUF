@@ -1,7 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from gobstuf.auth.request import ACCESS_TOKEN_HEADER, extract_roles, is_secured_request, decode_token
+from gobstuf.auth.request import ACCESS_TOKEN_HEADER, extract_roles, is_secured_request, decode_token, extract_user, \
+    USER_NAME_HEADER, USER_HEADER
 
 
 class TestRequest(TestCase):
@@ -35,3 +36,16 @@ class TestRequest(TestCase):
     def test_is_secured_request(self):
         self.assertTrue(is_secured_request({ACCESS_TOKEN_HEADER: 'access token'}))
         self.assertFalse(is_secured_request({}))
+
+    @patch("gobstuf.auth.request.jwt")
+    def test_extract_user(self, mock_jwt):
+        mock_jwt.decode.return_value = {"sAMAccountName": "entra_user"}
+        headers = {ACCESS_TOKEN_HEADER: "the token", USER_NAME_HEADER: "my_pref_user", USER_HEADER: "my_user"}
+
+        self.assertEqual(extract_user(headers), "entra_user")
+
+        mock_jwt.decode.return_value = {}
+        self.assertEqual(extract_user(headers), "my_pref_user")
+
+        headers.pop(USER_NAME_HEADER)
+        self.assertEqual(extract_user(headers), "my_user")

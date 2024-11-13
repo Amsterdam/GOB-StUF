@@ -6,6 +6,9 @@ import jwt
 ACCESS_TOKEN_HEADER = "X-Forwarded-Access-Token"
 USER_EMAIL_HEADER = "X-Forwarded-Email"
 USER_NAME_HEADER = "X-Forwarded-Preferred-Username"
+USER_HEADER = "X-Forwarded-User"
+
+ENTRA_USER_CLAIM = "sAMAccountName"
 
 
 def decode_token(headers: dict) -> dict[str, Any]:
@@ -30,6 +33,21 @@ def extract_roles(headers: dict) -> list[str]:
         return realm.get("roles", [])
 
     return decoded.get("roles", [])
+
+
+def extract_user(headers: dict) -> str | None:
+    """Extracts username from access token and fallback to X-Forwarded-Preferred-Username header."""
+    decoded = decode_token(headers)
+
+    # 1. try entra claim in access token (entra user only)
+    # 2. try preferred_username header (keycloak user/spn)
+    # 3. try user header (entra spn)
+    if entra_user := decoded.get(ENTRA_USER_CLAIM):
+        return entra_user
+    elif pref_user := headers.get(USER_NAME_HEADER):
+        return pref_user
+    else:
+        return headers.get(USER_HEADER)
 
 
 def is_secured_request(headers: dict):

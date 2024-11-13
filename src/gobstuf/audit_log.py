@@ -6,7 +6,7 @@ from functools import reduce
 from flask import request
 from flask_audit_log.util import get_client_ip
 
-from gobstuf.auth.request import extract_roles, is_secured_request, USER_NAME_HEADER
+from gobstuf.auth.request import extract_roles, is_secured_request, extract_user
 from gobstuf.config import CORRELATION_ID_HEADER, UNIQUE_ID_HEADER
 from gobstuf.logger import get_default_logger
 
@@ -96,10 +96,11 @@ def get_user_from_request() -> dict:
     Gets the user information from the request header set by keycloak
     and returns a dict with the user information for the Datapunt Audit Logger
     """
+    headers = request.headers
     return {
-        "authenticated": is_secured_request(request.headers),
-        "email": request.headers.get(USER_NAME_HEADER),
-        "roles": extract_roles(request.headers),
+        "authenticated": is_secured_request(headers),
+        "email": extract_user(headers),
+        "roles": extract_roles(headers),
         "ip": get_client_ip(request)
     }
 
