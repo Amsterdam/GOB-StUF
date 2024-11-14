@@ -44,9 +44,10 @@ def get_flask_app():
     app.route(rule="/brp/status/health/")(_health)
 
     # import blueprints, prints endpoints
-    from gobstuf.blueprints import hc_bp, secure_bp
+    from gobstuf.blueprints import hc_bp, secure_bp, entra_bp
 
     app.register_blueprint(secure_bp)
     app.register_blueprint(hc_bp)
+    app.register_blueprint(entra_bp)
 
     return app

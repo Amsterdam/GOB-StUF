@@ -31,8 +31,9 @@ CLIENT_CERT_KEY = _getenv("CLIENT_CERT_KEY", is_optional=True)
 
 API_BASE_PATH = _getenv("API_BASE_PATH", default_value="", is_optional=True)
 HC_BASE_PATH = _getenv("HC_BASE_PATH", default_value="", is_optional=True)
+ENTRA_BASE_PATH = _getenv("ENTRA_BASE_PATH", default_value="/entra", is_optional=True)
 
-BASE_PATHS = [API_BASE_PATH, HC_BASE_PATH]
+BASE_PATHS = [API_BASE_PATH, HC_BASE_PATH, ENTRA_BASE_PATH]
 
 AUDIT_LOG_CONFIG = {
     'EXEMPT_URLS': ["/brp/status/health"],
