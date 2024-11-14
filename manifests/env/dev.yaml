@@ -32,6 +32,7 @@ secrets:
       # Dev only: Entra ID (used in oauth2-proxy-entra.yml)
       - oauth2-proxy-entra-client-id
       - oauth2-proxy-entra-client-secret
+      - oauth2-proxy-entra-cookie-secret
       - oauth2-proxy-entra-oidc-issuer-url
 
 deployments:
