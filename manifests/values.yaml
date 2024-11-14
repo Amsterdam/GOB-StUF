@@ -33,16 +33,11 @@ secrets:
     annotations:
       helm.sh/hook-weight: "-5"
     secrets:
-      # keycloak (used as env var by proxy)
+      # Keycloak (used as env var by proxy)
       - oauth2-proxy-client-id
       - oauth2-proxy-client-secret
       - oauth2-proxy-cookie-secret
       - oauth2-proxy-oidc-issuer-url
-
-      # Dev only: entra (used in oauth2-proxy-entra.yml)
-      - oauth2-proxy-entra-client-id
-      - oauth2-proxy-entra-client-secret
-      - oauth2-proxy-entra-oidc-issuer-url
 
 jobs:
   certificate-init:
@@ -69,7 +64,7 @@ deployments:
       CLIENT_CERT_CRT: /mnt/secrets/mks-certificate/mks-certificate.crt
       CLIENT_CERT_KEY: /mnt/secrets/mks-certificate/mks-certificate.key
       REQUESTS_CA_BUNDLE: /app/ca-bundle.crt
-      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy --config oauth2-proxy-entra.cfg --alpha-config oauth2-proxy-entra.yml,freq=3,control=true,stopsignal=15"
+      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy.sh,freq=3,control=true,stopsignal=15"
       UWSGI_BUFFER_SIZE: "16384"
       UWSGI_CALLABLE: "app"
       UWSGI_DIE_ON_TERM: "1"
@@ -106,28 +101,9 @@ deployments:
         tempDirs:
           - /tmp
         ports:
-          - port: 8000
-            name: http
-services:
-  api:
-    selector:
-      component: api
-    ports:
-      - port: 8000
-        targetPort: http
-
-ingress:
-  backend-internal:
-    className: nginx-internal
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /brp/$2
-      nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
-      # shows outgoing ip for appgw, needs header rewrite
-      nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
-      nginx.ingress.kubernetes.io/compute-full-forwarded-for: "true"
-
-    paths:
-      - path: /brp(/|$)(.*)
-        service: api
-        port: 8000
-    tls: certificate
+          # Entra ID
+          - name: entra
+            port: 7999
+          # Keycloak
+          - name: keycloak
+            port: 8000
