@@ -107,3 +107,12 @@ deployments:
           # Keycloak
           - name: keycloak
             port: 8000
+
+services:
+  keycloak:
+    selector:
+      component: api
+    ports:
+      - name: keycloak
+        port: 8000
+        targetPort: keycloak

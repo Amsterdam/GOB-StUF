@@ -37,9 +37,21 @@ ingress:
       nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
     paths:
       - path: /brp(/|$)(.*)
-        service: api
+        service: keycloak
         port: 8000
     tls: certificate
 
   backend-internal:
     host: bp.data.amsterdam.nl
+    className: nginx-internal
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /brp/$2
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+      # shows outgoing ip for appgw, needs header rewrite
+      nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+      nginx.ingress.kubernetes.io/compute-full-forwarded-for: "true"
+    paths:
+      - path: /brp(/|$)(.*)
+        service: keycloak
+        port: 8000
+    tls: certificate

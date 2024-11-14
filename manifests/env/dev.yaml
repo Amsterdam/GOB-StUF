@@ -59,7 +59,7 @@ services:
         targetPort: keycloak
 
 # Define internal ingress (no external)
-# - brpproxy.benk-o.azure.amsterdam.nl
+# - ont.bp.data.amsterdam.nl
 ingress:
   backend-internal:
     host: ont.bp.data.amsterdam.nl
