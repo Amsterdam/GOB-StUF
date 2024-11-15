@@ -71,11 +71,11 @@ ingress:
       nginx.ingress.kubernetes.io/compute-full-forwarded-for: "true"
     paths:
       # Entra ID
-      - path: /entra
+      - path: /entra/brp
         service: entra
         port: 7999
       # Keycloak
-      - path: /
+      - path: /brp
         service: keycloak
         port: 8000
     tls: certificate

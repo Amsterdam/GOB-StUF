@@ -10,8 +10,8 @@ services:
       # With oauth2-proxy
       #   Set cookie_secure in oauth2-proxy.cfg to false
       #   Uncomment UWSGI_ATTACH_DAEMON2
-      # - "8165:8000" # Keycloak
       # - "8165:7999" # Entra ID
+      # - "8165:8000" # Keycloak
     container_name: gobstuf
     environment:
       #UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy.sh,freq=3,control=true,stopsignal=15"
@@ -34,6 +34,7 @@ services:
 
       API_BASE_PATH: /gob_stuf_test  # raw xml response endpoint
       HC_BASE_PATH:
+      ENTRA_BASE_PATH: /entra
       ROUTE_PATH_310: /310
       ROUTE_PATH_204: /204
       ROUTE_SCHEME: https
@@ -44,13 +45,13 @@ services:
       CLIENT_CERT_KEY: cert.key
       REQUESTS_CA_BUNDLE: ca-bundle.crt
 
-      # OAuth2:
-      #OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
       # Keycloak:
+      #OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
       #OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
       #OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
       #OAUTH2_PROXY_OIDC_ISSUER_URL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
       # Entra ID:
+      #OAUTH2_PROXY_ENTRA_COOKIE_SECRET: ${OAUTH2_PROXY_ENTRA_COOKIE_SECRET}
       #OAUTH2_PROXY_ENTRA_CLIENT_ID: ${OAUTH2_PROXY_ENTRA_CLIENT_ID}
       #OAUTH2_PROXY_ENTRA_CLIENT_SECRET: ${OAUTH2_PROXY_ENTRA_CLIENT_SECRET}
       #OAUTH2_PROXY_ENTRA_OIDC_ISSUER_URL: ${OAUTH2_PROXY_ENTRA_OIDC_ISSUER_URL}

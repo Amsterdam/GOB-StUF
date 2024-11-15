@@ -30,10 +30,7 @@ FROM python:3.11-slim-bookworm AS application
 
 WORKDIR /app
 
-RUN useradd --user-group --system --no-create-home benk && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends libpcre2-dev && \
-    rm -rf /var/cache/apt/archives /var/lib/apt/lists
+RUN useradd --user-group --system --no-create-home benk
 
 COPY --from=builder /usr/local/bin/uwsgi /usr/local/bin/uwsgi
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
