@@ -26,6 +26,7 @@ push: build
 	$(dc) push $(SERVICE_APP)
 
 deploy: manifests
+	helm uninstall $(HELM_RELEASE)
 	helm upgrade --install $(HELM_RELEASE) $(HELM_ARGS)
 
 manifests:
