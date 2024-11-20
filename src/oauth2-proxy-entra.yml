@@ -16,19 +16,19 @@ injectRequestHeaders:
       - claim: id_token
 
 # Enable for debugging, token in response header
-injectResponseHeaders:
-  - name: X-Forwarded-Access-Token
-    values:
-      - claim: access_token
-  - name: X-Forwarded-Id-Token
-    values:
-      - claim: id_token
-  - name: X-Forwarded-User
-    values:
-      - claim: user
-  - name: X-Forwarded-Preferred-Username
-    values:
-      - claim: preferred_username
+# injectResponseHeaders:
+#  - name: X-Forwarded-Access-Token
+#    values:
+#      - claim: access_token
+#  - name: X-Forwarded-Id-Token
+#    values:
+#      - claim: id_token
+#  - name: X-Forwarded-User
+#    values:
+#      - claim: user
+#  - name: X-Forwarded-Preferred-Username
+#    values:
+#      - claim: preferred_username
 
 providers:
   - id: azureEntraId
