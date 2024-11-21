@@ -10,30 +10,10 @@ image:
 # We must select the nodepool to run the pods on
 nodepool: cccbenkacc01
 
-# Default host for the ingress resources
-host: brpproxy.benk-a.azure.amsterdam.nl
-
-# Specify the keyvault that has the certificate
+# Specify the keyvault that has the acc certificate
 secrets:
   certificate:
     keyVaultName: shared-a-iaecdpzoozlqc
-
-  vault:
-    type: keyvault
-    annotations:
-      helm.sh/hook-weight: "-5"
-    secrets:
-      # Keycloak (used as env var by proxy)
-      - oauth2-proxy-client-id
-      - oauth2-proxy-client-secret
-      - oauth2-proxy-cookie-secret
-      - oauth2-proxy-oidc-issuer-url
-
-      # Entra ID (used in oauth2-proxy-entra.yml)
-      - oauth2-proxy-entra-client-id
-      - oauth2-proxy-entra-client-secret
-      - oauth2-proxy-entra-cookie-secret
-      - oauth2-proxy-entra-oidc-issuer-url
 
 deployments:
   api:
@@ -41,24 +21,10 @@ deployments:
       ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
       OAUTH2_PROXY_WHITELIST_DOMAINS: brpproxy.benk-a.azure.amsterdam.nl,*.acc.bp.data.amsterdam.nl
 
-services:
-  entra:
-    selector:
-      component: api
-    ports:
-      - name: entra
-        protocol: TCP
-        port: 7999
-        targetPort: entra
-  keycloak:
-    selector:
-      component: api
-    ports:
-      - name: keycloak
-        port: 8000
-        targetPort: keycloak
+# Default host for the ingress resources
+host: brpproxy.benk-a.azure.amsterdam.nl
 
-# Override host for external and internal ingress
+# Define hosts for external and internal ingress
 ingress:
   backend-external:
     host: acc.bp.data.amsterdam.nl
