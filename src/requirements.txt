@@ -4,4 +4,4 @@ git+https://github.com/Amsterdam/flask-audit-log.git@v0.1.0a-rc1#egg=datapunt-fl
 PyJWT~=2.10.1
 pytz~=2025.2
 requests~=2.32.3
-uWSGI==2.0.28
+uWSGI==2.0.29
