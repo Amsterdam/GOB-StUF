@@ -13,7 +13,7 @@ resources:
       type: github
       endpoint: Amsterdam
       name: Amsterdam/common-azure-pipelines
-      ref: a74d71a6fe669194a91542356c2d89b87f94a416  # v1.18.0
+      ref: refs/tags/1.20.5
 
 extends:
   template: pipelines/aks/template.yaml@templates
@@ -24,6 +24,8 @@ extends:
     build:
       pool:
         name: Selfhosted Azure Devops Agents
+      producedImages:  # analyze and lock image if tagged
+        - brpproxy/gobstuf
 
     dev:
       pool: Selfhosted Azure Devops Agents
