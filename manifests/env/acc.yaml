@@ -19,7 +19,7 @@ deployments:
   api:
     env:
       ROUTE_NETLOC: mks01.acc.amsterdam.nl:8443
-      OAUTH2_PROXY_WHITELIST_DOMAINS: brpproxy.benk-a.azure.amsterdam.nl,*.acc.bp.data.amsterdam.nl
+      OAUTH2_PROXY_WHITELIST_DOMAINS: brpproxy.benk-a.azure.amsterdam.nl,acc.bp.data.amsterdam.nl
 
 # Default host for the ingress resources
 host: brpproxy.benk-a.azure.amsterdam.nl
@@ -47,26 +47,7 @@ ingress:
         port: 8000
     tls: certificate
 
-  # Listener in use by WONEN
   backend-internal:
-    host: acc.bp.data.amsterdam.nl
-    className: nginx-internal
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
-      nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
-      nginx.ingress.kubernetes.io/compute-full-forwarded-for: "true"
-    paths:
-      # Entra ID
-      - path: /entra/brp
-        service: entra
-        port: 7999
-      # Keycloak
-      - path: /brp
-        service: keycloak
-        port: 8000
-    tls: certificate
-
-  backend-internal-benk-a:
     host: brpproxy.benk-a.azure.amsterdam.nl
     className: nginx-internal
     annotations:
