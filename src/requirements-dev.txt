@@ -7,6 +7,6 @@ freezegun~=1.5.1
 isort~=7.0.0
 mypy~=1.18.1
 pytest-env~=1.2.0
-pytest-subtests~=0.14.1
+pytest-subtests~=0.15.0
 pytest~=8.4.0
 requests-mock~=1.12.1
