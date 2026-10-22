@@ -2,7 +2,7 @@ from typing import Optional, Callable
 
 from flask import g, request, url_for
 
-from gobcore.secure.request import is_secured_request, extract_roles, USER_NAME_HEADER
+from gobstuf.auth.request import is_secured_request, extract_roles, extract_user
 
 REQUIRED_ROLE_PREFIX = 'fp_'
 REQUIRED_ROLE = 'brp_r'
@@ -37,18 +37,16 @@ def _get_role_fp(roles: list[str]) -> Optional[str]:
 
 
 def _allows_access(rule, *args, **kwargs) -> bool:
-    """
-    Check access to paths with variable catalog/collection names
-    """
-    roles = extract_roles(request.headers)
+    """Check access to paths with variable catalog/collection names."""
+    headers = request.headers
+    roles = extract_roles(headers)
     fp_role = _get_role_fp(roles)
 
     if REQUIRED_ROLE in roles and fp_role:
         # Store the MKS USER and APPLICATION in the global object and allow access
         setattr(g, MKS_APPLICATION_KEY, fp_role)
-        setattr(g, MKS_USER_KEY, request.headers.get(USER_NAME_HEADER, ""))
+        setattr(g, MKS_USER_KEY, extract_user(headers) or "")
         return True
-
     return False
 
 

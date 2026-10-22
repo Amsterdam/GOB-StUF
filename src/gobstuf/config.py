@@ -26,32 +26,23 @@ GOB_STUF_PORT = _getenv("GOB_STUF_PORT", default_value=8165)
 ROUTE_SCHEME = _getenv("ROUTE_SCHEME", default_value="https")
 
 # Optional parameters
-PKCS12_FILENAME = _getenv("PKCS12_FILENAME", is_optional=True)
-PKCS12_PASSWORD = _getenv("PKCS12_PASSWORD", is_optional=True)
+CLIENT_CERT_CRT = _getenv("CLIENT_CERT_CRT", is_optional=True)
+CLIENT_CERT_KEY = _getenv("CLIENT_CERT_KEY", is_optional=True)
 
 API_BASE_PATH = _getenv("API_BASE_PATH", default_value="", is_optional=True)
 HC_BASE_PATH = _getenv("HC_BASE_PATH", default_value="", is_optional=True)
+ENTRA_BASE_PATH = _getenv("ENTRA_BASE_PATH", default_value="/entra", is_optional=True)
 
-BASE_PATHS = [API_BASE_PATH, HC_BASE_PATH]
+BASE_PATHS = [API_BASE_PATH, HC_BASE_PATH, ENTRA_BASE_PATH]
 
 AUDIT_LOG_CONFIG = {
-    'EXEMPT_URLS': [],
+    'EXEMPT_URLS': ["/brp/status/health"],
     'LOG_HANDLER_CALLABLE_PATH': 'gobstuf.audit_log.get_log_handler',
     'USER_FROM_REQUEST_CALLABLE_PATH': 'gobstuf.audit_log.get_user_from_request'
 }
 
-CONTAINER_BASE = _getenv("CONTAINER_BASE", default_value="development")
-
-# The port BRP Regression tests should use to access the API locally.
-# 8001 for when running in Docker. GOB_STUF_PORT (8165 by default) otherwise
-BRP_REGRESSION_TEST_LOCAL_PORT = _getenv("BRP_REGRESSION_TEST_LOCAL_PORT", default_value=8000)
-GOB_OBJECTSTORE = 'GOBObjectstore'
-
 CORRELATION_ID_HEADER = 'X-Correlation-ID'
 UNIQUE_ID_HEADER = 'X-Unique-ID'
-
-KEYCLOAK_AUTH_URL = _getenv('KEYCLOAK_AUTH_URL')
-KEYCLOAK_CLIENT_ID = _getenv('KEYCLOAK_CLIENT_ID')
 
 BAG_API_URL = "https://api.data.amsterdam.nl/v1/bag"
 BAG_NAG_ENDPOINT = f"{BAG_API_URL}/nummeraanduidingen"

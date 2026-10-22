@@ -1,77 +1,47 @@
-# syntax=docker/dockerfile:1
-FROM amsterdam/gob_wheelhouse:3.9-slim-bullseye as wheelhouse
-MAINTAINER datapunt@amsterdam.nl
+FROM python:3.11-slim-bookworm AS builder
 
+ENV PIP_NO_CACHE_DIR=1 DEBIAN_FRONTEND=noninteractive
 
-# Application stage.
-FROM amsterdam/gob_baseimage:3.9-slim-bullseye as application
-MAINTAINER datapunt@amsterdam.nl
-# GOB base image: SQL Server driver.
+# uWSGI build dependencies:
+# - gcc
+# - libpcre2-dev (regex parsing)
+RUN apt-get update && apt-get install -y --no-install-recommends git gcc libpcre2-dev
 
-# Fill the wheelhouse.
-COPY --from=wheelhouse /opt/wheelhouse /opt/wheelhouse
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
-# Install StUF service in /app folder.
+FROM python:3.11-slim-bookworm AS test
+
+RUN useradd --user-group --system --no-create-home benktest
+
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+
+COPY requirements-dev.txt requirements-dev.txt
+RUN pip install -r requirements-dev.txt && rm requirements-dev.txt
+
+COPY gobstuf gobstuf
+COPY tests tests
+COPY .flake8 test.sh ./
+
+USER benktest
+CMD ["bash", "-c", "./test.sh"]
+
+FROM python:3.11-slim-bookworm AS application
+
 WORKDIR /app
 
-# Install required Python packages.
-COPY requirements.txt /app/
-RUN LIBGDAL_VERSION=$(gdal-config --version) pip install --no-cache-dir \
-	--find-links /opt/wheelhouse --requirement requirements.txt
-RUN rm requirements.txt
-# Wheelhouse cleanup.
-RUN rm -rf /opt/wheelhouse
+RUN useradd --user-group --system --no-create-home benk
 
-# Create directory for client certs (datapunt Openstack).
-RUN mkdir -p /certs/gob/ && chmod -R 755 /certs
+COPY --from=builder /usr/local/bin/uwsgi /usr/local/bin/uwsgi
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
-# OAuth2 Proxy.
-COPY ./oauth2-proxy oauth2-proxy
-COPY ./oauth2-proxy.cfg oauth2-proxy.cfg
-RUN chmod 755 oauth2-proxy
-RUN mkdir -p /var/log/oauth2-proxy && chown datapunt /var/log/oauth2-proxy
-RUN ./oauth2-proxy --version
+COPY --from=quay.io/oauth2-proxy/oauth2-proxy:v7.13.0 /bin/oauth2-proxy oauth2-proxy
 
-# Copy gobstuf module.
+COPY --chmod=755 oauth2-proxy.sh ./
+COPY oauth2-proxy.cfg ca-bundle.crt oauth2-proxy-entra.cfg oauth2-proxy-entra.yml ./
 COPY gobstuf gobstuf
 
-# Create downloaded dir for regression tests with correct permissions
-RUN mkdir -p /app/gobstuf/regression_tests/downloaded
-RUN chown datapunt /app/gobstuf/regression_tests/downloaded
+RUN mkdir -p /var/log/oauth2-proxy && chown benk /var/log/oauth2-proxy
 
-USER datapunt
+USER benk
 CMD uwsgi
-
-
-# Development.
-FROM application as development
-USER root
-# Install GOB-Core and GOB-Config in development mode. Will be overridden with
-# mounts from the developer filesystem. Changes made to GOB-Core and GOB-Config
-# will be available immediately.
-RUN git clone --depth=1 https://github.com/Amsterdam/GOB-Core.git
-RUN LIBGDAL_VERSION=$(gdal-config --version) pip install -e /app/GOB-Core
-RUN git clone --depth=1 https://github.com/Amsterdam/GOB-Config.git
-RUN pip install -e /app/GOB-Config
-USER datapunt
-
-
-# Test.
-FROM application as test
-USER root
-
-# Remove gobcore tests
-RUN rm -rf /app/src/gobcore/tests
-RUN rm -rf /app/src/gobconfig/tests
-# flask-audit-log cleanup.
-RUN rm -rf /app/src/datapunt-flask-audit-log/tests
-
-# Copy test module and tests.
-COPY test.sh .flake8 ./
-COPY tests tests
-
-# Copy Jenkins files.
-COPY .jenkins /.jenkins
-RUN mkdir -m 2755 -p /app/shared && chown -R datapunt.datapunt /app/shared
-
-USER datapunt

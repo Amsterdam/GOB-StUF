@@ -18,3 +18,5 @@ htmlcov
 **/*.p12
 **/*.key
 **/*.csr
+
+.venv

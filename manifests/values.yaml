@@ -1,0 +1,134 @@
+fullnameOverride: brpproxy
+tenantId: 72fca1b1-2c2e-4376-a445-294d80196804
+
+image:
+  registry: saks01weuacrpgpgo5qvmwo.azurecr.io
+  repository: brpproxy/gobstuf
+  tag: latest
+
+labels:
+  app: brpproxy
+
+network:
+  allow-ingress:
+    annotations:
+      helm.sh/hook-weight: "-5"
+    selector: app == 'brpproxy'
+    ingress:
+      - action: Allow
+    egress:
+      - action: Allow
+
+secrets:
+  certificate:
+    type: keyvault
+    tls: brpproxy
+
+  mks-certificate:
+    type: keyvault
+    tls: mks-certificate
+
+  # OAuth environment secrets
+  vault:
+    type: keyvault
+    annotations:
+      helm.sh/hook-weight: "-5"
+    secrets:
+      # Keycloak (used as env var by OAuth Proxy)
+      - oauth2-proxy-client-id
+      - oauth2-proxy-client-secret
+      - oauth2-proxy-cookie-secret
+      - oauth2-proxy-oidc-issuer-url
+
+      # Entra ID (used in oauth2-proxy-entra.yml)
+      - oauth2-proxy-entra-client-id
+      - oauth2-proxy-entra-client-secret
+      - oauth2-proxy-entra-cookie-secret
+      - oauth2-proxy-entra-oidc-issuer-url
+
+jobs:
+  certificate-init:
+    annotations:
+      helm.sh/hook: post-install,post-upgrade
+    labels:
+      component: certificate
+    secrets:
+      - certificate
+    containers:
+      - name: main
+        command:
+          - sleep
+        args:
+          - "1"
+
+deployments:
+  api:
+    selectorLabels:
+      component: api
+    env:
+      ROUTE_PATH_310: /CGS/StUF/0301/BG/0310/services/BeantwoordVraag
+      ROUTE_PATH_204: /CGS/StUF/services/BGSynchroon
+      CLIENT_CERT_CRT: /mnt/secrets/mks-certificate/mks-certificate.crt
+      CLIENT_CERT_KEY: /mnt/secrets/mks-certificate/mks-certificate.key
+      REQUESTS_CA_BUNDLE: /app/ca-bundle.crt
+      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy.sh,freq=3,control=true,stopsignal=15"
+      UWSGI_BUFFER_SIZE: "16384"
+      UWSGI_CALLABLE: "app"
+      UWSGI_DIE_ON_TERM: "1"
+      UWSGI_ENABLE_THREADS: ""
+      UWSGI_HARAKIRI: "3600"
+      UWSGI_HTTP: ":8001"
+      UWSGI_HTTP_TIMEOUT: "4000"
+      UWSGI_LOG_DRAIN: ".*\\/brp\\/status\\/health\\/.*"
+      UWSGI_MAX_REQUESTS: 100  # Restart workers after this many requests
+      UWSGI_MODULE: "gobstuf.wsgi"
+      UWSGI_NEED_APP: "1"
+      UWSGI_PROCESSES: "4"
+      UWSGI_RELOAD_ON_RSS: "512"
+      UWSGI_SINGLE_INTERPRETER: "1"
+      UWSGI_STRICT: "1"
+      UWSGI_VACUUM: "1"
+    autoscale:
+      cpu: 90
+      memory: 70
+      min: 2
+      max: 4
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 200m
+        memory: 1Gi
+    containers:
+      - name: main
+        secrets:
+          - vault
+          - mks-certificate
+        tempDirs:
+          - /tmp
+        ports:
+          # Entra ID
+          - name: entra
+            port: 7999
+          # Keycloak
+          - name: keycloak
+            port: 8000
+
+# Services (OAuth)
+services:
+  entra:
+    selector:
+      component: api
+    ports:
+      - name: entra
+        protocol: TCP
+        port: 7999
+        targetPort: entra
+  keycloak:
+    selector:
+      component: api
+    ports:
+      - name: keycloak
+        port: 8000
+        targetPort: keycloak

@@ -1,0 +1,46 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  tags:
+    include:
+      - "*.*.*"
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      endpoint: Amsterdam
+      name: Amsterdam/common-azure-pipelines
+      ref: refs/tags/1.20.5
+
+extends:
+  template: pipelines/aks/template.yaml@templates
+  parameters:
+    name: brpproxy-api
+    variables:
+      repository: brpproxy/gobstuf
+    build:
+      pool:
+        name: Selfhosted Azure Devops Agents
+      producedImages:  # analyze and lock image if tagged
+        - brpproxy/gobstuf
+
+    dev:
+      pool: Selfhosted Azure Devops Agents
+      devopsEnvironment: brpproxy-api-dev
+      namespace: ns-ccc-benk-ont-01-brpproxy-aks
+      kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-ont-01-brpproxy-aks
+
+    acc:
+      pool: Selfhosted Azure Devops Agents
+      devopsEnvironment: brpproxy-api-acc
+      namespace: ns-ccc-benk-acc-01-brpproxy-aks
+      kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-acc-01-brpproxy-aks
+
+    prod:
+      pool: Selfhosted Azure Devops Agents
+      devopsEnvironment: brpproxy-api-prod
+      namespace:  ns-ccc-benk-prd-01-brpproxy-aks
+      kubernetesServiceConnection: SCN-K8S-ns-ccc-benk-prd-01-brpproxy-aks

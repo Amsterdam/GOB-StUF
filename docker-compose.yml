@@ -1,58 +1,68 @@
-version: "3.7"
-
 services:
 
-  gobstuf:
+  gobstuf-dev:
     build:
       context: src
-      target: development
+      target: application
     ports:
       # No OAuth2 Proxy
       - "8165:8001"
       # With oauth2-proxy
       #   Set cookie_secure in oauth2-proxy.cfg to false
       #   Uncomment UWSGI_ATTACH_DAEMON2
-      # - "8165:8000"
+      # - "8165:7999" # Entra ID
+      # - "8165:8000" # Keycloak
     container_name: gobstuf
     environment:
-      KEYCLOAK_AUTH_URL: "https://keycloak/auth/url"
-      KEYCLOAK_CLIENT_ID: "fakefake"
-      MESSAGE_BROKER_ADDRESS: rabbitmq
-      UWSGI_HTTP: ":8001"
-      UWSGI_MODULE: "gobstuf.wsgi"
-      UWSGI_CALLABLE: "app"
-      UWSGI_HARAKIRI: "3600"
-      UWSGI_PROCESSES: "4"
-      UWSGI_ENABLE_THREADS: ""
-      UWSGI_MAX_WORKER_LIFETIME: "1800"
-      UWSGI_HTTP_TIMEOUT: "4000"
+      #UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy.sh,freq=3,control=true,stopsignal=15"
       UWSGI_BUFFER_SIZE: "8192"
+      UWSGI_CALLABLE: "app"
       UWSGI_DIE_ON_TERM: "1"
+      UWSGI_ENABLE_THREADS: ""
+      UWSGI_HARAKIRI: "3600"
+      UWSGI_HTTP: ":8001"
+      UWSGI_HTTP_TIMEOUT: "4000"
+      UWSGI_LOG_DRAIN: ".*\\/brp\\/status\\/health\\/.*"
+      UWSGI_MAX_REQUESTS: 100  # Restart workers after this many requests
+      UWSGI_MODULE: "gobstuf.wsgi"
       UWSGI_NEED_APP: "1"
-#      UWSGI_ATTACH_DAEMON2: "cmd=./oauth2-proxy --config oauth2-proxy.cfg,freq=3,control=true,stopsignal=15"
+      UWSGI_PROCESSES: "4"
+      UWSGI_RELOAD_ON_RSS: "512"
+      UWSGI_SINGLE_INTERPRETER: "1"
+      UWSGI_STRICT: "1"
+      UWSGI_VACUUM: "1"
 
-      PKCS12_FILENAME: ${PKCS12_FILENAME}
-      PKCS12_PASSWORD: ${PKCS12_PASSWORD}
-      BRP_REGRESSION_TEST_LOCAL_PORT: 8000  # Points to Gatekeeper. Overrides port 8165 defined in the .env file
+      API_BASE_PATH: /gob_stuf_test  # raw xml response endpoint
+      HC_BASE_PATH:
+      ENTRA_BASE_PATH: /entra
+      ROUTE_PATH_310: /310
+      ROUTE_PATH_204: /204
+      ROUTE_SCHEME: https
+      ROUTE_NETLOC: gob-stuf-tests:1234
 
-      OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
-      OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
-      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
-      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
-      OAUTH2_PROXY_REDIRECT_URL: ${OAUTH2_PROXY_REDIRECT_URL}
-    env_file: .env
-    volumes:
-      - gob-volume:/app/shared
-      - ./src/gobstuf:/app/gobstuf
-      - ./src/tests:/app/tests
-      - ${GOB_CORE_DIR-../GOB-Core}:/app/GOB-Core
-      - ${GOB_CONFIG_DIR-../GOB-Config}:/app/GOB-Config
+      GOB_STUF_PORT: 8000
+      CLIENT_CERT_CRT: cert.crt
+      CLIENT_CERT_KEY: cert.key
+      REQUESTS_CA_BUNDLE: ca-bundle.crt
 
-networks:
-  default:
-    name: gob-network
-    external: true
+      # Keycloak:
+      #OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+      #OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+      #OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+      #OAUTH2_PROXY_OIDC_ISSUER_URL: ${OAUTH2_PROXY_OIDC_ISSUER_URL}
+      # Entra ID:
+      #OAUTH2_PROXY_ENTRA_COOKIE_SECRET: ${OAUTH2_PROXY_ENTRA_COOKIE_SECRET}
+      #OAUTH2_PROXY_ENTRA_CLIENT_ID: ${OAUTH2_PROXY_ENTRA_CLIENT_ID}
+      #OAUTH2_PROXY_ENTRA_CLIENT_SECRET: ${OAUTH2_PROXY_ENTRA_CLIENT_SECRET}
+      #OAUTH2_PROXY_ENTRA_OIDC_ISSUER_URL: ${OAUTH2_PROXY_ENTRA_OIDC_ISSUER_URL}
 
-volumes:
-  gob-volume:
-    external: true
+  gobstuf-test:
+    build:
+      context: src
+      target: test
+
+  gobstuf-app:
+    build:
+      context: src
+      target: application
+    image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-brpproxy/gobstuf}:${VERSION:-latest}

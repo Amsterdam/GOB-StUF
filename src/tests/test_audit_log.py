@@ -1,9 +1,10 @@
+import json
 import unittest
 from unittest.mock import patch, MagicMock, ANY
 
-import json
+from gobstuf.audit_log import GOBAuditLogHandler, get_log_handler, get_user_from_request, get_nested_item, \
+    on_audit_log_exception
 
-from gobstuf.audit_log import GOBAuditLogHandler, get_log_handler, get_user_from_request, get_nested_item, on_audit_log_exception, log_request, log_response
 
 class TestAuditLog(unittest.TestCase):
 
@@ -92,16 +93,14 @@ class TestAuditLog(unittest.TestCase):
 
     @patch('gobstuf.audit_log.get_client_ip')
     def test_get_user_from_request(self, mock_get_client_ip):
-        mock_request = MagicMock()
+        mock_request = MagicMock(headers={"X-Forwarded-Preferred-Username": "my_user"})
 
         with patch('gobstuf.audit_log.request', mock_request):
 
             user = get_user_from_request()
             self.assertEqual(user, {
                 'authenticated': False,
-                'provider': '',
-                'realm': '',
-                'email': '',
+                "email": "my_user",
                 'roles': [],
                 'ip': mock_get_client_ip.return_value
             })

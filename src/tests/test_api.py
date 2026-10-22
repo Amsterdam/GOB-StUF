@@ -2,12 +2,17 @@ import unittest
 from os import environ
 from unittest import mock
 
+from gobstuf.api import _health, get_flask_app
+from gobstuf.blueprints.secure import (
+    _get_stuf,
+    _handle_stuf_request,
+    _post_stuf,
+    _routed_url,
+    _stuf,
+    _update_request,
+    _update_response,
+)
 from werkzeug.exceptions import BadRequest, MethodNotAllowed
-
-from gobstuf.api import _health
-from gobstuf.api import get_flask_app
-from gobstuf.blueprints.secure import _routed_url, _update_response, _update_request, _get_stuf, _post_stuf, _stuf, \
-    _handle_stuf_request
 
 
 class MockResponse:
@@ -17,18 +22,25 @@ class MockResponse:
         self.status_code = status_code
 
 
-@mock.patch('gobstuf.api.AuditLogMiddleware', mock.MagicMock())
-@mock.patch('gobstuf.api.logger', mock.MagicMock())
+@mock.patch("gobstuf.api.AuditLogMiddleware", mock.MagicMock())
+@mock.patch("gobstuf.api.logger", mock.MagicMock())
 class TestAPI(unittest.TestCase):
 
-    def test_health(self):
+    @mock.patch("gobstuf.api.socket")
+    def test_health(self, mock_socket):
         result = _health()
         self.assertEqual(result, "Connectivity OK")
+        mock_socket.create_connection.assert_called_with(("gob-stuf-tests", 1234), timeout=5.0)
+        mock_socket.create_connection.return_value.close.assert_called()
+
+        mock_socket.create_connection.side_effect = TimeoutError
+        result = _health()
+        self.assertEqual(result, "Backend not available")
 
     def test_routed_url(self):
         result = _routed_url("proto://domain/path?args")
-        NETLOC = environ.get('ROUTE_NETLOC')
-        ROUTE_SCHEME = environ.get('ROUTE_SCHEME')
+        NETLOC = environ.get("ROUTE_NETLOC")
+        ROUTE_SCHEME = environ.get("ROUTE_SCHEME")
         self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?args", result)
 
         result = _routed_url("proto://domain/path?wsdl")
@@ -38,15 +50,15 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
 
     def test_routed_url_apibasepath(self):
-        BASE_PATH = environ.get('BASE_PATH')
-        NETLOC = environ.get('ROUTE_NETLOC')
-        ROUTE_SCHEME = environ.get('ROUTE_SCHEME')
+        BASE_PATH = environ.get("BASE_PATH")
+        NETLOC = environ.get("ROUTE_NETLOC")
+        ROUTE_SCHEME = environ.get("ROUTE_SCHEME")
         result = _routed_url(f"proto://domain{BASE_PATH}/path?wsdl")
         self.assertEqual(f"{ROUTE_SCHEME}://{NETLOC}/path?wsdl", result)
 
     def test_update_response(self):
-        NETLOC = environ.get('ROUTE_NETLOC')
-        GOB_STUF_PORT = environ.get('GOB_STUF_PORT')
+        NETLOC = environ.get("ROUTE_NETLOC")
+        GOB_STUF_PORT = environ.get("GOB_STUF_PORT")
         result = _update_response("text")
         self.assertEqual(result, "text")
 
@@ -85,24 +97,18 @@ class TestAPI(unittest.TestCase):
 
         url = "any url"
         data = "any data"
-        headers = {
-            "Soapaction": "Any action",
-            "Content-Type": "text/xml",
-            "Any other": "Any value"
-        }
-        expect_headers = {
-            "Soapaction": "Any action",
-            "Content-Type": "text/xml"
-        }
+        headers = {"Soapaction": "Any action", "Content-Type": "text/xml", "Any other": "Any value"}
+        expect_headers = {"Soapaction": "Any action", "Content-Type": "text/xml"}
 
         response = _post_stuf(url, data, headers)
         self.assertEqual(response, "post")
         mock_post.assert_called_with(url, data=data, headers=expect_headers)
 
-        for h in [{},
-                  {"Soapaction": "Any action"},
-                  {"Soapaction": "Any action", "Content-Type": "any type"},
-                  ]:
+        for h in [
+            {},
+            {"Soapaction": "Any action"},
+            {"Soapaction": "Any action", "Content-Type": "any type"},
+        ]:
             with self.assertRaises(BadRequest):
                 headers = h
                 response = _post_stuf(url, data, headers)
@@ -111,46 +117,46 @@ class TestAPI(unittest.TestCase):
     @mock.patch("gobstuf.blueprints.secure._post_stuf")
     @mock.patch("gobstuf.blueprints.secure._update_request")
     def test_handle_stuf_request(self, mock_update_request, mock_post_stuf, mock_get_stuf):
-        routed_url = 'routed url'
+        routed_url = "routed url"
 
-        request = type('MockGet', (object,), {'method': 'GET'})
+        request = type("MockGet", (object,), {"method": "GET"})
         self.assertEqual(mock_get_stuf.return_value, _handle_stuf_request(request, routed_url))
         mock_get_stuf.assert_called_with(routed_url)
 
-        request = type('MockPost', (object,), {'method': 'POST', 'data': mock.MagicMock(), 'headers': 'headers'})
+        request = type("MockPost", (object,), {"method": "POST", "data": mock.MagicMock(), "headers": "headers"})
         self.assertEqual(mock_post_stuf.return_value, _handle_stuf_request(request, routed_url))
         mock_post_stuf.assert_called_with(routed_url, mock_update_request.return_value, request.headers)
 
-        request = type('MockInvalidMethod', (object,), {'method': 'INVALID'})
-        with self.assertRaisesRegex(MethodNotAllowed, '405 Method Not Allowed'):
+        request = type("MockInvalidMethod", (object,), {"method": "INVALID"})
+        with self.assertRaisesRegex(MethodNotAllowed, "405 Method Not Allowed"):
             _handle_stuf_request(request, routed_url)
 
-    @mock.patch("gobstuf.blueprints.secure._handle_stuf_request", return_value=MockResponse('get', 123))
+    @mock.patch("gobstuf.blueprints.secure._handle_stuf_request", return_value=MockResponse("get", 123))
     @mock.patch("gobstuf.blueprints.secure.flask")
     def test_stuf(self, mock_flask, mock_handle_stuf):
-        mock_flask.request.method = 'GET'
+        mock_flask.request.method = "GET"
         mock_flask.request.url = "any url"
         mock_flask.request.data = b"any data"
         mock_flask.request.headers = {
-            'Soapaction': 'zeepactie',
+            "Soapaction": "zeepactie",
         }
-        mock_flask.request.remote_addr = '1.2.3.4'
+        mock_flask.request.remote_addr = "1.2.3.4"
 
         response = _stuf()
         self.assertEqual(response.data, b"get")
 
-    @mock.patch("gobstuf.blueprints.secure._handle_stuf_request", return_value=MockResponse('get', 123))
+    @mock.patch("gobstuf.blueprints.secure._handle_stuf_request", return_value=MockResponse("get", 123))
     @mock.patch("gobstuf.blueprints.secure.flask")
     def test_stuf_exception(self, mock_flask, mock_handle_stuf):
         mock_handle_stuf.side_effect = BadRequest("Exception message")
 
-        mock_flask.request.method = 'GET'
+        mock_flask.request.method = "GET"
         mock_flask.request.url = "any url"
         mock_flask.request.data = b"any data"
         mock_flask.request.headers = {
-            'Soapaction': 'zeepactie',
+            "Soapaction": "zeepactie",
         }
-        mock_flask.request.remote_addr = '1.2.3.4'
+        mock_flask.request.remote_addr = "1.2.3.4"
 
         with self.assertRaises(BadRequest):
             response = _stuf()
@@ -158,20 +164,23 @@ class TestAPI(unittest.TestCase):
     @mock.patch("gobstuf.api.CORS", mock.MagicMock())
     @mock.patch("gobstuf.api.Flask")
     def test_get_app(self, mock_flask):
-        mock_app = mock.MagicMock()
+        mock_app = mock.MagicMock(name="App")
         mock_flask.return_value = mock_app
         app = get_flask_app()
-        mock_flask.assert_called()
-        mock_app.route.assert_called()
+
+        mock_flask.assert_called_with("gobstuf.api")
+        mock_app.route.assert_called_with(rule="/brp/status/health/")
 
 
 class TestAPIMiddleware(unittest.TestCase):
 
-    @mock.patch('gobstuf.api.AuditLogMiddleware')
-    @mock.patch("gobstuf.api.CORS", mock.MagicMock())
+    @mock.patch("gobstuf.api.AuditLogMiddleware")
+    @mock.patch("gobstuf.api.CORS")
     @mock.patch("gobstuf.api.Flask")
-    def test_get_app(self, mock_flask, mock_middleware):
-        mock_app = mock.MagicMock()
-        mock_flask.return_value = mock_app
+    def test_get_app(self, mock_flask, mock_cors, mock_middleware):
+        mock_flask.return_value = mock.MagicMock(name="Flask")
         app = get_flask_app()
+
+        mock_flask.assert_called_with("gobstuf.api")
+        mock_cors.assert_called_with(app, resources={"/brp/*": {"origins": [f"https://bp.data.amsterdam.nl"]}})
         mock_middleware.assert_called_with(app)

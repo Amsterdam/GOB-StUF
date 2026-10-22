@@ -1,58 +1,6 @@
-import os
-import datetime
-
 from gobstuf.api import get_flask_app
 
-from gobcore.logging.logger import logger
-from gobcore.message_broker.config import WORKFLOW_EXCHANGE, BRP_REGRESSION_TEST_QUEUE, BRP_REGRESSION_TEST_RESULT_KEY
-from gobcore.message_broker.messagedriven_service import messagedriven_service
-
 from gobstuf.config import GOB_STUF_PORT
-from gobstuf.regression_tests.brp import BrpRegression, ObjectstoreResultsWriter
-
-
-def handle_brp_regression_test_msg(msg):
-    results = BrpRegression(logger).run()
-    writer = ObjectstoreResultsWriter(results, 'regression_tests/results/brp')
-    writer.write()
-    logger.info("Written test results to Objecstore at regression_tests/results/brp")
-
-    return {
-        'header': {
-            **msg.get('header', {}),
-            'timestamp': datetime.datetime.utcnow().isoformat(),
-        },
-        'summary': logger.get_summary(),
-    }
-
-
-SERVICEDEFINITION = {
-    'brp_regression_test': {
-        'queue': BRP_REGRESSION_TEST_QUEUE,
-        'handler': handle_brp_regression_test_msg,
-        'report': {
-            'exchange': WORKFLOW_EXCHANGE,
-            'key': BRP_REGRESSION_TEST_RESULT_KEY,
-        }
-    }
-}
-
-
-def run_message_thread():
-    """
-    The connection with GOB is run in a separate service
-
-    If the connection cannot be initialized or breaks during operation
-    the application is killed using os._exit with an exit code that signals unavailability
-
-    :return: None
-    """
-    try:
-        messagedriven_service(SERVICEDEFINITION, "StUF")
-    except:  # noqa: E722 do not use bare 'except'
-        pass
-    print("ERROR: no connection with GOB message broker, application is stopped")
-    os._exit(os.EX_UNAVAILABLE)
 
 
 def get_app():

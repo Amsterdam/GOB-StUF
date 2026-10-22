@@ -1,11 +1,8 @@
-"""
-Formatting of all REST responses
+"""Formatting of all REST responses."""
 
-"""
 import json
 
 from flask import Response, request
-
 
 HTTP_200_OK = 200
 HTTP_400_BAD_REQUEST = 400
@@ -13,18 +10,25 @@ HTTP_403_FORBIDDEN = 403
 HTTP_404_NOT_FOUND = 404
 HTTP_500_INTERNAL_SERVER_ERROR = 500
 
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "default-src 'self'",  # Content comes from the site's own origin
+    "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",  # 2 year (https://hstspreload.org)
+    "X-Frame-Options": "DENY",  # No iframing allowed
+    "X-Content-Type-Options": "nosniff",  # Avoid MIME type sniffing
+}
 
-class RESTResponse():
+
+class RESTResponse:
 
     @classmethod
     def _json_response(cls, data, **kwargs):
-        """
-        JSON response
+        """JSON response.
 
         :param data:
         :param kwargs:
         :return:
         """
+        kwargs = {"mimetype": "application/json", "headers": SECURITY_HEADERS} | kwargs
         return Response(response=json.dumps(data), **kwargs)
 
     @classmethod
@@ -39,6 +43,7 @@ class RESTResponse():
         :param kwargs:
         :return:
         """
+        # fmt: off
         status_info = {
             400: {'code': 'badRequest',     'description': 'Bad Request',           'sec': '10.4.1'},
             401: {'code': 'authentication', 'description': 'Unauthorized',          'sec': '10.4.2'},
@@ -46,6 +51,7 @@ class RESTResponse():
             404: {'code': 'notFound',       'description': 'Not Found',             'sec': '10.4.5'},
             500: {'code': 'serverError',    'description': 'Internal Server Error', 'sec': '10.5.1'},
         }[status]
+        # fmt: on
 
         sec = f'{status_info["sec"]} {status} {status_info["description"]}'
         data = {
@@ -65,8 +71,7 @@ class RESTResponse():
 
     @classmethod
     def _hal(cls, data, links=None):
-        """
-        Add Hypertext Application Language links to the given data
+        """Add Hypertext Application Language links to the given data.
 
         :param data:
         :return:
@@ -84,16 +89,15 @@ class RESTResponse():
 
     @classmethod
     def ok(cls, data, links=None):
-        """
-        An OK response returns the data in HAL JSON format
+        """An OK response returns the data in HAL JSON format.
 
         :param data:
         :return:
         """
         hal_data = cls._hal(data, links)
-        return cls._json_response(data=hal_data,
-                                  content_type='application/hal+json',
-                                  status=HTTP_200_OK)
+        return cls._json_response(
+            data=hal_data, content_type="application/hal+json", status=HTTP_200_OK
+        )
 
     @classmethod
     def bad_request(cls, **kwargs):

@@ -1,91 +1,138 @@
-from unittest import TestCase
-from unittest.mock import patch, MagicMock
-
 import json
+from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from gobstuf.rest.brp.rest_response import RESTResponse
 
-mock_response = MagicMock()
-any_data = {"any": "data"}
-
 mock_request = MagicMock()
-mock_request.url = "any url"
+mock_request.url = "https://flask.palletsprojects.com/"
+
+test_data = {"test": "data"}
 
 
-@patch("gobstuf.rest.brp.rest_response.Response", mock_response)
 class TestRESTResponse(TestCase):
-
-    def setUp(self) -> None:
-        mock_response.reset_mock()
-        mock_response.side_effect = lambda **kwargs: kwargs
+    """Test REST responses."""
 
     def test_json_response(self):
+        """Test JSON responses."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            # Return the data as a JSON string response
-            result = RESTResponse._json_response(any_data)
-            self.assertEqual(result['response'], json.dumps(any_data))
+            response = RESTResponse._json_response(test_data)
 
-            # Include any other arguments in the Response
-            result = RESTResponse._json_response(any_data, aap="noot")
-            self.assertEqual(result['aap'], "noot")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status, "200 OK")
+            self.assertEqual(response.content_type, "application/json")
+            self.assertEqual(response.headers.get("Content-Type"), "application/json")
+            self.assertEqual(response.headers.get("X-Content-Type-Options"), "nosniff")
+            self.assertEqual(json.loads(response.data), test_data)
 
-    def test_client_error_response(self):
-        with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            result = RESTResponse._client_error_response(data=any_data, status=400)
-            response = json.loads(result['response'])
-            # Check if all required attributes are present in the response
-            for attr in ['type', 'title', 'status', 'detail', 'instance', 'code']:
-                self.assertTrue(attr in response)
-
-            # Check if the type is correctly build
-            self.assertEqual(response['type'], "https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1 400 Bad Request")
-            self.assertEqual(response['status'], 400)
-            self.assertEqual(response['instance'], mock_request.url)
-
-            # Check override of default fields
-            result = RESTResponse._client_error_response(data=any_data, status=400, title='any title', any='other')
-            response = json.loads(result['response'])
-            self.assertEqual(response['title'], 'any title')
-            self.assertEqual(response['any'], 'other')
+            # Change mimetype in Response.
+            response = RESTResponse._json_response(test_data, mimetype="application/hal+json")
+            self.assertEqual(response.content_type, "application/hal+json")
+            self.assertEqual(response.headers.get("Content-Security-Policy"), "default-src 'self'")
 
     def test_hal(self):
+        """Test HAL data."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            hal = RESTResponse._hal(any_data)
-            self.assertEqual(hal, {'_links': {'self': {'href': 'any url'}}, 'any': 'data'})
+            self.assertEqual(
+                RESTResponse._hal(test_data),
+                {"_links": {"self": {"href": "https://flask.palletsprojects.com/"}}, "test": "data"},
+            )
 
-    def test_ok(self):
+    def test_client_error(self):
+        """Test client error (4xx) responses."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            result = RESTResponse.ok(any_data)
-            response = json.loads(result['response'])
-            self.assertEqual(result['content_type'], 'application/hal+json')
-            self.assertEqual(result['status'], 200)
-            self.assertEqual(response, RESTResponse._hal(any_data))
+            response = RESTResponse._client_error_response(data=test_data, status=401)
+            response_data = json.loads(response.data)
 
-    def test_errors(self):
+            # Check if all required attributes are present in the response data
+            self.assertTrue(
+                set(response_data.keys()).issuperset(("type", "title", "status", "detail", "instance", "code"))
+            )
+            self.assertEqual(response_data["instance"], mock_request.url)
+
+            # Check if the type is correctly build
+            self.assertEqual(
+                response_data["type"],
+                "https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2 401 Unauthorized",
+            )
+
+            self.assertEqual(response.status_code, 401)
+            self.assertEqual(response.status, "401 UNAUTHORIZED")
+            self.assertEqual(response.content_type, "application/problem+json")
+
+            # Check valid overrides of default fields
+            response = RESTResponse._client_error_response(data=test_data, status=403)
+            response_data = json.loads(response.data)
+
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status, "403 FORBIDDEN")
+            self.assertEqual(response.headers.get("X-Frame-Options"), "DENY")
+
+    def test_rest_ok(self):
+        """Test OK response."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            for method in ['bad_request', 'forbidden', 'not_found']:
-                result = getattr(RESTResponse, method)(**any_data)
-                self.assertEqual(result['content_type'], 'application/problem+json')
-                response = json.loads(result['response'])
-                for k, v in any_data.items():
-                    self.assertEqual(response[k], v)
+            response = RESTResponse.ok(test_data)
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status, "200 OK")
+            self.assertEqual(response.content_type, "application/hal+json")
+            self.assertEqual(response.headers.get("Content-Type"), "application/hal+json")
+
+            self.assertEqual(response.json["test"], "data")
+            self.assertEqual(response.json, RESTResponse._hal(test_data))
+
+            # Check Security Headers
+            self.assertEqual(response.headers.get("Content-Security-Policy"), "default-src 'self'")
+            self.assertEqual(
+                response.headers.get("Strict-Transport-Security"), "max-age=63072000; includeSubDomains; preload"
+            )
+            self.assertEqual(response.headers.get("X-Frame-Options"), "DENY")
+            self.assertEqual(response.headers.get("X-Content-Type-Options"), "nosniff")
 
     def test_bad_request(self):
+        """Test bad request (400) response."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            result = RESTResponse.bad_request()
-            self.assertEqual(result['status'], 400)
+            response = RESTResponse.bad_request()
+
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status, "400 BAD REQUEST")
+            self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.json["status"], 400)
+            self.assertEqual(
+                response.json["detail"],
+                "The request could not be understood by the server due to malformed syntax."
+                " The client SHOULD NOT repeat the request without modification.",
+            )
+            self.assertEqual(
+                response.headers.get("Strict-Transport-Security"), "max-age=63072000; includeSubDomains; preload"
+            )
 
     def test_forbidden(self):
+        """Test forbidden (403) response."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            result = RESTResponse.forbidden()
-            self.assertEqual(result['status'], 403)
+            response = RESTResponse.forbidden()
+
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status, "403 FORBIDDEN")
+            self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.headers.get("X-Content-Type-Options"), "nosniff")
 
     def test_not_found(self):
+        """Test not_found (404) response."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            result = RESTResponse.not_found()
-            self.assertEqual(result['status'], 404)
+            response = RESTResponse.not_found()
+
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status, "404 NOT FOUND")
+            self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.headers.get("Content-Security-Policy"), "default-src 'self'")
 
     def test_internal_server_error(self):
+        """Test internal_server_error (500) response."""
         with patch("gobstuf.rest.brp.rest_response.request", mock_request):
-            result = RESTResponse.internal_server_error()
-            self.assertEqual(result['status'], 500)
+            response = RESTResponse.internal_server_error()
+
+            self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.status, "500 INTERNAL SERVER ERROR")
+            self.assertEqual(response.content_type, "application/problem+json")
+            self.assertEqual(response.headers.get("X-Frame-Options"), "DENY")

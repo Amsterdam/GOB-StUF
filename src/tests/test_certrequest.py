@@ -1,6 +1,5 @@
 import unittest
-from os import environ
-from unittest import mock
+from unittest.mock import call, patch
 
 from gobstuf.certrequest import cert_get, cert_post
 
@@ -12,43 +11,24 @@ class MockResponse:
         self.reason = reason
 
 
+@patch("gobstuf.certrequest.logger")
 class TestConfig(unittest.TestCase):
-    """Test if requests get PKCS12 config from environment"""
+    """Test if requests get certificate config from environment"""
 
-    @mock.patch("gobstuf.certrequest.get")
-    def test_get(self, mock_get):
-        mock_get.return_value = MockResponse()
+    @patch("gobstuf.certrequest.requests")
+    def test_get(self, mock_requests, mock_logger):
+        mock_requests.get.return_value = MockResponse(200, "OK")
 
-        response = cert_get("any url")
-        mock_get.assert_called_with(
-            "any url",
-            pkcs12_filename=environ.get("PKCS12_FILENAME"),
-            pkcs12_password=environ.get("PKCS12_PASSWORD")
-        )
+        cert_get("my_url", key="value")
 
-        self.assertIsInstance(response, MockResponse)
+        mock_requests.get.assert_called_once_with("my_url", cert=("cert.crt", "cert.key"), key="value")
+        mock_logger.info.assert_has_calls([call("GET my_url"), call("RESPONSE 200, OK")])
 
-    @mock.patch("gobstuf.certrequest.post")
-    def test_post(self, mock_post):
-        mock_post.return_value = MockResponse()
+    @patch("gobstuf.certrequest.requests")
+    def test_post(self, mock_requests, mock_logger):
+        mock_requests.post.return_value = MockResponse(200, "OK")
 
-        cert_post("any url", data="any data", headers={"a": 0})
-        mock_post.assert_called_with(
-            "any url",
-            data="any data",
-            headers={"a": 0},
-            pkcs12_filename=environ.get("PKCS12_FILENAME"),
-            pkcs12_password=environ.get("PKCS12_PASSWORD"),
-        )
+        cert_post("my_url", data="<xml>", key="value")
 
-        # headers is a default argument
-        response = cert_post("any url", data="any data", headers={})
-        mock_post.assert_called_with(
-            "any url",
-            data="any data",
-            headers={},
-            pkcs12_filename=environ.get("PKCS12_FILENAME"),
-            pkcs12_password=environ.get("PKCS12_PASSWORD"),
-        )
-
-        self.assertIsInstance(response, MockResponse)
+        mock_requests.post.assert_called_once_with("my_url", "<xml>", cert=("cert.crt", "cert.key"), key="value")
+        mock_logger.info.assert_has_calls([call("POST my_url"), call("RESPONSE 200, OK")])
